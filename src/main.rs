@@ -120,7 +120,7 @@ struct Dungeon {
 impl Dungeon {
 
     fn new(xsize: usize, ysize: usize, zsize:usize) -> Dungeon {
-        let mut levels = Vec::new();
+        let mut levels: Vec<Vec<Room>> = Vec::new();
 
         let mut rng = thread_rng();
 
@@ -200,7 +200,7 @@ impl Dungeon {
 
             v.shuffle(&mut rng);
 
-            // Fix up the levels
+            // Fix up the entrance
             for y in 0..ysize {
                 for x in 0..xsize {
                     let i = y * xsize + x;
@@ -214,6 +214,20 @@ impl Dungeon {
                 }
             }
 
+            // Fix up the stairs up
+            if z > 0 {
+                let mut downs = Vec::new();
+
+                let prev_level = levels.last().unwrap();
+
+                for i in 0..xsize * ysize {
+                    if prev_level[i].roomtype == RoomType::StairsDown {
+                        downs.push(i);
+                    }
+                }
+
+                // TODO: match ups to downs
+            }
 
             levels.push(v);
         }
