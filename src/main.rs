@@ -210,66 +210,6 @@ impl Dungeon {
         &self.levels[z][i]
     }
 
-    #[allow(dead_code)]
-    fn map_dump(&self, player: Player) {
-        self.map_base(player, true)
-    }
-
-    #[allow(dead_code)]
-    fn map(&self, player: Player) {
-        self.map_base(player, false)
-    }
-
-    fn map_base(&self, player: Player, show_all: bool) {
-        let z = player.z;
-
-        for y in 0..self.ysize {
-            for x in 0..self.xsize {
-
-                if x >= 1 {
-                    print!("   ");
-                }
-
-                let r = self.room_at(x, y, z);
-
-                let bracket = x == player.x && y == player.y;
-
-                if bracket {
-                    print!("<");
-                } else {
-                    print!(" ");
-                }
-
-                if r.discovered || show_all {
-                    match r.roomtype {
-                        RoomType::Empty => print!("."),
-                        RoomType::Entrance => print!("E"),
-                        RoomType::StairsDown => print!("D"),
-                        RoomType::StairsUp => print!("U"),
-                        RoomType::Gold => print!("G"),
-                        RoomType::Pool => print!("P"),
-                        RoomType::Chest => print!("C"),
-                        RoomType::Flares => print!("F"),
-                        RoomType::Warp => print!("W"),
-                        RoomType::Sinkhole => print!("S"),
-                        RoomType::CrystalOrb => print!("O"),
-                        RoomType::Book => print!("B"),
-                        RoomType::Monster(_) => print!("M"),
-                    }
-                } else {
-                    print!("?");
-                }
-
-                if bracket {
-                    print!(">");
-                } else {
-                    print!(" ");
-                }
-            }
-
-            println!("\n");
-        }
-    }
 }
 
 struct Player {
@@ -291,10 +231,60 @@ impl Player {
     }
 }
 
+fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
+    let z = player.z;
+
+    for y in 0..dungeon.ysize {
+        for x in 0..dungeon.xsize {
+
+            if x >= 1 {
+                print!("   ");
+            }
+
+            let r = dungeon.room_at(x, y, z);
+
+            let bracket = x == player.x && y == player.y;
+
+            if bracket {
+                print!("<");
+            } else {
+                print!(" ");
+            }
+
+            if r.discovered || show_all {
+                match r.roomtype {
+                    RoomType::Empty => print!("."),
+                    RoomType::Entrance => print!("E"),
+                    RoomType::StairsDown => print!("D"),
+                    RoomType::StairsUp => print!("U"),
+                    RoomType::Gold => print!("G"),
+                    RoomType::Pool => print!("P"),
+                    RoomType::Chest => print!("C"),
+                    RoomType::Flares => print!("F"),
+                    RoomType::Warp => print!("W"),
+                    RoomType::Sinkhole => print!("S"),
+                    RoomType::CrystalOrb => print!("O"),
+                    RoomType::Book => print!("B"),
+                    RoomType::Monster(_) => print!("M"),
+                }
+            } else {
+                print!("?");
+            }
+
+            if bracket {
+                print!(">");
+            } else {
+                print!(" ");
+            }
+        }
+
+        println!("\n");
+    }
+}
+
 fn main() {
     let dungeon = Dungeon::new(8, 8, 8);
     let player = Player::new(dungeon.entrance_x(), 0, 0);
 
-    dungeon.map_dump(player);
-    //dungeon.map(player);
+    map(&dungeon, &player, true);
 }
