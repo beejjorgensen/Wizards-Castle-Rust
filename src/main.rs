@@ -1,5 +1,6 @@
 extern crate rand;
 
+use rand::Rng;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 
@@ -13,7 +14,7 @@ enum RoomType {
     Pool,
     Chest,
     Flares,
-    Warp,
+    Warp(bool),
     Sinkhole,
     CrystalOrb,
     Book,
@@ -122,6 +123,8 @@ impl Dungeon {
 
         let entrance_x = (xsize - 1) / 2;
 
+        let orb_of_zot_level = rng.gen_range(0, zsize);
+
         for z in 0..zsize {
             let mut v = Vec::new();
             let mut remaining = area;
@@ -153,12 +156,14 @@ impl Dungeon {
 
             // Items
 
-            for _ in 0..item_count {
+            for i in 0..item_count {
+                let orb_of_zot_warp = i == 0 && z == orb_of_zot_level;
+
                 v.push(Room{ roomtype: RoomType::Gold, discovered: false});
                 v.push(Room{ roomtype: RoomType::Pool, discovered: false});
                 v.push(Room{ roomtype: RoomType::Chest, discovered: false});
                 v.push(Room{ roomtype: RoomType::Flares, discovered: false});
-                v.push(Room{ roomtype: RoomType::Warp, discovered: false});
+                v.push(Room{ roomtype: RoomType::Warp(orb_of_zot_warp), discovered: false});
                 v.push(Room{ roomtype: RoomType::Sinkhole, discovered: false});
                 v.push(Room{ roomtype: RoomType::CrystalOrb, discovered: false});
                 v.push(Room{ roomtype: RoomType::Book, discovered: false});
@@ -231,6 +236,7 @@ impl Player {
     }
 }
 
+/// Print a map
 fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
     let z = player.z;
 
@@ -261,7 +267,7 @@ fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
                     RoomType::Pool => print!("P"),
                     RoomType::Chest => print!("C"),
                     RoomType::Flares => print!("F"),
-                    RoomType::Warp => print!("W"),
+                    RoomType::Warp(_) => print!("W"),
                     RoomType::Sinkhole => print!("S"),
                     RoomType::CrystalOrb => print!("O"),
                     RoomType::Book => print!("B"),
@@ -282,6 +288,7 @@ fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
     }
 }
 
+/// Main
 fn main() {
     let dungeon = Dungeon::new(8, 8, 8);
     let player = Player::new(dungeon.entrance_x(), 0, 0);
