@@ -11,6 +11,12 @@ enum RoomType {
     StairsUp,
     Gold,
     Pool,
+    Chest,
+    Flares,
+    Warp,
+    Sinkhole,
+    CrystalOrb,
+    Book,
     Monster(Monster)
 }
 
@@ -150,14 +156,19 @@ impl Dungeon {
             for _ in 0..item_count {
                 v.push(Room{ roomtype: RoomType::Gold, discovered: false});
                 v.push(Room{ roomtype: RoomType::Pool, discovered: false});
-                remaining -= 2;
+                v.push(Room{ roomtype: RoomType::Chest, discovered: false});
+                v.push(Room{ roomtype: RoomType::Flares, discovered: false});
+                v.push(Room{ roomtype: RoomType::Warp, discovered: false});
+                v.push(Room{ roomtype: RoomType::Sinkhole, discovered: false});
+                v.push(Room{ roomtype: RoomType::CrystalOrb, discovered: false});
+                v.push(Room{ roomtype: RoomType::Book, discovered: false});
+                remaining -= 8;
             }
 
             // Monsters {
-            for i in 0..MONSTER_COUNT {
+            for i in 0..(MONSTER_COUNT-1) { // -1 to not count the Vendors
                 v.push(Room{ roomtype: RoomType::Monster(Monster::new(i)), discovered: false});
                 remaining -= 1;
-
             }
 
             // Fill the rest with empty
@@ -237,6 +248,12 @@ impl Dungeon {
                         RoomType::StairsUp => print!("U"),
                         RoomType::Gold => print!("G"),
                         RoomType::Pool => print!("P"),
+                        RoomType::Chest => print!("C"),
+                        RoomType::Flares => print!("F"),
+                        RoomType::Warp => print!("W"),
+                        RoomType::Sinkhole => print!("S"),
+                        RoomType::CrystalOrb => print!("O"),
+                        RoomType::Book => print!("B"),
                         RoomType::Monster(_) => print!("M"),
                     }
                 } else {
