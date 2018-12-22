@@ -217,6 +217,7 @@ impl Dungeon {
             // Fix up the stairs up
             if z > 0 {
                 let mut downs = Vec::new();
+                let mut ups = Vec::new();
 
                 let prev_level = levels.last().unwrap();
 
@@ -226,7 +227,19 @@ impl Dungeon {
                     }
                 }
 
-                // TODO: match ups to downs
+                for i in 0..xsize * ysize {
+                    if v[i].roomtype == RoomType::StairsUp {
+                        ups.push(i);
+                    }
+                }
+
+                while ups.len() > 0 {
+                    let up_i = ups.pop().unwrap();
+                    let down_i = downs.pop().unwrap();
+
+                    v.swap(up_i, down_i);
+                }
+
             }
 
             levels.push(v);
@@ -321,7 +334,12 @@ fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
 /// Main
 fn main() {
     let dungeon = Dungeon::new(8, 8, 8);
-    let player = Player::new(dungeon.entrance_x(), 0, 0);
+    let mut player = Player::new(dungeon.entrance_x(), 0, 0);
+
+    map(&dungeon, &player, true);
+
+    player.z = 1;
+    println!("");
 
     map(&dungeon, &player, true);
 }
