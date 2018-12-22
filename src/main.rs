@@ -47,10 +47,11 @@ struct Monster {
     hp: usize,
     damage: usize,
     break_weapon: bool,
+    has_runestaff: bool,
 }
 
 impl Monster {
-    fn new(monster_num: usize) -> Monster {
+    fn new(monster_num: usize, has_runestaff: bool) -> Monster {
         let name = [
             "kobold",
             "orc",
@@ -91,7 +92,14 @@ impl Monster {
 
         let break_weapon = monster_type == MonsterType::Gargoyle || monster_type == MonsterType::Dragon;
 
-        Monster{monster_type, name: String::from(name[monster_num]), hp, damage, break_weapon}
+        Monster{
+            monster_type,
+            name: String::from(name[monster_num]),
+            hp,
+            damage,
+            break_weapon,
+            has_runestaff
+        }
     }
 }
 
@@ -124,6 +132,7 @@ impl Dungeon {
         let entrance_x = (xsize - 1) / 2;
 
         let orb_of_zot_level = rng.gen_range(0, zsize);
+        let runestaff_level = rng.gen_range(0, zsize);
 
         for z in 0..zsize {
             let mut v = Vec::new();
@@ -170,9 +179,16 @@ impl Dungeon {
                 remaining -= 8;
             }
 
-            // Monsters {
-            for i in 0..(MONSTER_COUNT-1) { // -1 to not count the Vendors
-                v.push(Room{ roomtype: RoomType::Monster(Monster::new(i)), discovered: false});
+            // Monsters
+
+            let monsters_to_place = MONSTER_COUNT - 1; // -1 to not count the Vendors
+
+            let monster_with_runestaff = rng.gen_range(0, monsters_to_place);
+
+            for i in 0..monsters_to_place {
+                let has_runestaff = i == monster_with_runestaff && z == runestaff_level;
+
+                v.push(Room{ roomtype: RoomType::Monster(Monster::new(i, has_runestaff)), discovered: false});
                 remaining -= 1;
             }
 
