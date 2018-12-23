@@ -103,6 +103,16 @@ impl Monster {
     }
 }
 
+/*
+#[derive(Debug)]
+enum CurseType {
+    None,
+    Forgetfulness,
+    TheLeech,
+    Lethargy,
+}
+*/
+
 #[derive(Debug)]
 struct Room {
     roomtype: RoomType,
