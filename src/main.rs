@@ -245,10 +245,8 @@ impl Dungeon {
                     }
                 }
             }
-        }
 
-        // Fix up the stairs up
-        for z in 0..zsize {
+            // Fix up the stairs up
             if z > 0 {
                 let mut downs = Vec::new();
                 let mut ups = Vec::new();
