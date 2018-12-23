@@ -86,7 +86,8 @@ impl Monster {
     }
 }
 
-/*
+const CURSE_COUNT:usize = 3;
+
 #[derive(Debug)]
 enum CurseType {
     None,
@@ -94,7 +95,6 @@ enum CurseType {
     TheLeech,
     Lethargy,
 }
-*/
 
 #[derive(Debug,PartialEq)]
 enum RoomType {
@@ -117,11 +117,16 @@ enum RoomType {
 struct Room {
     roomtype: RoomType,
     discovered: bool,
+    curse: CurseType,
 }
 
 impl Default for Room {
     fn default() -> Room {
-        Room { roomtype: RoomType::Empty, discovered: false }
+        Room {
+            roomtype: RoomType::Empty,
+            discovered: false,
+            curse: CurseType::None,
+        }
     }
 }
 
@@ -156,7 +161,7 @@ impl Dungeon {
 
             // Entrance
             if z == 0 {
-                this_level.push(Room{ roomtype: RoomType::Entrance, discovered: true});
+                this_level.push(Room{ roomtype: RoomType::Entrance, discovered: true, ..Default::default() });
             }
 
             // Stairs down
@@ -201,13 +206,27 @@ impl Dungeon {
             levels.push(this_level);
         }
 
+        // Add curse rooms
+        for i in 0..CURSE_COUNT {
+            let curse_level = rng.gen_range(0, zsize);
+
+            let curse = match i {
+                0 => CurseType::Forgetfulness,
+                1 => CurseType::TheLeech,
+                2 => CurseType::Lethargy,
+                _ => CurseType::None,
+            };
+
+            levels[curse_level].push(Room { curse, ..Default::default() })
+        }
+
         // Run through the levels, padding them with empty rooms, shuffling
         // them, and moving certain rooms to their proper positions.
 
         for z in 0..zsize {
             // Fill the rest with empty
             while levels[z].len() < area {
-                levels[z].push(Room{ roomtype: RoomType::Empty, discovered: false});
+                levels[z].push(Room{ roomtype: RoomType::Empty, ..Default::default() });
             }
 
             // Shuffle the level
