@@ -51,22 +51,7 @@ impl Monster {
             "vendor",
         ];
 
-        let monster_type = match monster_num {
-            0 => MonsterType::Kobold,
-            1 => MonsterType::Orc,
-            2 => MonsterType::Wolf,
-            3 => MonsterType::Goblin,
-            4 => MonsterType::Ogre,
-            5 => MonsterType::Troll,
-            6 => MonsterType::Bear,
-            7 => MonsterType::Minotaur,
-            8 => MonsterType::Gargoyle,
-            9 => MonsterType::Chimera,
-            10 => MonsterType::Balrog,
-            11 => MonsterType::Dragon,
-            12 => MonsterType::Vendor,
-            _ => MonsterType::Vendor, // This should never happen
-        };
+        let monster_type = Monster::get_monster_by_id(monster_num);
 
         let m1 = monster_num + 1; // Change to 1-based
 
@@ -82,6 +67,26 @@ impl Monster {
             damage,
             break_weapon,
             has_runestaff
+        }
+    }
+
+    /// Return a MonsterType for a given ID
+    fn get_monster_by_id(id: usize) -> MonsterType {
+        match id {
+            0 => MonsterType::Kobold,
+            1 => MonsterType::Orc,
+            2 => MonsterType::Wolf,
+            3 => MonsterType::Goblin,
+            4 => MonsterType::Ogre,
+            5 => MonsterType::Troll,
+            6 => MonsterType::Bear,
+            7 => MonsterType::Minotaur,
+            8 => MonsterType::Gargoyle,
+            9 => MonsterType::Chimera,
+            10 => MonsterType::Balrog,
+            11 => MonsterType::Dragon,
+            12 => MonsterType::Vendor,
+            _ => panic!("get_monster_by_id: unknown id")
         }
     }
 }
@@ -123,9 +128,24 @@ impl Treasure {
         let max_value = (treasure_num + 1) * 1500;
 
         Treasure {
-            treasure_type: Dungeon::get_treasure_by_id(treasure_num),
+            treasure_type: Treasure::get_treasure_by_id(treasure_num),
             name: String::from(name[treasure_num]),
             max_value,
+        }
+    }
+
+    /// Return a treasure for a given ID
+    fn get_treasure_by_id(id: usize) -> TreasureType {
+        match id {
+            0 => TreasureType::RubyRed,
+            1 => TreasureType::NornStone,
+            2 => TreasureType::PalePearl,
+            3 => TreasureType::OpalEye,
+            4 => TreasureType::GreenGem,
+            5 => TreasureType::BlueFlame,
+            6 => TreasureType::Palintir,
+            7 => TreasureType::Silmaril,
+            _ => panic!("get_treasure_by_id: unknown id")
         }
     }
 }
@@ -139,6 +159,20 @@ enum CurseType {
     Forgetfulness,
     TheLeech,
     Lethargy,
+}
+
+struct Curse {
+}
+
+impl Curse {
+    fn get_curse_by_id(id: usize) -> CurseType {
+        match id {
+            0 => CurseType::Forgetfulness,
+            1 => CurseType::TheLeech,
+            2 => CurseType::Lethargy,
+            _ => panic!("get_curse_by_id: unknown id")
+        }
+    }
 }
 
 #[derive(Debug,PartialEq)]
@@ -256,7 +290,7 @@ impl Dungeon {
         for i in 0..CURSE_COUNT {
             let curse_level = rng.gen_range(0, zsize);
 
-            let curse = Dungeon::get_curse_by_id(i);
+            let curse = Curse::get_curse_by_id(i);
 
             levels[curse_level].push(Room { curse, ..Default::default() })
         }
@@ -322,29 +356,6 @@ impl Dungeon {
         Dungeon{levels, xsize, ysize, zsize}
     }
 
-    /// Return a treasure for a given ID
-    fn get_treasure_by_id(id: usize) -> TreasureType {
-        match id {
-            0 => TreasureType::RubyRed,
-            1 => TreasureType::NornStone,
-            2 => TreasureType::PalePearl,
-            3 => TreasureType::OpalEye,
-            4 => TreasureType::GreenGem,
-            5 => TreasureType::BlueFlame,
-            6 => TreasureType::Palintir,
-            7 => TreasureType::Silmaril,
-            _ => panic!("get_treasure_by_id: unknown id")
-        }
-    }
-
-    fn get_curse_by_id(id: usize) -> CurseType {
-        match id {
-            0 => CurseType::Forgetfulness,
-            1 => CurseType::TheLeech,
-            2 => CurseType::Lethargy,
-            _ => panic!("get_curse_by_id: unknown id")
-        }
-    }
     /// Get the entrance x position
     fn entrance_x(&self) -> usize {
         return (self.xsize - 1) / 2;
