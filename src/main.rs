@@ -100,6 +100,37 @@ enum TreasureType {
     Silmaril,
 }
 
+#[derive(Debug,PartialEq)]
+struct Treasure {
+    treasure_type: TreasureType,
+    name: String,
+    max_value: usize,
+}
+
+impl Treasure {
+    fn new(treasure_num: usize) -> Treasure {
+        let name = [
+            "ruby red",
+            "norn stone",
+            "pale pearl",
+            "opal eye",
+            "green gem",
+            "blue flame",
+            "palintir",
+            "simaril",
+        ];
+
+        let max_value = (treasure_num + 1) * 1500;
+
+        Treasure {
+            treasure_type: Dungeon::get_treasure_by_id(treasure_num),
+            name: String::from(name[treasure_num]),
+            max_value,
+        }
+    }
+}
+
+
 const CURSE_COUNT:usize = 3;
 
 #[derive(Debug)]
@@ -125,7 +156,7 @@ enum RoomType {
     CrystalOrb,
     Book,
     Monster(Monster),
-    Treasure(TreasureType),
+    Treasure(Treasure),
 }
 
 #[derive(Debug)]
@@ -236,11 +267,9 @@ impl Dungeon {
         }
 
         for i in 0..TREASURE_COUNT {
-            let treasure = Dungeon::get_treasure_by_id(i);
-
             let treasure_level = rng.gen_range(0, zsize);
 
-            levels[treasure_level].push(Room { roomtype: RoomType::Treasure(treasure), ..Default::default() })
+            levels[treasure_level].push(Room { roomtype: RoomType::Treasure(Treasure::new(i)), ..Default::default() })
         }
 
         // Run through the levels, padding them with empty rooms, shuffling
