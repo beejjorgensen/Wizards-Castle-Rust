@@ -256,12 +256,7 @@ impl Dungeon {
         for i in 0..CURSE_COUNT {
             let curse_level = rng.gen_range(0, zsize);
 
-            let curse = match i {
-                0 => CurseType::Forgetfulness,
-                1 => CurseType::TheLeech,
-                2 => CurseType::Lethargy,
-                _ => CurseType::None,
-            };
+            let curse = Dungeon::get_curse_by_id(i);
 
             levels[curse_level].push(Room { curse, ..Default::default() })
         }
@@ -338,10 +333,18 @@ impl Dungeon {
             5 => TreasureType::BlueFlame,
             6 => TreasureType::Palintir,
             7 => TreasureType::Silmaril,
-            _ => panic!("get_treasure_by_id: unknown ID")
+            _ => panic!("get_treasure_by_id: unknown id")
         }
     }
 
+    fn get_curse_by_id(id: usize) -> CurseType {
+        match id {
+            0 => CurseType::Forgetfulness,
+            1 => CurseType::TheLeech,
+            2 => CurseType::Lethargy,
+            _ => panic!("get_curse_by_id: unknown id")
+        }
+    }
     /// Get the entrance x position
     fn entrance_x(&self) -> usize {
         return (self.xsize - 1) / 2;
