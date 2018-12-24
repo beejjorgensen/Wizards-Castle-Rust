@@ -86,6 +86,20 @@ impl Monster {
     }
 }
 
+const TREASURE_COUNT:usize = 8;
+
+#[derive(Debug,PartialEq)]
+enum TreasureType {
+    RubyRed,
+    NornStone,
+    PalePearl,
+    OpalEye,
+    GreenGem,
+    BlueFlame,
+    Palintir,
+    Silmaril,
+}
+
 const CURSE_COUNT:usize = 3;
 
 #[derive(Debug)]
@@ -110,7 +124,8 @@ enum RoomType {
     Sinkhole,
     CrystalOrb,
     Book,
-    Monster(Monster)
+    Monster(Monster),
+    Treasure(TreasureType),
 }
 
 #[derive(Debug)]
@@ -220,6 +235,14 @@ impl Dungeon {
             levels[curse_level].push(Room { curse, ..Default::default() })
         }
 
+        for i in 0..TREASURE_COUNT {
+            let treasure = Dungeon::get_treasure_by_id(i);
+
+            let treasure_level = rng.gen_range(0, zsize);
+
+            levels[treasure_level].push(Room { roomtype: RoomType::Treasure(treasure), ..Default::default() })
+        }
+
         // Run through the levels, padding them with empty rooms, shuffling
         // them, and moving certain rooms to their proper positions.
 
@@ -273,6 +296,21 @@ impl Dungeon {
         }
 
         Dungeon{levels, xsize, ysize, zsize}
+    }
+
+    /// Return a treasure for a given ID
+    fn get_treasure_by_id(id: usize) -> TreasureType {
+        match id {
+            0 => TreasureType::RubyRed,
+            1 => TreasureType::NornStone,
+            2 => TreasureType::PalePearl,
+            3 => TreasureType::OpalEye,
+            4 => TreasureType::GreenGem,
+            5 => TreasureType::BlueFlame,
+            6 => TreasureType::Palintir,
+            7 => TreasureType::Silmaril,
+            _ => panic!("get_treasure_by_id: unknown ID")
+        }
     }
 
     /// Get the entrance x position
@@ -344,6 +382,7 @@ fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
                     RoomType::CrystalOrb => print!("O"),
                     RoomType::Book => print!("B"),
                     RoomType::Monster(_) => print!("M"),
+                    RoomType::Treasure(_) => print!("T"),
                 }
             } else {
                 print!("?");
