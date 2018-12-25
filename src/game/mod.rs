@@ -29,7 +29,8 @@ impl Game {
 
         let dungeon = Dungeon::new(xsize, ysize, zsize);
 
-        let player = Player::new(dungeon.entrance_x(), 0, 0);
+        let mut player = Player::new();
+        player.set_position(dungeon.entrance_x(), 0, 0);
 
         Game {
             dungeon,
