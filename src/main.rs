@@ -1,5 +1,6 @@
 extern crate wizardscastle;
 
+use wizardscastle::game::Game;
 use wizardscastle::dungeon::Dungeon;
 use wizardscastle::room::RoomType;
 use wizardscastle::player::Player;
@@ -59,13 +60,12 @@ fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
 
 /// Main
 fn main() {
-    let dungeon = Dungeon::new(8, 8, 8);
-    let mut player = Player::new(dungeon.entrance_x(), 0, 0);
+    let mut game = Game::new(8, 8, 8);
 
-    map(&dungeon, &player, true);
+    map(&game.dungeon, &game.player, true);
 
-    player.z = 1;
+    game.player.z = 1;
     println!("");
 
-    map(&dungeon, &player, true);
+    map(&game.dungeon, &game.player, true);
 }
