@@ -67,7 +67,7 @@ impl Player {
 
         let race_id = Player::get_id_by_race(&race);
 
-        self.st = 8 + (race_id + 1) * 2;
+        self.st = 2 + (race_id + 1) * 2;
         self.dx = 14 - (race_id + 1) * 2;
         self.iq = 8;
 
