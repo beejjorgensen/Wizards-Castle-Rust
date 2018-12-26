@@ -1,3 +1,4 @@
+pub mod armor;
 pub mod curse;
 pub mod dungeon;
 pub mod error;

@@ -1,4 +1,5 @@
 use error::Error;
+use armor::Armor;
 
 #[derive(PartialEq)]
 pub enum Stat {
@@ -28,10 +29,14 @@ pub struct Player {
     pub race: Race,
     pub gender: Gender,
 
+    pub gp: usize,
+
     pub additional_points: usize,
     pub st: usize,
     pub dx: usize,
     pub iq: usize,
+
+    pub armor: Armor,
 
     //blind: bool,
 }
@@ -46,6 +51,8 @@ impl Player {
             race: Race::Hobbit,
             gender: Gender::Male,
 
+            gp: 0,
+
             additional_points: 0,
 
             st: 0,
@@ -53,6 +60,8 @@ impl Player {
             iq: 0,
 
             //blind: false
+
+            armor: Armor::None,
         }
     }
 
@@ -63,7 +72,7 @@ impl Player {
     }
 
     /// Set the race and all the corresponding points
-    pub fn set_race(&mut self, race: Race) {
+    pub fn init(&mut self, race: Race) {
 
         let race_id = Player::get_id_by_race(&race);
 
@@ -78,6 +87,8 @@ impl Player {
         }
 
         self.race = race;
+
+        self.gp = 60;
     }
 
     /// Get a race number by race type
@@ -112,5 +123,18 @@ impl Player {
         self.additional_points -= points;
 
         Ok(self.additional_points)
+    }
+
+    // Give the player some armor
+    pub fn purchase_armor(&mut self, a:Armor, is_vendor:bool) -> Result<(), Error> {
+        let armor_cost = Armor::cost(a, is_vendor);
+
+        if armor_cost > self.gp {
+            return Err(Error::NotEnoughGP);
+        }
+
+        self.armor = a;
+
+        Ok(())
     }
 }
