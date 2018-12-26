@@ -1,3 +1,12 @@
+use error::Error;
+
+#[derive(PartialEq)]
+pub enum Stat {
+    Strength,
+    Dexterity,
+    Intelligence,
+}
+
 #[derive(PartialEq)]
 pub enum Gender {
     Male,
@@ -19,7 +28,7 @@ pub struct Player {
     pub race: Race,
     pub gender: Gender,
 
-    additional_points: usize,
+    pub additional_points: usize,
     pub st: usize,
     pub dx: usize,
     pub iq: usize,
@@ -84,5 +93,24 @@ impl Player {
     /// Set character gender
     pub fn set_gender(&mut self, gender:Gender) {
         self.gender = gender;
+    }
+
+    /// Allocate points to a stat
+    /// 
+    /// TODO: support deallocation of points
+    pub fn allocate_points(&mut self, stat:&Stat, points:usize) -> Result<usize, Error> {
+        if points > self.additional_points {
+            return Err(Error::NotEnoughPoints);
+        }
+
+        match stat {
+            Stat::Strength => self.st += points,
+            Stat::Dexterity => self.dx += points,
+            Stat::Intelligence => self.iq += points,
+        };
+
+        self.additional_points -= points;
+
+        Ok(self.additional_points)
     }
 }

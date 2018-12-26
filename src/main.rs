@@ -5,7 +5,7 @@ use std::io::{stdin,stdout,Write};
 use wizardscastle::game::Game;
 use wizardscastle::dungeon::Dungeon;
 use wizardscastle::room::RoomType;
-use wizardscastle::player::{Race, Gender, Player};
+use wizardscastle::player::{Race, Gender, Player, Stat};
 
 /// Print a map
 fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
@@ -132,15 +132,49 @@ fn race_gender_select(game: &mut Game) {
     };
 
     game.player.set_gender(gender);
+}
 
-/*
-1585 PRINT "WHICH SEX TO YOU PREFER";
+fn allocate_points(game: &mut Game) {
+    println!("\nOK {}, YOU HAVE THESE STATISTICS:\n", race_str(&game.player));
 
-1595 IF O$="M" THEN SX=1 : GOTO 1615
-1600 IF O$="F" GOTO 1615
-1605 PRINT "** CUTE ";R$(RC);", REAL CUTE. TRY M OR F."
-*/
+    println!("STRENGTH= {} INTELLIGENCE= {} DEXTERITY= {}\n",
+        game.player.st, game.player.iq, game.player.dx);
 
+    println!("AND {} OTHER POINTS TO ALLOCATE AS YOU WISH.\n", game.player.additional_points);
+
+    let stats = vec!(Stat::Intelligence, Stat::Strength, Stat::Dexterity);
+    let stat_names = vec!("INTELLIGENCE", "STRENGTH", "DEXTERITY");
+
+    for i in 0..3 {
+        let mut ok = false;
+
+        while !ok {
+            let s = get_input(Some(&format!("HOW MANY POINTS DO YOU ADD TO {}? ", stat_names[i])));
+
+            let points_to_add;
+            
+            match s.parse::<usize>() {
+                Ok(p) => points_to_add = p,
+                Err(_) => {
+                    print!("\n** ");
+                    continue;
+                },
+            };
+
+            if let Ok(_) = game.player.allocate_points(&stats[i], points_to_add) {
+                ok = true;
+            } else {
+                print!("\n** ");
+                continue;
+            }
+        }
+
+        println!();
+
+        if game.player.additional_points == 0 {
+            return;
+        }
+    }
 }
 
 /// Main
@@ -150,6 +184,8 @@ fn main() {
     intro();
 
     race_gender_select(&mut game);
+
+    allocate_points(&mut game);
 
     map(&game.dungeon, &game.player, true);
 }
