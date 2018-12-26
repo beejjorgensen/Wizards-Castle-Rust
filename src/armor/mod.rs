@@ -1,17 +1,36 @@
 #[derive(Debug,PartialEq,Copy,Clone)]
-pub enum Armor {
+pub enum ArmorType {
     None,
     Leather,
     Chainmail,
     Plate,
 }
 
+pub struct Armor {
+    armor_type: ArmorType,
+    health: isize,
+}
+
 impl Armor {
-    pub fn cost(a:Armor, is_vendor:bool) -> usize {
+    pub fn new(a: ArmorType) -> Armor {
+        let health = match a {
+            ArmorType::None => 0 * 7,
+            ArmorType::Leather => 1 * 7,
+            ArmorType::Chainmail => 2 * 7,
+            ArmorType::Plate => 3 * 7,
+        };
+
+        Armor {
+            armor_type: a,
+            health,
+        }
+    }
+
+    pub fn cost(a:ArmorType, is_vendor:bool) -> usize {
         let value;
 
         if is_vendor {
-            if a == Armor::None {
+            if a == ArmorType::None {
                 value = 0;
 
             } else {
@@ -22,22 +41,22 @@ impl Armor {
 
         } else {
             value = match a {
-                Armor::None => 0,
-                Armor::Leather => 1250,
-                Armor::Chainmail => 1500,
-                Armor::Plate => 2000,
+                ArmorType::None => 0,
+                ArmorType::Leather => 1250,
+                ArmorType::Chainmail => 1500,
+                ArmorType::Plate => 2000,
             }
         }
 
         value
     }
 
-    fn to_id(a:Armor) -> usize {
+    fn to_id(a:ArmorType) -> usize {
         match a {
-            Armor::None => 9999,
-            Armor::Leather => 0,
-            Armor::Chainmail => 1,
-            Armor::Plate => 2,
+            ArmorType::None => 9999,
+            ArmorType::Leather => 0,
+            ArmorType::Chainmail => 1,
+            ArmorType::Plate => 2,
         }
     }
 }

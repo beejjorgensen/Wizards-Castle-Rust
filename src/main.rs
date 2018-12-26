@@ -10,7 +10,7 @@ use wizardscastle::game::Game;
 use wizardscastle::dungeon::Dungeon;
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Player, Stat};
-use wizardscastle::armor::Armor;
+use wizardscastle::armor::ArmorType;
 
 /// Return a random monster name
 fn rand_monster_str() -> String {
@@ -218,6 +218,29 @@ fn buy_armor(game: &mut Game) {
 
         match armor_str.get(..1) {
 
+            Some("P") => break game.player.purchase_armor(ArmorType::Plate, false),
+            Some("C") => break game.player.purchase_armor(ArmorType::Chainmail, false),
+            Some("L") => break game.player.purchase_armor(ArmorType::Leather, false),
+            Some("N") => break game.player.purchase_armor(ArmorType::None, false),
+            _ => println!("\n** ARE YOU A {} or a {} ? TYPE P,C,L OR N", race_str(&game.player), rand_monster_str()),
+        }
+    };
+}
+
+/*
+fn buy_weapon(game: &mut Game) {
+
+    println!("\nOK, {}, YOU HAVE {} GOLD PIECES (GP's)\n", race_str(&game.player), game.player.gp);
+
+    println!("HERE IS A LIST OF ARMOR YOU CAN BUY (WITH COST IN <>)\n");
+
+    println!("PLATE<30> CHAINMAIL<20> LEATHER<10> NOTHING<0>");
+
+    let _ = loop {
+        let armor_str = get_input(Some("\nYOUR CHOICE? "));
+
+        match armor_str.get(..1) {
+
             Some("P") => break game.player.purchase_armor(Armor::Plate, false),
             Some("C") => break game.player.purchase_armor(Armor::Chainmail, false),
             Some("L") => break game.player.purchase_armor(Armor::Leather, false),
@@ -225,17 +248,7 @@ fn buy_armor(game: &mut Game) {
             _ => println!("\n** ARE YOU A {} or a {} ? TYPE P,C,L OR N", race_str(&game.player), rand_monster_str()),
         }
     };
-
 /*
-370 PRINTCHR$(12):PRINT"OK, ";R$(RC);", YOU HAVE 60 GOLD PIECES (GP's)":PRINT
-380 Z$="ARMOR":GOSUB3390:AV=0:WV=0:FL=0:WC=0
-390 PRINT"PLATE<30> CHAINMAIL<20> LEATHER<10> NOTHING<0>"
-400 GOSUB3280:IFO$="N"THEN440
-410 AV=-3*(O$="P")-2*(O$="C")-(O$="L"):IFAV>0THEN440
-420 PRINT:PRINT"** ARE YOU A ";R$(RC);" OR ";C$(FNA(12)+12);
-430 PRINT" ? TYPE P,C,L, OR N":PRINT:GOTO380
-440 AH=AV*7:GP=GP-AV*10:PRINTCHR$(12)
-
 3280 PRINT:PRINT"YOUR CHOICE ";
 3290 INPUTO$:O$=LEFT$(O$,1):RETURN
 
@@ -243,6 +256,7 @@ fn buy_armor(game: &mut Game) {
 */
 
 }
+*/
 
 /// Main
 fn main() {

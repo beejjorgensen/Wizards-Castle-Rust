@@ -1,5 +1,5 @@
 use error::Error;
-use armor::Armor;
+use armor::{Armor, ArmorType};
 
 #[derive(PartialEq)]
 pub enum Stat {
@@ -61,7 +61,7 @@ impl Player {
 
             //blind: false
 
-            armor: Armor::None,
+            armor: Armor::new(ArmorType::None),
         }
     }
 
@@ -126,14 +126,14 @@ impl Player {
     }
 
     // Give the player some armor
-    pub fn purchase_armor(&mut self, a:Armor, is_vendor:bool) -> Result<(), Error> {
+    pub fn purchase_armor(&mut self, a:ArmorType, is_vendor:bool) -> Result<(), Error> {
         let armor_cost = Armor::cost(a, is_vendor);
 
         if armor_cost > self.gp {
             return Err(Error::NotEnoughGP);
         }
 
-        self.armor = a;
+        self.armor = Armor::new(a);
 
         Ok(())
     }
