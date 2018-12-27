@@ -12,6 +12,7 @@ pub enum Event {
     None,
     FoundGold(usize),
     FoundFlares(usize),
+    Sinkhole,
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -64,6 +65,8 @@ impl Game {
     pub fn room_effect(&mut self) -> Event {
         let p = &mut self.player;
 
+        let zsize = self.dungeon.zsize;
+
         let room = self.dungeon.room_at(p.x, p.y, p.z);
 
         if room.roomtype == RoomType::Gold {
@@ -86,6 +89,12 @@ impl Game {
             return Event::FoundFlares(flare_amount);
         }
 
+        if room.roomtype == RoomType::Sinkhole {
+            p.z = (p.z + 1) % zsize;
+
+            return Event::Sinkhole;
+        }
+        
         Event::None
     }
 

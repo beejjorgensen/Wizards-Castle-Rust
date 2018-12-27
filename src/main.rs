@@ -422,7 +422,7 @@ impl UI {
             return;
         }
 
-        println!("YOU ARE AT ({},{}) LEVEL {}", p.x, p.y, p.z);
+        println!("YOU ARE AT ({},{}) LEVEL {}", p.x + 1, p.y + 1, p.z + 1);
     }
 
     /// Print player stats
@@ -496,6 +496,8 @@ fn main() {
             ui.print_stats();
 
             ui.print_room();
+            
+            let mut automove = false;
 
             match ui.game.room_effect() {
                 Event::FoundGold(_) => {
@@ -504,10 +506,17 @@ fn main() {
                 Event::FoundFlares(_) => {
                     println!("YOU HAVE {}", ui.game.player.flares);
                 },
+                Event::Sinkhole => {
+                    automove = true;
+                },
                 Event::None => (),
             }
 
             ui.turn_count += 1;
+
+            if automove {
+                continue;
+            }
 
             // TODO curse effects
 
