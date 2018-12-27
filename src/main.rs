@@ -11,6 +11,7 @@ use wizardscastle::dungeon::Dungeon;
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Player, Stat};
 use wizardscastle::armor::ArmorType;
+use wizardscastle::weapon::WeaponType;
 
 /// Return a random monster name
 fn rand_monster_str() -> String {
@@ -227,36 +228,27 @@ fn buy_armor(game: &mut Game) {
     };
 }
 
-/*
 fn buy_weapon(game: &mut Game) {
 
-    println!("\nOK, {}, YOU HAVE {} GOLD PIECES (GP's)\n", race_str(&game.player), game.player.gp);
+    println!("\nOK, BOLD {}, YOU HAVE {} GP's LEFT\n", race_str(&game.player), game.player.gp);
 
-    println!("HERE IS A LIST OF ARMOR YOU CAN BUY (WITH COST IN <>)\n");
+    println!("HERE IS A LIST OF WEAPONS YOU CAN BUY (WITH COST IN <>)\n");
 
-    println!("PLATE<30> CHAINMAIL<20> LEATHER<10> NOTHING<0>");
+    println!("SWORD<30> MACE<20> DAGGER<10> NOTHING<0>");
 
     let _ = loop {
         let armor_str = get_input(Some("\nYOUR CHOICE? "));
 
         match armor_str.get(..1) {
 
-            Some("P") => break game.player.purchase_armor(Armor::Plate, false),
-            Some("C") => break game.player.purchase_armor(Armor::Chainmail, false),
-            Some("L") => break game.player.purchase_armor(Armor::Leather, false),
-            Some("N") => break game.player.purchase_armor(Armor::None, false),
-            _ => println!("\n** ARE YOU A {} or a {} ? TYPE P,C,L OR N", race_str(&game.player), rand_monster_str()),
+            Some("S") => break game.player.purchase_weapon(WeaponType::Sword, false),
+            Some("M") => break game.player.purchase_weapon(WeaponType::Mace, false),
+            Some("D") => break game.player.purchase_weapon(WeaponType::Dagger, false),
+            Some("N") => break game.player.purchase_weapon(WeaponType::None, false),
+            _ => println!("\n** IS YOUR IQ REALLY {}? TYPE S, M, D, OR N", game.player.iq),
         }
     };
-/*
-3280 PRINT:PRINT"YOUR CHOICE ";
-3290 INPUTO$:O$=LEFT$(O$,1):RETURN
-
-3390 PRINT"HERE IS A LIST OF ";Z$;" YOU CAN BUY (WITH COST IN <>)":PRINT:RETURN
-*/
-
 }
-*/
 
 /// Main
 fn main() {
@@ -265,10 +257,9 @@ fn main() {
     intro();
 
     race_gender_select(&mut game);
-
     allocate_points(&mut game);
-
     buy_armor(&mut game);
+    buy_weapon(&mut game);
 
     map(&game.dungeon, &game.player, true);
 }
