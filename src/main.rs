@@ -12,12 +12,12 @@ use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::ArmorType;
 use wizardscastle::weapon::WeaponType;
 
-struct UI<'a> {
-    game: &'a mut Game,
+struct UI {
+    game: Game,
     turn_count: usize,
 }
 
-impl<'a> UI<'a> {
+impl UI {
     /// Return a random monster name
     fn rand_monster_str() -> String {
         let name = [
@@ -325,8 +325,10 @@ impl<'a> UI<'a> {
 
 /// Main
 fn main() {
+    let game = Game::new(8, 8, 8);
+
     let mut ui = UI {
-        game: &mut Game::new(8, 8, 8),
+        game: game,
         turn_count: 0,
     };
 
@@ -345,6 +347,10 @@ fn main() {
     ui.turn_count = 0;
 
     while playing {
+        ui.turn_count += 1;
+
+        ui.game.dungeon.discover(ui.game.player.x, ui.game.player.y, ui.game.player.z);
+
         ui.map(true);
     }
 }

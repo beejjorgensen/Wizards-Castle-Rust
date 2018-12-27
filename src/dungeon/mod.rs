@@ -10,7 +10,7 @@ use curse::Curse;
 use treasure::Treasure;
 
 #[derive(Debug)]
-pub struct  Dungeon {
+pub struct Dungeon {
     pub levels: Vec<Vec<Room>>,
     pub xsize: usize,
     pub ysize: usize,
@@ -167,4 +167,9 @@ impl Dungeon {
         &self.levels[z][i]
     }
 
+    pub fn discover(&mut self, x:usize, y:usize, z:usize) {
+        let i = y * self.xsize + x;
+
+        self.levels[z][i].discovered = true;
+    }
 }
