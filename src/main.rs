@@ -6,7 +6,7 @@ use std::io::{stdin,stdout,Write};
 use self::rand::Rng;
 use self::rand::thread_rng;
 
-use wizardscastle::game::Game;
+use wizardscastle::game::{Game,Direction};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::ArmorType;
@@ -113,6 +113,11 @@ impl UI {
         }
 
         String::from("A")
+    }
+
+    /// Move a direction
+    fn move_dir(&mut self, dir:Direction) {
+        self.game.move_dir(dir)
     }
 
     /// Print a map
@@ -497,6 +502,10 @@ fn main() {
 
                 match command.get(..1) {
                     Some("M") => ui.map(false),
+                    Some("N") => ui.move_dir(Direction::North),
+                    Some("S") => ui.move_dir(Direction::South),
+                    Some("W") => ui.move_dir(Direction::West),
+                    Some("E") => ui.move_dir(Direction::East),
                     _ => {
                         println!("\n** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
                         valid_command = false;
