@@ -501,6 +501,9 @@ fn main() {
                 Event::FoundGold(_) => {
                     println!("YOU HAVE {}", ui.game.player.gp);
                 },
+                Event::FoundFlares(_) => {
+                    println!("YOU HAVE {}", ui.game.player.flares);
+                },
                 Event::None => (),
             }
 

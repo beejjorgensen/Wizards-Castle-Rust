@@ -11,6 +11,7 @@ use self::rand::thread_rng;
 pub enum Event {
     None,
     FoundGold(usize),
+    FoundFlares(usize),
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -73,6 +74,16 @@ impl Game {
             room.make_empty();
 
             return Event::FoundGold(gold_amount);
+        }
+
+        if room.roomtype == RoomType::Flares {
+            let flare_amount = Game::d(1,5);
+
+            p.flares += flare_amount;
+
+            room.make_empty();
+
+            return Event::FoundFlares(flare_amount);
         }
 
         Event::None
