@@ -1,6 +1,6 @@
 pub const MONSTER_COUNT: usize = 13;
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Copy,Clone)]
 pub enum MonsterType {
     Kobold,
     Orc,
@@ -20,7 +20,6 @@ pub enum MonsterType {
 #[derive(Debug,PartialEq)]
 pub struct Monster {
     monster_type: MonsterType,
-    name: String,
     hp: usize,
     damage: usize,
     break_weapon: bool,
@@ -29,22 +28,6 @@ pub struct Monster {
 
 impl Monster {
     pub fn new(monster_num: usize, has_runestaff: bool) -> Monster {
-        let name = [
-            "kobold",
-            "orc",
-            "wolf",
-            "goblin",
-            "ogre",
-            "troll",
-            "bear",
-            "minotaur",
-            "gargoyle",
-            "chimera",
-            "balrog",
-            "dragon",
-            "vendor",
-        ];
-
         let monster_type = Monster::get_monster_by_id(monster_num);
 
         let m1 = monster_num + 1; // Change to 1-based
@@ -56,7 +39,6 @@ impl Monster {
 
         Monster{
             monster_type,
-            name: String::from(name[monster_num]),
             hp,
             damage,
             break_weapon,
@@ -82,5 +64,9 @@ impl Monster {
             12 => MonsterType::Vendor,
             _ => panic!("get_monster_by_id: unknown id")
         }
+    }
+
+    pub fn monster_type(&self) -> MonsterType {
+        self.monster_type
     }
 }

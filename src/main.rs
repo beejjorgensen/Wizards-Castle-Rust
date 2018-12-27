@@ -12,6 +12,7 @@ use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::ArmorType;
 use wizardscastle::weapon::WeaponType;
 use wizardscastle::treasure::TreasureType;
+use wizardscastle::monster::MonsterType;
 
 struct UI {
     game: Game,
@@ -21,26 +22,44 @@ struct UI {
 impl UI {
     /// Return a random monster name
     fn rand_monster_str() -> String {
-        let name = [
-            "kobold",
-            "orc",
-            "wolf",
-            "goblin",
-            "ogre",
-            "troll",
-            "bear",
-            "minotaur",
-            "gargoyle",
-            "chimera",
-            "balrog",
-            "dragon",
+        let monster = [
+            MonsterType::Kobold,
+            MonsterType::Orc,
+            MonsterType::Wolf,
+            MonsterType::Goblin,
+            MonsterType::Ogre,
+            MonsterType::Troll,
+            MonsterType::Bear,
+            MonsterType::Minotaur,
+            MonsterType::Gargoyle,
+            MonsterType::Chimera,
+            MonsterType::Balrog,
+            MonsterType::Dragon,
         ];
 
         let mut rng = thread_rng();
 
-        let i = rng.gen_range(0, name.len());
+        let i = rng.gen_range(0, monster.len());
 
-        String::from(name[i]).to_uppercase()
+        UI::monster_name(monster[i])
+    }
+
+    fn monster_name(m:MonsterType) -> String {
+        match m {
+            MonsterType::Kobold => String::from("KOBOLD"),
+            MonsterType::Orc => String::from("ORC"),
+            MonsterType::Wolf => String::from("WOLF"),
+            MonsterType::Goblin => String::from("GOBLIN"),
+            MonsterType::Ogre => String::from("OGRE"),
+            MonsterType::Troll => String::from("TROLL"),
+            MonsterType::Bear => String::from("BEAR"),
+            MonsterType::Minotaur => String::from("MINOTAUR"),
+            MonsterType::Gargoyle => String::from("GARGOYLE"),
+            MonsterType::Chimera => String::from("CHIMERA"),
+            MonsterType::Balrog => String::from("BALROG"),
+            MonsterType::Dragon => String::from("DRAGON"),
+            MonsterType::Vendor => String::from("VENDOR"),
+        }
     }
 
     fn weapon_name(w:WeaponType) -> String {
@@ -72,7 +91,6 @@ impl UI {
             TreasureType::Palintir => String::from("THE PALINTIR"),
             TreasureType::Silmaril => String::from("THE SILMARIL"),
         }
-
     }
 
     fn room_name(r:&RoomType) -> String {
@@ -90,7 +108,7 @@ impl UI {
             RoomType::CrystalOrb => String::from("A CRYSTAL ORB"),
             RoomType::Book => String::from("A BOOK"),
             RoomType::Monster(m) => {
-                    let mon_str = UI::rand_monster_str();
+                    let mon_str = UI::monster_name(m.monster_type());
                     format!("{} {}", UI::get_article(&mon_str), mon_str)
                 }
             RoomType::Treasure(t) => {
