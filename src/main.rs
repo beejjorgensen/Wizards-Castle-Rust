@@ -90,7 +90,8 @@ impl UI {
             RoomType::CrystalOrb => String::from("A CRYSTAL ORB"),
             RoomType::Book => String::from("A BOOK"),
             RoomType::Monster(m) => {
-                    String::from("A MONSTER") // TODO
+                    let mon_str = UI::rand_monster_str();
+                    format!("{} {}", UI::get_article(&mon_str), mon_str)
                 }
             RoomType::Treasure(t) => {
                 format!("THE {}", UI::treasure_name(t.treasure_type()))
