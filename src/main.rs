@@ -11,6 +11,7 @@ use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::ArmorType;
 use wizardscastle::weapon::WeaponType;
+use wizardscastle::treasure::TreasureType;
 
 struct UI {
     game: Game,
@@ -44,7 +45,7 @@ impl UI {
 
     fn weapon_name(w:WeaponType) -> String {
         match w {
-            WeaponType::None => String::from("NONE"),
+            WeaponType::None => String::from("NO WEAPON"),
             WeaponType::Dagger => String::from("DAGGER"),
             WeaponType::Mace => String::from("MACE"),
             WeaponType::Sword => String::from("SWORD"),
@@ -53,10 +54,47 @@ impl UI {
 
     fn armor_name(a:ArmorType) -> String {
         match a {
-            ArmorType::None => String::from("NONE"),
+            ArmorType::None => String::from("NO ARMOR"),
             ArmorType::Leather => String::from("LEATHER"),
             ArmorType::Chainmail => String::from("CHAINMAIL"),
             ArmorType::Plate => String::from("PLATE"),
+        }
+    }
+
+    fn treasure_name(t:&TreasureType) -> String {
+        match t {
+            TreasureType::RubyRed => String::from("THE RUBY RED"),
+            TreasureType::NornStone => String::from("THE NORN STONE"),
+            TreasureType::PalePearl => String::from("THE PALE PEARL"),
+            TreasureType::OpalEye => String::from("THE OPAL EYE"),
+            TreasureType::GreenGem => String::from("THE GREEN GEM"),
+            TreasureType::BlueFlame => String::from("THE BLUE FLAME"),
+            TreasureType::Palintir => String::from("THE PALINTIR"),
+            TreasureType::Silmaril => String::from("THE SILMARIL"),
+        }
+
+    }
+
+    fn room_name(r:&RoomType) -> String {
+        match r {
+            RoomType::Empty => String::from("AN EMPTY ROOM"),
+            RoomType::Entrance => String::from("THE ENTRANCE"),
+            RoomType::StairsDown => String::from("STAIRS GOING DOWN"),
+            RoomType::StairsUp => String::from("STAIRS GOING UP"),
+            RoomType::Gold => String::from("GOLD PIECES"),
+            RoomType::Pool => String::from("A POOL"),
+            RoomType::Chest => String::from("A CHEST"),
+            RoomType::Flares => String::from("FLARES"),
+            RoomType::Warp(_) => String::from("A WARP"),
+            RoomType::Sinkhole => String::from("A SINKHOLE"),
+            RoomType::CrystalOrb => String::from("A CRYSTAL ORB"),
+            RoomType::Book => String::from("A BOOK"),
+            RoomType::Monster(m) => {
+                    String::from("A MONSTER") // TODO
+                }
+            RoomType::Treasure(t) => {
+                format!("THE {}", UI::treasure_name(t.treasure_type()))
+            }
         }
     }
 
@@ -385,6 +423,17 @@ impl UI {
 
         println!("\n");
     }
+
+    /// Print the current room
+    fn print_room(&self) {
+        let p = &self.game.player;
+
+        let room = self.game.dungeon.room_at(p.x, p.y, p.z);
+
+        let room_str = UI::room_name(&room.roomtype);
+
+        println!("HERE YOU FIND {}\n", room_str);
+    }
 }
 
 /// Main
@@ -411,16 +460,48 @@ fn main() {
     ui.turn_count = 0;
 
     while playing {
-        ui.turn_count += 1;
 
-        ui.game.dungeon.discover(ui.game.player.x, ui.game.player.y, ui.game.player.z);
+        let alive = true;
 
-        println!();
+        while alive {
+            ui.game.dungeon.discover(ui.game.player.x, ui.game.player.y, ui.game.player.z);
 
-        ui.print_location();
-        ui.print_stats();
-        //ui.print_room();
+            println!();
 
-        ui.map(false);
+            ui.print_location();
+            ui.print_stats();
+
+            ui.print_room();
+
+            ui.turn_count += 1;
+
+            // TODO curse effects
+
+            // TODO curse check
+
+            // TODO random message
+
+            // TODO cure blindness
+
+            // TODO dissolve books
+
+            let mut valid_command = false;
+
+            while !valid_command {
+                valid_command = true;
+
+                let command = UI::get_input(Some("\nYOUR MOVE? "));
+
+                println!();
+
+                match command.get(..1) {
+                    Some("M") => ui.map(false),
+                    _ => {
+                        println!("\n** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
+                        valid_command = false;
+                    }
+                }
+            }
+        }
     }
 }

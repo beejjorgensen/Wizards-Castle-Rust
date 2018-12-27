@@ -55,4 +55,8 @@ impl Treasure {
             _ => panic!("get_treasure_by_id: unknown id")
         }
     }
+
+    pub fn treasure_type(&self) -> &TreasureType {
+        &self.treasure_type
+    }
 }
