@@ -118,7 +118,7 @@ impl Game {
         let mut rng = thread_rng();
 
         for _ in 0..count {
-            total += rng.gen_range(0, sides);
+            total += rng.gen_range(0, sides) + 1;
         }
 
         total
