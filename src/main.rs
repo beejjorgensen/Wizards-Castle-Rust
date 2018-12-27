@@ -37,6 +37,22 @@ fn rand_monster_str() -> String {
     String::from(name[i]).to_uppercase()
 }
 
+fn starts_with_vowel(s: &str) -> bool {
+    if let Some(c) = String::from(s).to_uppercase().chars().next() {
+        return c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
+    }
+
+    return false;
+}
+
+fn get_article(s: &str) -> String {
+    if starts_with_vowel(s) {
+        return String::from("AN");
+    }
+
+    String::from("A")
+}
+
 /// Print a map
 fn map(dungeon: &Dungeon, player: &Player, show_all: bool) {
     let z = player.z;
@@ -221,7 +237,12 @@ fn buy_armor(game: &mut Game) {
             Some("C") => break game.player.purchase_armor(ArmorType::Chainmail, false),
             Some("L") => break game.player.purchase_armor(ArmorType::Leather, false),
             Some("N") => break game.player.purchase_armor(ArmorType::None, false),
-            _ => println!("\n** ARE YOU A {} or a {} ? TYPE P,C,L OR N", race_str(&game.player), rand_monster_str()),
+            _ => {
+                let mon_str = rand_monster_str();
+                let article = get_article(&mon_str);
+
+                println!("\n** ARE YOU A {} OR {} {}? TYPE P,C,L OR N", race_str(&game.player), article, mon_str);
+            },
         }
     };
 }
@@ -309,5 +330,9 @@ fn main() {
     buy_lamp(&mut game);
     buy_flares(&mut game);
 
-    map(&game.dungeon, &game.player, true);
+    let playing = true;
+
+    while playing {
+        map(&game.dungeon, &game.player, true);
+    }
 }
