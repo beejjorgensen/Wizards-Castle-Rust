@@ -41,6 +41,8 @@ pub struct Player {
     pub weapon: Weapon,
     pub lamp: bool,
 
+    pub flares: usize,
+
     //blind: bool,
 }
 
@@ -67,6 +69,7 @@ impl Player {
             armor: Armor::new(ArmorType::None),
             weapon: Weapon::new(WeaponType::None),
             lamp: false,
+            flares: 0,
         }
     }
 
@@ -94,6 +97,8 @@ impl Player {
         self.race = race;
 
         self.gp = 60;
+
+        self.flares = 0;
     }
 
     /// Get a race number by race type
@@ -173,6 +178,23 @@ impl Player {
 
         self.lamp = lamp;
         self.gp -= 20;
+
+        Ok(())
+    }
+
+    /// Return the max number of flares a player can afford
+    pub fn max_flares(&self) -> usize {
+        self.gp
+    }
+
+    /// Purchase flares
+    pub fn purchase_flares(&mut self, flares:usize) -> Result<(), Error> {
+        if flares > self.max_flares() {
+            return Err(Error::NotEnoughGP);
+        }
+
+        self.flares += flares;
+        self.gp -= flares;
 
         Ok(())
     }

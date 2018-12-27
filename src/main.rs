@@ -264,6 +264,38 @@ fn buy_lamp(game: &mut Game) {
     };
 }
 
+fn buy_flares(game: &mut Game) {
+    let max_flares = game.player.max_flares();
+
+    if max_flares == 0 {
+        return;
+    }
+
+    println!("\nOK, {}, YOU HAVE {} GOLD PIECES LEFT\n", race_str(&game.player), game.player.gp);
+
+    loop {
+        let flare_str = get_input(Some("FLARES COST 1 GP EACH, HOW MANY DO YOU WANT? "));
+
+        let flare_count;
+        
+        match flare_str.parse::<usize>() {
+            Ok(f) => flare_count = f,
+            Err(_) => {
+                print!("** IF YOU DON'T WANT ANY JUST TYPE 0 (ZERO)\n\n");
+                continue;
+            },
+        };
+
+        match game.player.purchase_flares(flare_count) {
+            Ok(_) => break,
+            Err(_) => {
+                print!("** YOU CAN ONLY AFFORD {}\n\n", max_flares);
+                continue;
+            }
+        }
+    };
+}
+
 /// Main
 fn main() {
     let mut game = Game::new(8, 8, 8);
@@ -275,6 +307,7 @@ fn main() {
     buy_armor(&mut game);
     buy_weapon(&mut game);
     buy_lamp(&mut game);
+    buy_flares(&mut game);
 
     map(&game.dungeon, &game.player, true);
 }
