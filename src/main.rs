@@ -6,7 +6,7 @@ use std::io::{stdin,stdout,Write};
 use self::rand::Rng;
 use self::rand::thread_rng;
 
-use wizardscastle::game::{Game,Direction};
+use wizardscastle::game::{Game,Direction,Event};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::ArmorType;
@@ -139,7 +139,7 @@ impl UI {
     }
 
     /// Print a map
-    fn map(&self, show_all: bool) {
+    fn map(&mut self, show_all: bool) {
         let z = self.game.player.z;
 
         for y in 0..self.game.dungeon.ysize {
@@ -449,7 +449,7 @@ impl UI {
     }
 
     /// Print the current room
-    fn print_room(&self) {
+    fn print_room(&mut self) {
         let p = &self.game.player;
 
         let room = self.game.dungeon.room_at(p.x, p.y, p.z);
@@ -497,6 +497,13 @@ fn main() {
 
             ui.print_room();
 
+            match ui.game.room_effect() {
+                Event::FoundGold(_) => {
+                    println!("YOU HAVE {}", ui.game.player.gp);
+                },
+                Event::None => (),
+            }
+
             ui.turn_count += 1;
 
             // TODO curse effects
@@ -519,7 +526,7 @@ fn main() {
                 println!();
 
                 match command.get(..1) {
-                    Some("M") => ui.map(false),
+                    Some("M") => ui.map(true),
                     Some("N") => ui.move_dir(Direction::North),
                     Some("S") => ui.move_dir(Direction::South),
                     Some("W") => ui.move_dir(Direction::West),
@@ -529,6 +536,7 @@ fn main() {
                         valid_command = false;
                     }
                 }
+
             }
         }
     }

@@ -36,3 +36,9 @@ impl Default for Room {
         }
     }
 }
+
+impl Room {
+    pub fn make_empty(&mut self) {
+        self.roomtype = RoomType::Empty;
+    }
+}

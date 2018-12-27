@@ -161,10 +161,10 @@ impl Dungeon {
     }
 
     /// Return a reference to the room at a location
-    pub fn room_at(&self, x: usize, y: usize, z: usize) -> &Room { // TODO: Result
+    pub fn room_at(&mut self, x: usize, y: usize, z: usize) -> &mut Room { // TODO: Result
         let i = y * self.xsize + x;
 
-        &self.levels[z][i]
+        &mut self.levels[z][i]
     }
 
     pub fn discover(&mut self, x:usize, y:usize, z:usize) {

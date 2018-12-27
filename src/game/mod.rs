@@ -1,6 +1,17 @@
+extern crate rand;
+
 use dungeon::Dungeon;
 use player::Player;
 use room::RoomType;
+
+use self::rand::Rng;
+use self::rand::thread_rng;
+
+#[derive(Debug,Clone,Copy)]
+pub enum Event {
+    None,
+    FoundGold(usize),
+}
 
 #[derive(Debug,Clone,Copy)]
 pub enum Direction {
@@ -47,9 +58,32 @@ impl Game {
             state: GameState::CharGenChooseClass,
         }
     }
+    
+    // Check for a room event
+    pub fn room_effect(&mut self) -> Event {
+        let p = &mut self.player;
 
+        let room = self.dungeon.room_at(p.x, p.y, p.z);
+
+        if room.roomtype == RoomType::Gold {
+            let gold_amount = Game::d(1,10);
+
+            p.gp += gold_amount;
+
+            room.make_empty();
+
+            return Event::FoundGold(gold_amount);
+        }
+
+        Event::None
+    }
+
+    /// Handle a move command
     pub fn move_dir(&mut self, dir:Direction) {
         let p = &mut self.player;
+
+        let xsize = self.dungeon.xsize;
+        let ysize = self.dungeon.ysize;
 
         let room = self.dungeon.room_at(p.x, p.y, p.z);
 
@@ -60,20 +94,33 @@ impl Game {
         match dir {
             Direction::North => {
                 if p.y == 0 {
-                    p.y = self.dungeon.ysize - 1;
+                    p.y = ysize - 1;
                 } else {
                     p.y -= 1;
                 }
             }
-            Direction::South => p.y = (p.y + 1) % self.dungeon.ysize,
+            Direction::South => p.y = (p.y + 1) % ysize,
             Direction::West =>  {
                 if p.x == 0 {
-                    p.x = self.dungeon.xsize - 1;
+                    p.x = xsize - 1;
                 } else {
                     p.x -= 1;
                 }
             }
-            Direction::East => p.x = (p.x + 1) % self.dungeon.xsize,
+            Direction::East => p.x = (p.x + 1) % xsize,
         }
+    }
+
+    /// Roll a die (1d6, 2d7, etc.)
+    pub fn d(count:usize, sides:usize) -> usize {
+        let mut total = 0;
+
+        let mut rng = thread_rng();
+
+        for _ in 0..count {
+            total += rng.gen_range(0, sides);
+        }
+
+        total
     }
 }
