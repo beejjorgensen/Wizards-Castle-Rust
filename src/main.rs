@@ -115,7 +115,7 @@ fn get_input(prompt: Option<&str>) -> String {
 
 /// Print intro text
 fn intro() {
-    println!("{:*^64}\n", "");
+    println!("\n{:*^64}\n", "");
 
     println!("{:^64}\n", "* * * THE WIZARD'S CASTLE * * *");
 
