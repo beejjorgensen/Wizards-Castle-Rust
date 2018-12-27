@@ -39,6 +39,7 @@ pub struct Player {
 
     pub armor: Armor,
     pub weapon: Weapon,
+    pub lamp: bool,
 
     //blind: bool,
 }
@@ -65,6 +66,7 @@ impl Player {
 
             armor: Armor::new(ArmorType::None),
             weapon: Weapon::new(WeaponType::None),
+            lamp: false,
         }
     }
 
@@ -154,6 +156,23 @@ impl Player {
         self.weapon = Weapon::new(w);
 
         self.gp -= weapon_cost;
+
+        Ok(())
+    }
+
+    /// True if the player can afford a lamp
+    pub fn can_purchase_lamp(&self) -> bool {
+        self.gp >= 20
+    }
+
+    /// Purchase a lamp
+    pub fn purchase_lamp(&mut self, lamp:bool) -> Result<(), Error> {
+        if !self.can_purchase_lamp() {
+            return Err(Error::NotEnoughGP);
+        }
+
+        self.lamp = lamp;
+        self.gp -= 20;
 
         Ok(())
     }

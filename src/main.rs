@@ -198,8 +198,6 @@ fn allocate_points(game: &mut Game) {
             }
         }
 
-        println!();
-
         if game.player.additional_points == 0 {
             return;
         }
@@ -250,6 +248,22 @@ fn buy_weapon(game: &mut Game) {
     };
 }
 
+fn buy_lamp(game: &mut Game) {
+    if !game.player.can_purchase_lamp() {
+        return;
+    }
+
+    let _ = loop {
+        let lamp_str = get_input(Some("\nWANT TO BUY A LAMP FOR 20 GP's? "));
+
+        match lamp_str.get(..1) {
+            Some("Y") => break game.player.purchase_lamp(true),
+            Some("N") => break game.player.purchase_lamp(false),
+            _ => println!("\n** ANSWER YES OR NO"),
+        }
+    };
+}
+
 /// Main
 fn main() {
     let mut game = Game::new(8, 8, 8);
@@ -260,6 +274,7 @@ fn main() {
     allocate_points(&mut game);
     buy_armor(&mut game);
     buy_weapon(&mut game);
+    buy_lamp(&mut game);
 
     map(&game.dungeon, &game.player, true);
 }
