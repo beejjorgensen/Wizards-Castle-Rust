@@ -30,6 +30,14 @@ impl Armor {
         let value;
 
         if is_vendor {
+            value = match a {
+                ArmorType::None => 0,
+                ArmorType::Leather => 1250,
+                ArmorType::Chainmail => 1500,
+                ArmorType::Plate => 2000,
+            }
+
+        } else {
             if a == ArmorType::None {
                 value = 0;
 
@@ -37,14 +45,6 @@ impl Armor {
                 let id = Armor::to_id(a);
 
                 value = (id + 1) * 10;
-            }
-
-        } else {
-            value = match a {
-                ArmorType::None => 0,
-                ArmorType::Leather => 1250,
-                ArmorType::Chainmail => 1500,
-                ArmorType::Plate => 2000,
             }
         }
 
