@@ -509,6 +509,9 @@ fn main() {
                 Event::Sinkhole => {
                     automove = true;
                 },
+                Event::Warp => {
+                    automove = true;
+                },
                 Event::None => (),
             }
 

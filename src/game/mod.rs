@@ -13,6 +13,7 @@ pub enum Event {
     FoundGold(usize),
     FoundFlares(usize),
     Sinkhole,
+    Warp,
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -65,6 +66,10 @@ impl Game {
     pub fn room_effect(&mut self) -> Event {
         let p = &mut self.player;
 
+        let mut rng = thread_rng();
+
+        let xsize = self.dungeon.xsize;
+        let ysize = self.dungeon.ysize;
         let zsize = self.dungeon.zsize;
 
         let room = self.dungeon.room_at(p.x, p.y, p.z);
@@ -93,6 +98,19 @@ impl Game {
             p.z = (p.z + 1) % zsize;
 
             return Event::Sinkhole;
+        }
+
+        if let RoomType::Warp(orb_of_zot) = room.roomtype {
+            if orb_of_zot {
+                // TODO
+
+            } else {
+                p.x = rng.gen_range(0, xsize);
+                p.y = rng.gen_range(0, ysize);
+                p.z = rng.gen_range(0, zsize);
+            }
+
+            return Event::Warp;
         }
         
         Event::None
