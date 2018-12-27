@@ -398,14 +398,14 @@ impl UI {
             return;
         }
 
-        println!("YOU ARE AT ({},{}) LEVEL {}\n", p.x, p.y, p.z);
+        println!("YOU ARE AT ({},{}) LEVEL {}", p.x, p.y, p.z);
     }
 
     /// Print player stats
     fn print_stats(&self) {
         let p = &self.game.player;
 
-        println!("ST={} IQ={} DX={} FLARES={} GP's={}\n",
+        println!("ST={} IQ={} DX={} FLARES={} GP's={}",
             p.stat(Stat::Strength),
             p.stat(Stat::Intelligence),
             p.stat(Stat::Dexterity),
