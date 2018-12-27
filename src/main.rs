@@ -135,6 +135,10 @@ impl UI {
     }
 
     /// Print intro text
+    ///
+    /// Note: the original version lacked this preamble--it only appears in the
+    /// magazine article. It was, however, included in the MBASIC port.
+    ///
     fn intro(&self) {
         println!("\n{:*^64}\n", "");
 
@@ -184,6 +188,7 @@ impl UI {
         self.game.player.set_gender(gender);
     }
 
+    /// Allocate additional stat points
     fn allocate_points(&mut self) {
         println!("\nOK {}, YOU HAVE THESE STATISTICS:\n", self.race_str());
 
@@ -252,6 +257,7 @@ impl UI {
         };
     }
 
+    /// Buy weapon
     fn buy_weapon(&mut self) {
 
         println!("\nOK, BOLD {}, YOU HAVE {} GP's LEFT\n", self.race_str(), self.game.player.gp);
@@ -274,6 +280,7 @@ impl UI {
         };
     }
 
+    /// Buy lamp
     fn buy_lamp(&mut self) {
         if !self.game.player.can_purchase_lamp() {
             return;
@@ -290,6 +297,7 @@ impl UI {
         };
     }
 
+    /// Buy flares
     fn buy_flares(&mut self) {
         let max_flares = self.game.player.max_flares();
 
@@ -321,6 +329,43 @@ impl UI {
             }
         };
     }
+
+    /// Print the player's location
+    ///
+    /// Note: the original game had a horizontal Y axis and a vertical X axis.
+    /// This version reverses that.
+    ///
+    fn print_location(&self) {
+        let p = &self.game.player;
+
+        if p.is_blind() {
+            return;
+        }
+
+        println!("YOU ARE AT ({},{}) LEVEL {}\n", p.x, p.y, p.z);
+    }
+
+    /// Print player stats
+    fn print_stats(&self) {
+        let p = &self.game.player;
+
+        println!("ST={} IQ={} DX={} FLARES={} GP's={}",
+            p.stat(Stat::Strength),
+            p.stat(Stat::Intelligence),
+            p.stat(Stat::Dexterity),
+            p.flares(),
+            p.gp());
+    }
+/*
+        1670 PRINT:IFBL=0THENGOSUB3400:PRINT
+1680 PRINT"ST= ";ST;" IQ= ";IQ;" DX= ";DX;" FLARES= ";FL;" GP's= ";GP
+1690 PRINT:PRINTW$(WV+1);" / ";W$(AV+5);:IFLF=1THENPRINT" / A LAMP";
+1700 PRINT:PRINT:WC=0:Q=FNE(PEEK(FND(Z))):POKEFND(Z),Q:Z$="YOU HAVE "
+1710 PRINT"HERE YOU FIND ";C$(Q):IF(Q<7)OR(Q=11)OR(Q=12)THEN620
+
+3400 PRINT"YOU ARE AT (";X;",";Y;") LEVEL ";Z:RETURN
+*/
+
 }
 
 /// Main
@@ -351,6 +396,12 @@ fn main() {
 
         ui.game.dungeon.discover(ui.game.player.x, ui.game.player.y, ui.game.player.z);
 
-        ui.map(true);
+        println!();
+
+        ui.print_location();
+        ui.print_stats();
+        //ui.print_room();
+
+        ui.map(false);
     }
 }

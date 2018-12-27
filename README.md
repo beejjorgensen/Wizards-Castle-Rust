@@ -18,4 +18,10 @@ Please don't hold it against me.
 
 * Have a default binary that plays the game in the classic text format.
 
+## TODO
+
+* Make enums `Copy` when possible
+
+* Make fewer fields `pub` and provide accessors.
+
 <beej@beej.us>

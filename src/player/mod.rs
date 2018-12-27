@@ -43,7 +43,7 @@ pub struct Player {
 
     pub flares: usize,
 
-    //blind: bool,
+    blind: bool,
 }
 
 impl Player {
@@ -64,7 +64,7 @@ impl Player {
             dx: 0,
             iq: 0,
 
-            //blind: false
+            blind: false,
 
             armor: Armor::new(ArmorType::None),
             weapon: Weapon::new(WeaponType::None),
@@ -177,7 +177,10 @@ impl Player {
         }
 
         self.lamp = lamp;
-        self.gp -= 20;
+
+        if lamp {
+            self.gp -= 20;
+        }
 
         Ok(())
     }
@@ -197,5 +200,28 @@ impl Player {
         self.gp -= flares;
 
         Ok(())
+    }
+
+    pub fn is_blind(&self) -> bool {
+        self.blind
+    }
+
+    /// Return a player stat
+    pub fn stat(&self, stat:Stat) -> usize {
+        match stat {
+            Stat::Strength => self.st,
+            Stat::Intelligence => self.iq,
+            Stat::Dexterity => self.dx,
+        }
+    }
+
+    /// Return flare count
+    pub fn flares(&self) -> usize {
+        self.flares
+    }
+
+    /// Return number of gold pieces
+    pub fn gp(&self) -> usize {
+        self.gp
     }
 }
