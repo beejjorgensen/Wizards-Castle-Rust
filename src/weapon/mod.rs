@@ -50,4 +50,7 @@ impl Weapon {
         }
     }
 
+    pub fn weapon_type(&self) -> WeaponType {
+        self.weapon_type
+    }
 }

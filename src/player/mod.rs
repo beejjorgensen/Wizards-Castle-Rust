@@ -224,4 +224,16 @@ impl Player {
     pub fn gp(&self) -> usize {
         self.gp
     }
+
+    pub fn weapon(&self) -> &Weapon {
+        &self.weapon
+    }
+
+    pub fn armor(&self) -> &Armor {
+        &self.armor
+    }
+
+    pub fn has_lamp(&self) -> bool {
+        self.lamp
+    }
 }

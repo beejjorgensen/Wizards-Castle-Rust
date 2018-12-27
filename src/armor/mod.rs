@@ -59,4 +59,8 @@ impl Armor {
             ArmorType::Plate => 2,
         }
     }
+
+    pub fn armor_type(&self) -> ArmorType {
+        self.armor_type
+    }
 }

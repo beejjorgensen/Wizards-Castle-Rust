@@ -42,6 +42,24 @@ impl UI {
         String::from(name[i]).to_uppercase()
     }
 
+    fn weapon_name(w:WeaponType) -> String {
+        match w {
+            WeaponType::None => String::from("NONE"),
+            WeaponType::Dagger => String::from("DAGGER"),
+            WeaponType::Mace => String::from("MACE"),
+            WeaponType::Sword => String::from("SWORD"),
+        }
+    }
+
+    fn armor_name(a:ArmorType) -> String {
+        match a {
+            ArmorType::None => String::from("NONE"),
+            ArmorType::Leather => String::from("LEATHER"),
+            ArmorType::Chainmail => String::from("CHAINMAIL"),
+            ArmorType::Plate => String::from("PLATE"),
+        }
+    }
+
     fn starts_with_vowel(s: &str) -> bool {
         if let Some(c) = String::from(s).to_uppercase().chars().next() {
             return c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
@@ -349,23 +367,24 @@ impl UI {
     fn print_stats(&self) {
         let p = &self.game.player;
 
-        println!("ST={} IQ={} DX={} FLARES={} GP's={}",
+        println!("ST={} IQ={} DX={} FLARES={} GP's={}\n",
             p.stat(Stat::Strength),
             p.stat(Stat::Intelligence),
             p.stat(Stat::Dexterity),
             p.flares(),
             p.gp());
+
+        let w_name = UI::weapon_name(p.weapon().weapon_type());
+        let a_name = UI::armor_name(p.armor().armor_type());
+
+        print!( "{} / {}", w_name, a_name);
+
+        if p.has_lamp() {
+            print!(" / A LAMP");
+        }
+
+        println!("\n");
     }
-/*
-        1670 PRINT:IFBL=0THENGOSUB3400:PRINT
-1680 PRINT"ST= ";ST;" IQ= ";IQ;" DX= ";DX;" FLARES= ";FL;" GP's= ";GP
-1690 PRINT:PRINTW$(WV+1);" / ";W$(AV+5);:IFLF=1THENPRINT" / A LAMP";
-1700 PRINT:PRINT:WC=0:Q=FNE(PEEK(FND(Z))):POKEFND(Z),Q:Z$="YOU HAVE "
-1710 PRINT"HERE YOU FIND ";C$(Q):IF(Q<7)OR(Q=11)OR(Q=12)THEN620
-
-3400 PRINT"YOU ARE AT (";X;",";Y;") LEVEL ";Z:RETURN
-*/
-
 }
 
 /// Main
