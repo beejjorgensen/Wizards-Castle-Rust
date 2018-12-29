@@ -45,6 +45,7 @@ pub struct Game {
     pub dungeon: Dungeon,
     pub player: Player,
     state: GameState,
+    prev_dir: Direction,
 }
 
 impl Game {
@@ -59,6 +60,7 @@ impl Game {
             dungeon,
             player,
             state: GameState::CharGenChooseClass,
+            prev_dir: Direction::South,
         }
     }
     
@@ -102,8 +104,8 @@ impl Game {
 
         if let RoomType::Warp(orb_of_zot) = room.roomtype {
             if orb_of_zot {
-                // TODO
-
+                //let prev_dir = self.prev_dir;
+                //self.move_dir(prev_dir);
             } else {
                 p.x = rng.gen_range(0, xsize);
                 p.y = rng.gen_range(0, ysize);
@@ -124,6 +126,8 @@ impl Game {
         let ysize = self.dungeon.ysize;
 
         let room = self.dungeon.room_at(p.x, p.y, p.z);
+
+        self.prev_dir = dir;
 
         if room.roomtype == RoomType::Entrance {
             // TODO handle game exit
