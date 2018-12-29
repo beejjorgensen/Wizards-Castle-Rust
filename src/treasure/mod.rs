@@ -1,6 +1,6 @@
 pub const TREASURE_COUNT:usize = 8;
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Copy,Clone)]
 pub enum TreasureType {
     RubyRed,
     NornStone,
@@ -12,31 +12,18 @@ pub enum TreasureType {
     Silmaril,
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Copy,Clone)]
 pub struct Treasure {
     treasure_type: TreasureType,
-    name: String,
     max_value: usize,
 }
 
 impl Treasure {
     pub fn new(treasure_num: usize) -> Treasure {
-        let name = [
-            "ruby red",
-            "norn stone",
-            "pale pearl",
-            "opal eye",
-            "green gem",
-            "blue flame",
-            "palintir",
-            "simaril",
-        ];
-
         let max_value = (treasure_num + 1) * 1500;
 
         Treasure {
             treasure_type: Treasure::get_treasure_by_id(treasure_num),
-            name: String::from(name[treasure_num]),
             max_value,
         }
     }

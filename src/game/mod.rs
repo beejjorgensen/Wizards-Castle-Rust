@@ -64,58 +64,96 @@ impl Game {
         }
     }
     
+    fn room_effect_gold(&mut self) -> Event {
+        let gold_amount = Game::d(1,10);
+
+        self.player.gp += gold_amount;
+
+        let room = self.dungeon.room_at_mut(self.player.x, self.player.y, self.player.z);
+
+        room.make_empty();
+
+        return Event::FoundGold(gold_amount);
+    }
+
+    fn room_effect_flares(&mut self) -> Event {
+        let flare_amount = Game::d(1,5);
+
+        self.player.flares += flare_amount;
+
+        let room = self.dungeon.room_at_mut(self.player.x, self.player.y, self.player.z);
+
+        room.make_empty();
+
+        return Event::FoundFlares(flare_amount);
+    }
+
+    fn room_effect_sinkhole(&mut self) -> Event {
+        self.player.z = (self.player.z + 1) % self.dungeon.zsize;
+
+        return Event::Sinkhole;
+    }
+
+    fn room_effect_warp(&mut self, orb_of_zot:bool) -> Event {
+        if orb_of_zot {
+            let prev_dir = self.prev_dir;
+            self.move_dir(prev_dir);
+        } else {
+            let mut rng = thread_rng();
+
+            self.player.x = rng.gen_range(0, self.dungeon.xsize);
+            self.player.y = rng.gen_range(0, self.dungeon.ysize);
+            self.player.z = rng.gen_range(0, self.dungeon.zsize);
+        }
+
+        return Event::Warp;
+    }
+
     // Check for a room event
     pub fn room_effect(&mut self) -> Event {
-        let p = &mut self.player;
 
-        let mut rng = thread_rng();
+        let roomtype;
 
-        let xsize = self.dungeon.xsize;
-        let ysize = self.dungeon.ysize;
-        let zsize = self.dungeon.zsize;
-
-        let room = self.dungeon.room_at(p.x, p.y, p.z);
-
-        if room.roomtype == RoomType::Gold {
-            let gold_amount = Game::d(1,10);
-
-            p.gp += gold_amount;
-
-            room.make_empty();
-
-            return Event::FoundGold(gold_amount);
+        {
+            let room = self.dungeon.room_at(self.player.x, self.player.y, self.player.z);
+            roomtype = room.roomtype;
         }
 
-        if room.roomtype == RoomType::Flares {
-            let flare_amount = Game::d(1,5);
-
-            p.flares += flare_amount;
-
-            room.make_empty();
-
-            return Event::FoundFlares(flare_amount);
+        match roomtype {
+            RoomType::Gold => self.room_effect_gold(),
+            RoomType::Flares => self.room_effect_flares(),
+            RoomType::Sinkhole => self.room_effect_sinkhole(),
+            RoomType::Warp(orb_of_zot) => self.room_effect_warp(orb_of_zot),
+            _ => Event::None,
         }
 
-        if room.roomtype == RoomType::Sinkhole {
-            p.z = (p.z + 1) % zsize;
+/*
+        let action;
+        let mut orb_of_zot = false;
 
-            return Event::Sinkhole;
+        {
+            let room = self.dungeon.room_at(self.player.x, self.player.y, self.player.z);
+
+            action = match room.roomtype {
+                RoomType::Gold => 1,
+                RoomType::Flares => 2,
+                RoomType::Sinkhole => 3,
+                RoomType::Warp(oz) => {
+                    orb_of_zot = oz;
+                    4
+                }
+                _ => 99,
+            };
         }
 
-        if let RoomType::Warp(orb_of_zot) = room.roomtype {
-            if orb_of_zot {
-                //let prev_dir = self.prev_dir;
-                //self.move_dir(prev_dir);
-            } else {
-                p.x = rng.gen_range(0, xsize);
-                p.y = rng.gen_range(0, ysize);
-                p.z = rng.gen_range(0, zsize);
-            }
-
-            return Event::Warp;
+        match action {
+            1 => self.room_effect_gold(),
+            2 => self.room_effect_flares(),
+            3 => self.room_effect_sinkhole(),
+            4 => self.room_effect_warp(orb_of_zot),
+            _ => Event::None,
         }
-        
-        Event::None
+        */
     }
 
     /// Handle a move command

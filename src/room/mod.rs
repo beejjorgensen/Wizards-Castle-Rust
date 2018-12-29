@@ -2,7 +2,7 @@ use treasure::Treasure;
 use monster::Monster;
 use curse::CurseType;
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Copy,Clone)]
 pub enum RoomType {
     Empty,
     Entrance,

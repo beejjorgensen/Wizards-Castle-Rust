@@ -126,6 +126,23 @@ impl Dungeon {
                 }
             }
 
+            /*
+            // cheater code to reveal Orb of Zot location
+            if z == orb_of_zot_level {
+                for y in 0..ysize {
+                    for x in 0..xsize {
+                        let i = y * xsize + x;
+
+                        if let RoomType::Warp(oz) = levels[z][i].roomtype {
+                            if oz {
+                                println!("\n>>> ORB OF ZOT IS AT {},{},{} <<<\n", x+1, y+1, z+1);
+                            }
+                        }
+                    }
+                }
+            }
+            */
+
             // Fix up the stairs up
             if z > 0 {
                 let mut downs = Vec::new();
@@ -161,7 +178,14 @@ impl Dungeon {
     }
 
     /// Return a reference to the room at a location
-    pub fn room_at(&mut self, x: usize, y: usize, z: usize) -> &mut Room { // TODO: Result
+    pub fn room_at(&self, x: usize, y: usize, z: usize) -> &Room { // TODO: Result
+        let i = y * self.xsize + x;
+
+        &self.levels[z][i]
+    }
+
+    /// Return a reference to the room at a location
+    pub fn room_at_mut(&mut self, x: usize, y: usize, z: usize) -> &mut Room { // TODO: Result
         let i = y * self.xsize + x;
 
         &mut self.levels[z][i]
