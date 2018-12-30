@@ -116,6 +116,8 @@ impl Game {
     fn room_effect_treasure(&mut self, treasure:Treasure) -> Event {
         self.make_current_room_empty();
 
+        self.player.treasures.push(treasure.treasure_type);
+
         Event::Treasure(treasure)
     }
 

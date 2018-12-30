@@ -1,6 +1,7 @@
 use error::Error;
 use armor::{Armor, ArmorType};
 use weapon::{Weapon, WeaponType};
+use treasure::TreasureType;
 
 #[derive(PartialEq)]
 pub enum Stat {
@@ -40,8 +41,10 @@ pub struct Player {
     pub armor: Armor,
     pub weapon: Weapon,
     pub lamp: bool,
+    pub treasures: Vec<TreasureType>,
 
     pub flares: usize,
+
 
     blind: bool,
 }
@@ -69,6 +72,7 @@ impl Player {
             armor: Armor::new(ArmorType::None),
             weapon: Weapon::new(WeaponType::None),
             lamp: false,
+            treasures: Vec::new(),
             flares: 0,
         }
     }
@@ -99,6 +103,8 @@ impl Player {
         self.gp = 60;
 
         self.flares = 0;
+
+        self.treasures.clear();
     }
 
     /// Get a race number by race type

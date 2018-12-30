@@ -14,7 +14,7 @@ pub enum TreasureType {
 
 #[derive(Debug,PartialEq,Copy,Clone)]
 pub struct Treasure {
-    treasure_type: TreasureType,
+    pub treasure_type: TreasureType,
     max_value: usize,
 }
 
