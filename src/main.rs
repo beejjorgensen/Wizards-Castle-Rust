@@ -550,7 +550,7 @@ fn main() {
                     Some("W") => ui.move_dir(Direction::West),
                     Some("E") => ui.move_dir(Direction::East),
                     _ => {
-                        println!("\n** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
+                        println!("** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
                         valid_command = false;
                     }
                 }
