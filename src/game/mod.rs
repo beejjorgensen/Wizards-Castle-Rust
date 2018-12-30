@@ -3,6 +3,7 @@ extern crate rand;
 use dungeon::Dungeon;
 use player::Player;
 use room::RoomType;
+use treasure::Treasure;
 
 use self::rand::Rng;
 use self::rand::thread_rng;
@@ -14,6 +15,7 @@ pub enum Event {
     FoundFlares(usize),
     Sinkhole,
     Warp,
+    Treasure(Treasure),
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -64,14 +66,18 @@ impl Game {
         }
     }
     
+    fn make_current_room_empty(&mut self) {
+        let room = self.dungeon.room_at_mut(self.player.x, self.player.y, self.player.z);
+
+        room.make_empty();
+    }
+
     fn room_effect_gold(&mut self) -> Event {
         let gold_amount = Game::d(1,10);
 
         self.player.gp += gold_amount;
 
-        let room = self.dungeon.room_at_mut(self.player.x, self.player.y, self.player.z);
-
-        room.make_empty();
+        self.make_current_room_empty();
 
         return Event::FoundGold(gold_amount);
     }
@@ -81,9 +87,7 @@ impl Game {
 
         self.player.flares += flare_amount;
 
-        let room = self.dungeon.room_at_mut(self.player.x, self.player.y, self.player.z);
-
-        room.make_empty();
+        self.make_current_room_empty();
 
         return Event::FoundFlares(flare_amount);
     }
@@ -109,6 +113,12 @@ impl Game {
         return Event::Warp;
     }
 
+    fn room_effect_treasure(&mut self, treasure:Treasure) -> Event {
+        self.make_current_room_empty();
+
+        Event::Treasure(treasure)
+    }
+
     // Check for a room event
     pub fn room_effect(&mut self) -> Event {
 
@@ -124,36 +134,9 @@ impl Game {
             RoomType::Flares => self.room_effect_flares(),
             RoomType::Sinkhole => self.room_effect_sinkhole(),
             RoomType::Warp(orb_of_zot) => self.room_effect_warp(orb_of_zot),
+            RoomType::Treasure(t) => self.room_effect_treasure(t),
             _ => Event::None,
         }
-
-/*
-        let action;
-        let mut orb_of_zot = false;
-
-        {
-            let room = self.dungeon.room_at(self.player.x, self.player.y, self.player.z);
-
-            action = match room.roomtype {
-                RoomType::Gold => 1,
-                RoomType::Flares => 2,
-                RoomType::Sinkhole => 3,
-                RoomType::Warp(oz) => {
-                    orb_of_zot = oz;
-                    4
-                }
-                _ => 99,
-            };
-        }
-
-        match action {
-            1 => self.room_effect_gold(),
-            2 => self.room_effect_flares(),
-            3 => self.room_effect_sinkhole(),
-            4 => self.room_effect_warp(orb_of_zot),
-            _ => Event::None,
-        }
-        */
     }
 
     /// Handle a move command

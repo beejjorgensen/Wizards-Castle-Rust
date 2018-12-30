@@ -512,6 +512,9 @@ fn main() {
                 Event::Warp => {
                     automove = true;
                 },
+                Event::Treasure(_) => {
+                    println!("IT'S NOW YOURS\n");
+                }
                 Event::None => (),
             }
 
