@@ -5,7 +5,7 @@ use player::Player;
 use room::RoomType;
 use treasure::Treasure;
 use monster::{Monster,MonsterType};
-use weapon::WeaponType;
+use weapon::{Weapon,WeaponType};
 use error::Error;
 
 use self::rand::Rng;
@@ -27,7 +27,9 @@ pub enum CombatEvent {
     NoWeapon,
     //BookHands,
     Miss,
-    Hit(usize),
+    Hit(usize, bool, bool),
+    MonsterMiss,
+    MonsterHit(usize, bool),
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -52,6 +54,8 @@ pub enum GameState {
     Warp,
     Sinkhole,
     Gas,
+
+    Dead,
 }
 
 pub struct Game {
@@ -159,12 +163,13 @@ impl Game {
     }
 
     /// Handle player attacking monster
-    pub fn attack(&self) -> Result<CombatEvent, Error> {
+    pub fn attack(&mut self) -> Result<CombatEvent, Error> {
         if self.state != GameState::PlayerAttack {
             return Err(Error::WrongState);
         }
 
         if self.player.weapon.weapon_type() == WeaponType::None {
+            self.state = GameState::MonsterAttack;
             return Ok(CombatEvent::NoWeapon);
         }
 
@@ -172,13 +177,62 @@ impl Game {
 
         if hit {
             let damage = self.player.weapon.damage();
+            let mut broke_weapon = false;
+            let next_state = GameState::MonsterAttack;
+            let defeated;
 
-            return Ok(CombatEvent::Hit(damage));
+            if let Some(mut monster) = self.currently_fighting {
+                if monster.can_break_weapon() && Game::d(1,8) == 1 {
+                    broke_weapon = true;
+                    self.player.weapon = Weapon::new(WeaponType::None);
+                }
+
+                defeated = monster.take_damage(damage);
+            } else {
+                panic!("not fighting a monster");
+            }
+
+            self.state = next_state;
+            return Ok(CombatEvent::Hit(damage, broke_weapon, defeated));
         }
 
+        self.state = GameState::MonsterAttack;
         Ok(CombatEvent::Miss)
     }
 
+    /// Handle a monster attack
+    pub fn be_attacked(&mut self) -> Result<CombatEvent, Error> {
+        if self.state != GameState::MonsterAttack {
+            return Err(Error::WrongState);
+        }
+
+        // TODO check for web breaking
+
+        // TODO check for stuck in web
+
+        let hit = self.player.dx < (Game::d(3,7) + (self.player.is_blind() as usize) * 3);
+
+        if hit {
+            if let Some(monster) = self.currently_fighting {
+                let damage = monster.damage();
+                let defeated = self.player.take_damage(damage);
+
+                if defeated {
+                    self.state = GameState::Dead;
+                }
+
+                return Ok(CombatEvent::MonsterHit(damage, defeated))
+            } else {
+                panic!("being attacked, but not by any monster");
+            }
+        }
+
+
+        self.state = GameState::PlayerAttack;
+
+        Ok(CombatEvent::MonsterMiss)
+    }
+    
     // Check for a room event
     pub fn room_effect(&mut self) -> Event {
 

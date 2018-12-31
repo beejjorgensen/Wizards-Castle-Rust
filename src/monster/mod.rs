@@ -66,7 +66,31 @@ impl Monster {
         }
     }
 
+    /// Return the monster's type
     pub fn monster_type(&self) -> MonsterType {
         self.monster_type
+    }
+
+    /// Return true if the monster can break a weapon
+    pub fn can_break_weapon(&self) -> bool {
+        self.break_weapon
+    }
+
+    /// Damage the monster
+    ///
+    /// Return true if defeated
+    pub fn take_damage(&mut self, damage:usize) -> bool {
+        if damage < self.hp {
+            self.hp -= damage;
+            return false;
+        }
+
+        self.hp = 0;
+        true
+    }
+
+    /// Return damage inflicted
+    pub fn damage(&self) -> usize {
+        self.damage
     }
 }

@@ -459,73 +459,136 @@ impl UI {
         println!("HERE YOU FIND {}\n", room_str);
     }
 
+    // Attack a monster
+    fn combat_attack(&mut self, m_art:&str, m_name:&str) {
+        // Need to do this before the attack since the weapon might
+        // break during it
+        let weapon_type = self.game.player.weapon.weapon_type();
+
+        match self.game.attack() {
+            Ok(CombatEvent::NoWeapon) =>  {
+                println!("\n** POUNDING ON {} {} WON'T HURT IT", m_art, m_name);
+            },
+
+            Ok(CombatEvent::Hit(_, weapon_broke, defeated)) =>  {
+                println!("\n  YOU HIT THE LOUSY {}", m_name);
+
+                if weapon_broke {
+                    println!("\nOH NO! YOUR {} BROKE", UI::weapon_name(weapon_type));
+                }
+
+                if defeated {
+                    println!("{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
+
+                    // TODO random eating message
+                }
+            },
+            
+            Ok(CombatEvent::Miss) => {
+                println!("\n  DRAT! MISSED");
+            },
+
+            // TODO: check for book hands
+
+            Ok(any) => panic!("unexpected combat event {:#?}", any),
+
+            Err(err) => panic!("error in combat {:#?}", err),
+        }
+    }
+
+    /// Be attacked by a monster
+    fn combat_be_attacked(&mut self) {
+        match self.game.be_attacked() {
+            Ok(CombatEvent::MonsterHit(_damage, _defeated)) => {
+                println!("\n  OUCH! HE HIT YOU");
+            },
+
+            Ok(CombatEvent::MonsterMiss) => {
+                println!("\n  HAH! HE MISSED YOU");
+            },
+
+            Ok(any) => panic!("unexpected event while being attacked {:#?}", any),
+
+            Err(err) => panic!("error in combat being attacked {:#?}", err),
+        }
+
+    }
+
     /// Handle combat
-    fn combat(&self, monster_type:MonsterType) {
+    fn combat(&mut self, monster_type:MonsterType) {
 
         let m_name = UI::monster_name(monster_type);
         let m_art = UI::get_article(&m_name);
 
-        println!("YOU'RE FACING {} {}!\n", m_art, m_name);
+        println!("YOU'RE FACING {} {}!", m_art, m_name);
 
-        match self.game.state() {
-            GameState::PlayerAttack => {
-                print!("YOU MAY ATTACK OR RETREAT");
+        let mut in_combat = true;
 
-                let can_bribe = self.game.bribe_possible();
-                let can_cast_spell = self.game.spell_possible();
+        while in_combat {
 
-                if can_bribe {
-                    print!(", OR BRIBE");
-                }
+            match self.game.state() {
+                GameState::PlayerAttack => {
+                    print!("\nYOU MAY ATTACK OR RETREAT");
 
-                if can_cast_spell {
-                    print!(", OR CAST A SPELL");
-                }
+                    let can_bribe = self.game.bribe_possible();
+                    let can_cast_spell = self.game.spell_possible();
 
-                println!(".\n");
-
-                println!("\nYOUR STRENGTH IS {} AND DEXTERITY IS {}.\n",
-                    self.game.player.st, self.game.player.dx);
-
-                let err_str = "\n** CHOOSE ONE OF THE OPTIONS LISTED.";
-
-                match UI::get_input(Some("YOUR CHOICE? ")).get(..1) {
-                    Some("A") => {
-                        match self.game.attack() {
-                            Ok(CombatEvent::NoWeapon) =>  {
-                                println!("\n** POUNDING ON {} {} WON'T HURT IT", m_art, m_name);
-                            },
-
-                            Ok(CombatEvent::Hit(_)) =>  {
-                                println!("\n  YOU HIT THE LOUSY {}", m_name);
-                            },
-                            
-                            Ok(CombatEvent::Miss) => {
-                                println!("\n  DRAT! MISSED\n");
-                            },
-
-                            // TODO: check for book hands
-
-                            Err(err) => panic!("error in combat {:#?}", err),
-                        }
-
-                    },
-                    Some("R") => (),
-                    Some("B") => {
-                        if can_bribe {
-                        } else {
-                            println!("{}", err_str)
-                        }
+                    if can_bribe {
+                        print!(", OR BRIBE");
                     }
-                    _ => println!("{}", err_str),
-                }
 
-            },
-            //GameState::MonsterAttack =>
-            any => panic!("unknown state during combat {:#?}", any),
-        }
+                    if can_cast_spell {
+                        print!(", OR CAST A SPELL");
+                    }
 
+                    println!(".\n");
+
+                    println!("\nYOUR STRENGTH IS {} AND DEXTERITY IS {}.\n",
+                        self.game.player.st, self.game.player.dx);
+
+                    let err_str = "\n** CHOOSE ONE OF THE OPTIONS LISTED.";
+
+                    match UI::get_input(Some("YOUR CHOICE? ")).get(..1) {
+                        Some("A") => self.combat_attack(&m_art, &m_name),
+                        Some("R") => (), // TODO
+                        Some("B") => {
+                            if can_bribe {
+                                // TODO
+                            } else {
+                                println!("{}", err_str)
+                            }
+                        }
+                        Some("C") => {
+                            if can_cast_spell {
+                                // TODO
+                            } else {
+                                println!("{}", err_str)
+                            }
+                        }
+                        _ => println!("{}", err_str),
+                    }
+                },
+
+                GameState::MonsterAttack => {
+                    println!("\nTHE {} ATTACKS", m_name);
+
+                    self.combat_be_attacked();
+                },
+
+                GameState::Move => {
+                    in_combat = false;
+                },
+
+                GameState::Dead => {
+                    in_combat = false;
+                },
+
+                any => panic!("unknown state during combat {:#?}", any),
+            }
+
+        } // while in_combat
     }
+
 }
 
 /// Main

@@ -241,4 +241,18 @@ impl Player {
     pub fn has_lamp(&self) -> bool {
         self.lamp
     }
+
+    pub fn take_damage(&mut self, damage:usize) -> bool {
+        let defeated;
+
+        if damage >= self.st {
+            self.st = 0;
+            defeated = true;
+        } else {
+            self.st -= damage;
+            defeated = false;
+        }
+
+        defeated
+    }
 }
