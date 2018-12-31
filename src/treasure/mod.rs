@@ -12,7 +12,7 @@ pub enum TreasureType {
     Silmaril,
 }
 
-#[derive(Debug,PartialEq,Copy,Clone)]
+#[derive(Debug,PartialEq,Clone)]
 pub struct Treasure {
     pub treasure_type: TreasureType,
     max_value: usize,

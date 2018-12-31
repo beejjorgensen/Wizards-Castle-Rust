@@ -17,7 +17,7 @@ pub enum MonsterType {
     Vendor,
 }
 
-#[derive(Debug,PartialEq,Copy,Clone)]
+#[derive(Debug,PartialEq,Clone)]
 pub struct Monster {
     monster_type: MonsterType,
     hp: usize,

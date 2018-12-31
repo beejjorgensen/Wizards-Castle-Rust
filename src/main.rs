@@ -478,7 +478,7 @@ impl UI {
                 }
 
                 if defeated {
-                    println!("{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
+                    println!("\n{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
 
                     // TODO random eating message
                 }

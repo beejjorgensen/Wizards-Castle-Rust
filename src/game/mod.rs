@@ -11,7 +11,7 @@ use error::Error;
 use self::rand::Rng;
 use self::rand::thread_rng;
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,Clone)]
 pub enum Event {
     None,
     FoundGold(usize),
@@ -141,7 +141,7 @@ impl Game {
     }
 
     fn room_effect_monster(&mut self, monster:Monster) -> Event {
-        self.currently_fighting = Some(monster);
+        self.currently_fighting = Some(monster.clone());
 
         // TODO check for blind or lethargy
 
@@ -178,18 +178,27 @@ impl Game {
         if hit {
             let damage = self.player.weapon.damage();
             let mut broke_weapon = false;
-            let next_state = GameState::MonsterAttack;
+            let mut next_state = GameState::MonsterAttack;
             let defeated;
 
-            if let Some(mut monster) = self.currently_fighting {
+            if let Some(ref mut monster) = self.currently_fighting {
                 if monster.can_break_weapon() && Game::d(1,8) == 1 {
                     broke_weapon = true;
                     self.player.weapon = Weapon::new(WeaponType::None);
                 }
 
                 defeated = monster.take_damage(damage);
+                
+                if defeated {
+                    next_state = GameState::Move;
+                }
             } else {
                 panic!("not fighting a monster");
+            }
+
+            if defeated {
+                self.make_current_room_empty();
+                self.currently_fighting = None;
             }
 
             self.state = next_state;
@@ -213,7 +222,7 @@ impl Game {
         let hit = self.player.dx < (Game::d(3,7) + (self.player.is_blind() as usize) * 3);
 
         if hit {
-            if let Some(monster) = self.currently_fighting {
+            if let Some(ref mut monster) = self.currently_fighting {
                 let damage = monster.damage();
                 let defeated = self.player.take_damage(damage);
 
@@ -240,7 +249,7 @@ impl Game {
 
         {
             let room = self.dungeon.room_at(self.player.x, self.player.y, self.player.z);
-            roomtype = room.roomtype;
+            roomtype = room.roomtype.clone();
         }
 
         match roomtype {
