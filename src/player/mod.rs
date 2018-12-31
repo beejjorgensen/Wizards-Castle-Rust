@@ -45,7 +45,6 @@ pub struct Player {
 
     pub flares: usize,
 
-
     blind: bool,
 }
 

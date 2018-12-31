@@ -8,14 +8,12 @@ pub enum WeaponType {
 
 pub struct Weapon {
     weapon_type: WeaponType,
-    damage: usize,
 }
 
 impl Weapon {
     pub fn new(w:WeaponType) -> Weapon {
         Weapon {
             weapon_type: w,
-            damage: Weapon::damage(w),
         }
     }
 
@@ -41,13 +39,17 @@ impl Weapon {
         value
     }
 
-    pub fn damage(w:WeaponType) -> usize {
+    pub fn damage_by_type(w:WeaponType) -> usize {
         match w {
             WeaponType::None => 0,
             WeaponType::Dagger => 1,
             WeaponType::Mace => 2,
             WeaponType::Sword => 3,
         }
+    }
+
+    pub fn damage(&self) -> usize {
+        Weapon::damage_by_type(self.weapon_type)
     }
 
     pub fn weapon_type(&self) -> WeaponType {

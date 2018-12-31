@@ -4,6 +4,9 @@ use dungeon::Dungeon;
 use player::Player;
 use room::RoomType;
 use treasure::Treasure;
+use monster::{Monster,MonsterType};
+use weapon::WeaponType;
+use error::Error;
 
 use self::rand::Rng;
 use self::rand::thread_rng;
@@ -16,6 +19,15 @@ pub enum Event {
     Sinkhole,
     Warp,
     Treasure(Treasure),
+    Combat(MonsterType),
+}
+
+#[derive(Debug,Clone,Copy)]
+pub enum CombatEvent {
+    NoWeapon,
+    //BookHands,
+    Miss,
+    Hit(usize),
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -26,17 +38,16 @@ pub enum Direction {
     East,
 }
 
+#[derive(Debug,Clone,Copy,PartialEq)]
 pub enum GameState {
-    CharGenChooseClass,
-    CharGenStats,
-    CharGenOutfit,
+    Init,
 
     Move,
 
     Vendor,
 
-    CombatPlayer,
-    CombatMonster,
+    PlayerAttack,
+    MonsterAttack,
 
     Warp,
     Sinkhole,
@@ -48,6 +59,8 @@ pub struct Game {
     pub player: Player,
     state: GameState,
     prev_dir: Direction,
+    currently_fighting: Option<Monster>,
+    bribe_possible: bool,
 }
 
 impl Game {
@@ -61,8 +74,10 @@ impl Game {
         Game {
             dungeon,
             player,
-            state: GameState::CharGenChooseClass,
+            state: GameState::Init,
             prev_dir: Direction::South,
+            currently_fighting: None,
+            bribe_possible: true,
         }
     }
     
@@ -121,6 +136,49 @@ impl Game {
         Event::Treasure(treasure)
     }
 
+    fn room_effect_monster(&mut self, monster:Monster) -> Event {
+        self.currently_fighting = Some(monster);
+
+        // TODO check for blind or lethargy
+
+        self.state = GameState::PlayerAttack;
+
+        self.bribe_possible = true;
+
+        Event::Combat(monster.monster_type())
+    }
+
+    /// True if the player can bribe
+    pub fn bribe_possible(&self) -> bool {
+        self.bribe_possible
+    }
+
+    /// True if the player can cast a spell
+    pub fn spell_possible(&self) -> bool {
+        self.player.iq > 14
+    }
+
+    /// Handle player attacking monster
+    pub fn attack(&self) -> Result<CombatEvent, Error> {
+        if self.state != GameState::PlayerAttack {
+            return Err(Error::WrongState);
+        }
+
+        if self.player.weapon.weapon_type() == WeaponType::None {
+            return Ok(CombatEvent::NoWeapon);
+        }
+
+        let hit = self.player.dx >= (Game::d(1, 20) + (self.player.is_blind() as usize) * 3);
+
+        if hit {
+            let damage = self.player.weapon.damage();
+
+            return Ok(CombatEvent::Hit(damage));
+        }
+
+        Ok(CombatEvent::Miss)
+    }
+
     // Check for a room event
     pub fn room_effect(&mut self) -> Event {
 
@@ -137,6 +195,7 @@ impl Game {
             RoomType::Sinkhole => self.room_effect_sinkhole(),
             RoomType::Warp(orb_of_zot) => self.room_effect_warp(orb_of_zot),
             RoomType::Treasure(t) => self.room_effect_treasure(t),
+            RoomType::Monster(m) => self.room_effect_monster(m),
             _ => Event::None,
         }
     }
@@ -187,5 +246,10 @@ impl Game {
         }
 
         total
+    }
+
+    /// Return game state
+    pub fn state(&self) -> GameState {
+        self.state
     }
 }
