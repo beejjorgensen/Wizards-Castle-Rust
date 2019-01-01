@@ -43,6 +43,9 @@ pub struct Player {
     pub lamp: bool,
     pub treasures: Vec<TreasureType>,
 
+    runestaff: bool,
+    orb_of_zot: bool,
+
     pub flares: usize,
 
     blind: bool,
@@ -72,6 +75,10 @@ impl Player {
             weapon: Weapon::new(WeaponType::None),
             lamp: false,
             treasures: Vec::new(),
+
+            orb_of_zot: false,
+            runestaff: false,
+
             flares: 0,
         }
     }
@@ -230,18 +237,24 @@ impl Player {
         self.gp
     }
 
+    /// Return player's weapon
     pub fn weapon(&self) -> &Weapon {
         &self.weapon
     }
 
+    /// Return player's armor
     pub fn armor(&self) -> &Armor {
         &self.armor
     }
 
+    /// True if the player has a lamp
     pub fn has_lamp(&self) -> bool {
         self.lamp
     }
 
+    /// Damage the player
+    ///
+    /// Returns true if the player has died
     pub fn take_damage(&mut self, damage:usize) -> bool {
         let defeated;
 
@@ -254,5 +267,25 @@ impl Player {
         }
 
         defeated
+    }
+
+    /// Returns true if the player is dead
+    pub fn is_dead(&self) -> bool {
+        self.st == 0 || self.iq == 0 || self.dx == 0
+    }
+
+    /// True if the player has the Orb of Zot
+    pub fn has_orb_of_zot(&self) -> bool {
+        self.orb_of_zot
+    }
+
+    /// True if the player has the Runestaff
+    pub fn has_runestaff(&self) -> bool {
+        self.runestaff
+    }
+
+    /// Return a list of players treasures
+    pub fn get_treasures(&self) -> &Vec<TreasureType> {
+        &self.treasures
     }
 }

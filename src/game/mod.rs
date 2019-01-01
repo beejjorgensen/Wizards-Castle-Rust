@@ -32,7 +32,7 @@ pub enum CombatEvent {
     MonsterHit(usize, bool),
 }
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Direction {
     North,
     South,
@@ -56,6 +56,7 @@ pub enum GameState {
     Gas,
 
     Dead,
+    Exit,
 }
 
 pub struct Game {
@@ -85,12 +86,14 @@ impl Game {
         }
     }
     
+    /// Mark the player's current room as empty
     fn make_current_room_empty(&mut self) {
         let room = self.dungeon.room_at_mut(self.player.x, self.player.y, self.player.z);
 
         room.make_empty();
     }
 
+    /// Handle Gold room effects
     fn room_effect_gold(&mut self) -> Event {
         let gold_amount = Game::d(1,10);
 
@@ -101,6 +104,7 @@ impl Game {
         return Event::FoundGold(gold_amount);
     }
 
+    /// Handle Flare room effects
     fn room_effect_flares(&mut self) -> Event {
         let flare_amount = Game::d(1,5);
 
@@ -111,12 +115,14 @@ impl Game {
         return Event::FoundFlares(flare_amount);
     }
 
+    /// Handle Sinkhole room effects
     fn room_effect_sinkhole(&mut self) -> Event {
         self.player.z = (self.player.z + 1) % self.dungeon.zsize;
 
         return Event::Sinkhole;
     }
 
+    /// Handle Warp room effects
     fn room_effect_warp(&mut self, orb_of_zot:bool) -> Event {
         if orb_of_zot {
             let prev_dir = self.prev_dir;
@@ -132,6 +138,7 @@ impl Game {
         return Event::Warp;
     }
 
+    /// Handle Treasure room effects
     fn room_effect_treasure(&mut self, treasure:Treasure) -> Event {
         self.make_current_room_empty();
 
@@ -140,6 +147,7 @@ impl Game {
         Event::Treasure(treasure)
     }
 
+    // Handle Monster room effects
     fn room_effect_monster(&mut self, monster:Monster) -> Event {
         self.currently_fighting = Some(monster.clone());
 
@@ -235,6 +243,8 @@ impl Game {
                 let damage = monster.damage();
                 let defeated = self.player.take_damage(damage);
 
+                // TODO armor damage, destruction
+
                 if defeated {
                     self.state = GameState::Dead;
                 }
@@ -283,8 +293,10 @@ impl Game {
 
         self.prev_dir = dir;
 
-        if room.roomtype == RoomType::Entrance {
-            // TODO handle game exit
+        // Handle exit special case
+        if room.roomtype == RoomType::Entrance && dir == Direction::North {
+            self.state = GameState::Exit;
+            return;
         }
 
         match dir {

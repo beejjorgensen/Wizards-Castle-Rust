@@ -219,7 +219,7 @@ impl UI {
     /// Note: the original version lacked this preamble--it only appears in the
     /// magazine article. It was, however, included in the MBASIC port.
     ///
-    fn intro(&self) {
+    fn intro() {
         println!("\n{:*^64}\n", "");
 
         println!("{:^64}\n", "* * * THE WIZARD'S CASTLE * * *");
@@ -591,36 +591,113 @@ impl UI {
         } // while in_combat
     }
 
+    /// Print out the game over summary
+    pub fn game_summary(&self) {
+        match self.game.state() {
+            GameState::Dead => {
+                println!("\n\nA NOBLE EFFORT, OH FORMERLY LIVING {}\n", self.race_str());
+
+                print!("YOU DIED FROM LACK OF ");
+                if self.game.player.st == 0 {
+                    println!("STRENGTH");
+                }
+                else if self.game.player.iq == 0 {
+                    println!("INTELLIGENCE");
+                }
+                else if self.game.player.dx == 0 {
+                    println!("DEXTERITY");
+                }
+
+                println!("\nWHEN YOU DIED YOU HAD:\n");
+            },
+
+            GameState::Exit => {
+                let win = self.game.player.has_orb_of_zot();
+
+                print!("YOU LEFT THE CASTLE WITH");
+
+                if !win {
+                    print!("OUT");
+                }
+
+                println!(" THE ORB OF ZOT\n\n");
+
+                if win {
+                    println!("A GLORIOUS VICTORY!\n");
+                    println!("YOU ALSO GOT OUT WITH THE FOLLOWING:\n");
+                } else {
+                    println!("A LESS THAN AWE-INSPIRING DEFEAT.\n");
+                    println!("WHEN YOU LEFT THE CASTLE YOU HAD:\n");
+                }
+
+                println!("YOUR MISERABLE LIFE");
+            },
+
+            any => panic!("unexpected game state at end {:#?}", any),
+        }
+
+        // List treasures
+        for t in self.game.player.get_treasures() {
+            println!("{}", UI::treasure_name(t));
+        }
+
+        // Show weapon
+        println!("{}", UI::weapon_name(self.game.player.weapon().weapon_type()));
+
+        // Show armor
+        println!("{}", UI::armor_name(self.game.player.armor().armor_type()));
+
+        // Show lamp
+        if self.game.player.has_lamp() {
+            println!("A LAMP");
+        }
+
+        // Show flares
+        println!("{} FLARES", self.game.player.flares());
+
+        // Show GPs
+        println!("{} GP's", self.game.player.gp());
+
+        // Show Runestaff
+        if self.game.player.has_runestaff() {
+            println!("THE RUNESTAFF");
+        }
+
+        // Show turns
+        println!("\nAND IT TOOK YOU {} TURNS!\n", self.turn_count);
+    }
+
 }
 
 /// Main
 fn main() {
-    let game = Game::new(8, 8, 8);
+    let mut playing = true;
 
-    let mut ui = UI {
-        game: game,
-        turn_count: 0,
-    };
-
-    ui.intro();
-
-    ui.race_gender_select();
-    ui.allocate_points();
-    ui.buy_armor();
-    ui.buy_weapon();
-    ui.buy_lamp();
-    ui.buy_flares();
-
-    println!("\nOK {}, YOU ENTER THE CASTLE AND BEGIN.\n", ui.race_str());
-
-    let playing = true;
-    ui.turn_count = 0;
+    UI::intro();
 
     while playing {
 
-        let alive = true;
+        let game = Game::new(8, 8, 8);
+
+        let mut ui = UI {
+            game: game,
+            turn_count: 0,
+        };
+
+        ui.race_gender_select();
+        ui.allocate_points();
+        ui.buy_armor();
+        ui.buy_weapon();
+        ui.buy_lamp();
+        ui.buy_flares();
+
+        println!("\nOK {}, YOU ENTER THE CASTLE AND BEGIN.\n", ui.race_str());
+
+        let mut alive = true;
 
         while alive {
+            ui.turn_count += 1;
+
             ui.game.dungeon.discover(ui.game.player.x, ui.game.player.y, ui.game.player.z);
 
             println!();
@@ -654,13 +731,17 @@ fn main() {
                 Event::None => (),
             }
 
-            ui.turn_count += 1;
+            // See if we were killed by something
+            if ui.game.state() == GameState::Dead {
+                alive = false;
+                continue;
+            }
 
             if automove {
                 continue;
             }
 
-            // TODO curse effects
+            // TODO curse effects (Does this happen before automove??)
 
             // TODO curse check
 
@@ -669,6 +750,7 @@ fn main() {
             // TODO cure blindness
 
             // TODO dissolve books
+
 
             let mut valid_command = false;
 
@@ -690,7 +772,36 @@ fn main() {
                         valid_command = false;
                     }
                 }
+            }
 
+            // See if the player walked out
+            if ui.game.state() == GameState::Exit {
+                alive = false;
+                continue;
+            }
+
+        } // while alive
+
+        ui.game_summary();
+
+        let mut valid_command = false;
+
+        while !valid_command {
+            let play_again = UI::get_input(Some("\nPLAY AGAIN? "));
+
+            match play_again.get(..1) {
+                Some("Y") => {
+                    println!("\nSOME {}S NEVER LEARN\n\n", ui.race_str());
+                    valid_command = true;
+                },
+                Some("N") => {
+                    println!("\nMAYBE DUMB {} NOT SO DUMB AFTER ALL\n", ui.race_str());
+                    playing = false;
+                    valid_command = true;
+                }
+                _ => {
+                    println!("** ANSWER YES OR NO");
+                }
             }
         }
     }
