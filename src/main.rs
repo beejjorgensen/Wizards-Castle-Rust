@@ -520,8 +520,51 @@ impl UI {
 
     }
 
+    /// Retreat
+    fn combat_retreat(&mut self) {
+        match self.game.retreat() {
+            Ok(_) => (),
+            Err(err) => panic!("error retreating {:#?}", err),
+        };
+    }
+
+    /// Retreat a direction after last monster attack
+    fn combat_retreat_dir(&mut self) {
+        println!("\n\nYOU HAVE ESCAPED\n");
+
+        let dir;
+
+        loop {
+            let dir_str = UI::get_input(Some("\nDO YOU GO NORTH, SOUTH, EAST, OR WEST? "));
+
+            match dir_str.get(..1) {
+                Some("N") => {
+                    dir = Direction::North;
+                    break;
+                }
+                Some("S") => {
+                    dir = Direction::South;
+                    break;
+                }
+                Some("W") => {
+                    dir = Direction::West;
+                    break;
+                }
+                Some("E") => {
+                    dir = Direction::East;
+                    break;
+                }
+                _ => {
+                    println!("\n** ANSWER YES OR NO");
+                }
+            }
+        }
+
+        self.game.retreat_dir(dir);
+    }
+
     /// Handle combat
-    fn combat(&mut self, monster_type:MonsterType) {
+    fn combat(&mut self, monster_type:MonsterType) -> bool {
 
         let m_name = UI::monster_name(monster_type);
         let m_art = UI::get_article(&m_name);
@@ -529,6 +572,7 @@ impl UI {
         println!("YOU'RE FACING {} {}!", m_art, m_name);
 
         let mut in_combat = true;
+        let mut retreated = false;
 
         while in_combat {
 
@@ -556,7 +600,7 @@ impl UI {
 
                     match UI::get_input(Some("YOUR CHOICE? ")).get(..1) {
                         Some("A") => self.combat_attack(&m_art, &m_name),
-                        Some("R") => (), // TODO
+                        Some("R") => self.combat_retreat(),
                         Some("B") => {
                             if can_bribe {
                                 // TODO
@@ -581,6 +625,11 @@ impl UI {
                     self.combat_be_attacked();
                 },
 
+                GameState::Retreat => {
+                    self.combat_retreat_dir();
+                    retreated = true;
+                },
+
                 GameState::Move => {
                     in_combat = false;
                 },
@@ -593,6 +642,8 @@ impl UI {
             }
 
         } // while in_combat
+
+        retreated
     }
 
     /// Print out the game over summary
@@ -727,7 +778,11 @@ fn main() {
                     automove = true;
                 },
                 Event::Combat(monster_type) => {
-                    ui.combat(monster_type);
+                    let retreated = ui.combat(monster_type);
+
+                    if retreated {
+                        automove = true;
+                    }
                 }
                 Event::Treasure(_) => {
                     println!("IT'S NOW YOURS\n");

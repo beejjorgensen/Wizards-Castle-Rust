@@ -50,6 +50,7 @@ pub enum GameState {
 
     PlayerAttack,
     MonsterAttack,
+    Retreat,
 
     Warp,
     Sinkhole,
@@ -66,6 +67,7 @@ pub struct Game {
     prev_dir: Direction,
     currently_fighting: Option<Monster>,
     bribe_possible: bool,
+    retreating:bool,
 }
 
 impl Game {
@@ -83,6 +85,7 @@ impl Game {
             prev_dir: Direction::South,
             currently_fighting: None,
             bribe_possible: true,
+            retreating: false,
         }
     }
     
@@ -157,6 +160,8 @@ impl Game {
 
         self.bribe_possible = true;
 
+        self.retreating = false;
+
         Event::Combat(monster.monster_type())
     }
 
@@ -226,6 +231,15 @@ impl Game {
         Ok(CombatEvent::Miss)
     }
 
+    /// Helper function to get the next state after a monster attack
+    fn state_after_monster_attack(&mut self) {
+        if self.retreating {
+            self.state = GameState::Retreat;
+        } else {
+            self.state = GameState::PlayerAttack;
+        }
+    }
+
     /// Handle a monster attack
     pub fn be_attacked(&mut self) -> Result<CombatEvent, Error> {
         if self.state != GameState::MonsterAttack {
@@ -238,36 +252,69 @@ impl Game {
 
         let hit = self.player.dx < (Game::d(3,7) + (self.player.is_blind() as usize) * 3);
 
+        let mut combat_event = None;
+        let mut defeated = false;
+
+        // Handle player hit
         if hit {
             if let Some(ref mut monster) = self.currently_fighting {
                 let damage = monster.damage();
                 let armor_value = self.player.armor().armor_value();
 
                 let st_damage = std::cmp::max(damage - armor_value, 0);
-                let defeated = self.player.damage_st(st_damage);
+                defeated = self.player.damage_st(st_damage);
 
                 let armor_damage = std::cmp::min(damage, armor_value);
                 let armor_destroyed = self.player.damage_armor(armor_damage);
 
-                if defeated {
-                    self.state = GameState::Dead;
-                } else {
-                    self.state = GameState::PlayerAttack;
-                }
+                combat_event = Some(CombatEvent::MonsterHit(st_damage, defeated, armor_destroyed));
 
-                return Ok(CombatEvent::MonsterHit(st_damage, defeated, armor_destroyed));
             } else {
                 panic!("being attacked, but not by any monster");
             }
         }
 
+        // Set next state
+        if hit {
+            if defeated {
+                self.state = GameState::Dead;
+            } else {
+                self.state_after_monster_attack();
+            }
 
-        self.state = GameState::PlayerAttack;
+            if let Some(c_event) = combat_event {
+                return Ok(c_event);
+            }
+        }
+
+        self.state_after_monster_attack();
 
         Ok(CombatEvent::MonsterMiss)
     }
+
+    /// Handle retreat
+    ///
+    /// This is split out from retreat_dir because the monster gets another
+    /// attack in the middle of it.
+    pub fn retreat(&mut self) -> Result<(), Error> {
+        if self.state != GameState::PlayerAttack {
+            return Err(Error::WrongState);
+        }
+
+        self.state = GameState::MonsterAttack;
+        self.retreating = true;
+
+        Ok(())
+    }
+
+    /// After the monster's final attack
+    pub fn retreat_dir(&mut self, dir:Direction) {
+        self.state = GameState::Move;
+
+        self.move_dir(dir);
+    }
     
-    // Check for a room event
+    /// Check for a room event
     pub fn room_effect(&mut self) -> Event {
 
         let roomtype;
