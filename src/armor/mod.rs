@@ -8,10 +8,12 @@ pub enum ArmorType {
 
 pub struct Armor {
     armor_type: ArmorType,
-    health: isize,
+    health: usize,
 }
 
 impl Armor {
+
+    /// Create a new armor
     pub fn new(a: ArmorType) -> Armor {
         let health = match a {
             ArmorType::None => 0 * 7,
@@ -26,6 +28,7 @@ impl Armor {
         }
     }
 
+    /// Return the cost in GP of some armor in a given context
     pub fn cost(a:ArmorType, is_vendor:bool) -> usize {
         let value;
 
@@ -51,6 +54,7 @@ impl Armor {
         value
     }
 
+    /// Convert an armor type to its internal ID
     fn to_id(a:ArmorType) -> usize {
         match a {
             ArmorType::None => 9999,
@@ -60,7 +64,33 @@ impl Armor {
         }
     }
 
+    /// Return protection value of this armor
+    pub fn armor_value(&self) -> usize {
+        match self.armor_type {
+            ArmorType::None => 0,
+            ArmorType::Leather => 1,
+            ArmorType::Chainmail => 2,
+            ArmorType::Plate => 3,
+        }
+    }
+
+    /// Return armor type
     pub fn armor_type(&self) -> ArmorType {
         self.armor_type
+    }
+
+    /// Damage the armor
+    /// 
+    /// Return true if the armor is destroyed
+    pub fn damage(&mut self, damage:usize) -> bool {
+
+        if damage > self.health {
+            self.health = 0;
+            return true;
+        }
+
+        self.health -= damage;
+
+        false
     }
 }

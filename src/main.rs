@@ -501,8 +501,12 @@ impl UI {
     /// Be attacked by a monster
     fn combat_be_attacked(&mut self) {
         match self.game.be_attacked() {
-            Ok(CombatEvent::MonsterHit(_damage, _defeated)) => {
+            Ok(CombatEvent::MonsterHit(_damage, _defeated, armor_destroyed)) => {
                 println!("\n  OUCH! HE HIT YOU");
+
+                if armor_destroyed {
+                    println!("\nYOUR ARMOR IS DESTROYED - GOOD LUCK\n");
+                }
             },
 
             Ok(CombatEvent::MonsterMiss) => {
@@ -804,5 +808,7 @@ fn main() {
                 }
             }
         }
-    }
+
+    } // while playing
+
 }

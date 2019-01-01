@@ -29,7 +29,7 @@ pub enum CombatEvent {
     Miss,
     Hit(usize, bool, bool, usize),
     MonsterMiss,
-    MonsterHit(usize, bool),
+    MonsterHit(usize, bool, bool),
 }
 
 #[derive(Debug,Clone,Copy,PartialEq)]
@@ -241,15 +241,21 @@ impl Game {
         if hit {
             if let Some(ref mut monster) = self.currently_fighting {
                 let damage = monster.damage();
-                let defeated = self.player.take_damage(damage);
+                let armor_value = self.player.armor().armor_value();
 
-                // TODO armor damage, destruction
+                let st_damage = std::cmp::max(damage - armor_value, 0);
+                let defeated = self.player.damage_st(st_damage);
+
+                let armor_damage = std::cmp::min(damage, armor_value);
+                let armor_destroyed = self.player.damage_armor(armor_damage);
 
                 if defeated {
                     self.state = GameState::Dead;
+                } else {
+                    self.state = GameState::PlayerAttack;
                 }
 
-                return Ok(CombatEvent::MonsterHit(damage, defeated))
+                return Ok(CombatEvent::MonsterHit(st_damage, defeated, armor_destroyed));
             } else {
                 panic!("being attacked, but not by any monster");
             }

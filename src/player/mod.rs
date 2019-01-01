@@ -247,6 +247,11 @@ impl Player {
         &self.armor
     }
 
+    /// Return player's armor mutably
+    pub fn armor_mut(&mut self) -> &mut Armor {
+        &mut self.armor
+    }
+
     /// True if the player has a lamp
     pub fn has_lamp(&self) -> bool {
         self.lamp
@@ -255,7 +260,7 @@ impl Player {
     /// Damage the player
     ///
     /// Returns true if the player has died
-    pub fn take_damage(&mut self, damage:usize) -> bool {
+    pub fn damage_st(&mut self, damage:usize) -> bool {
         let defeated;
 
         if damage >= self.st {
@@ -267,6 +272,19 @@ impl Player {
         }
 
         defeated
+    }
+
+    /// Damage armor
+    /// 
+    /// Return true if the armor is destroyed
+    pub fn damage_armor(&mut self, damage:usize) -> bool {
+        let armor_destroyed = self.armor_mut().damage(damage) && self.armor().armor_type() != ArmorType::None;
+
+        if armor_destroyed {
+            self.armor = Armor::new(ArmorType::None);
+        }
+
+        armor_destroyed
     }
 
     /// Returns true if the player is dead
