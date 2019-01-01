@@ -800,7 +800,7 @@ fn main() {
                     valid_command = true;
                 }
                 _ => {
-                    println!("** ANSWER YES OR NO");
+                    println!("\n** ANSWER YES OR NO");
                 }
             }
         }
