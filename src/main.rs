@@ -470,7 +470,7 @@ impl UI {
                 println!("\n** POUNDING ON {} {} WON'T HURT IT", m_art, m_name);
             },
 
-            Ok(CombatEvent::Hit(_, weapon_broke, defeated, treasure)) =>  {
+            Ok(CombatEvent::Hit(_, weapon_broke, defeated, treasure, got_runestaff)) =>  {
                 println!("\n  YOU HIT THE LOUSY {}", m_name);
 
                 if weapon_broke {
@@ -481,6 +481,10 @@ impl UI {
                     println!("\n{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
 
                     // TODO random eating message
+
+                    if got_runestaff {
+                        println!("\nGREAT ZOT! YOU'VE FOUND THE RUNESTAFF");
+                    }
 
                     println!("\nYOU NOW GET HIS HOARD OF {} GP's", treasure);
                 }

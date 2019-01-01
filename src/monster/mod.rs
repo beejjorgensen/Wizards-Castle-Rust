@@ -93,4 +93,9 @@ impl Monster {
     pub fn damage(&self) -> usize {
         self.damage
     }
+
+    /// True if the monster has the runestaff
+    pub fn has_runestaff(&self) -> bool {
+        self.has_runestaff
+    }
 }

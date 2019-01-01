@@ -27,7 +27,7 @@ pub enum CombatEvent {
     NoWeapon,
     //BookHands,
     Miss,
-    Hit(usize, bool, bool, usize),
+    Hit(usize, bool, bool, usize, bool),
     MonsterMiss,
     MonsterHit(usize, bool, bool),
 }
@@ -193,6 +193,7 @@ impl Game {
             let mut broke_weapon = false;
             let mut next_state = GameState::MonsterAttack;
             let defeated;
+            let mut got_runestaff = false;
             let treasure;
 
             if let Some(ref mut monster) = self.currently_fighting {
@@ -205,14 +206,17 @@ impl Game {
                 
                 if defeated {
                     next_state = GameState::Move;
+
+                    if monster.has_runestaff() {
+                        self.player.receive_runestaff();
+                        got_runestaff = true;
+                    }
                 }
             } else {
                 panic!("not fighting a monster");
             }
 
             if defeated {
-                // TODO check for Runestaff
-
                 self.make_current_room_empty();
                 self.currently_fighting = None;
 
@@ -224,7 +228,7 @@ impl Game {
             self.player.gp += treasure;
 
             self.state = next_state;
-            return Ok(CombatEvent::Hit(damage, broke_weapon, defeated, treasure));
+            return Ok(CombatEvent::Hit(damage, broke_weapon, defeated, treasure, got_runestaff));
         }
 
         self.state = GameState::MonsterAttack;

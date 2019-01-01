@@ -302,6 +302,11 @@ impl Player {
         self.runestaff
     }
 
+    /// Give the runestaff to the player
+    pub fn receive_runestaff(&mut self) {
+        self.runestaff = true;
+    }
+
     /// Return a list of players treasures
     pub fn get_treasures(&self) -> &Vec<TreasureType> {
         &self.treasures
