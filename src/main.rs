@@ -780,9 +780,7 @@ fn main() {
                 Event::Combat(monster_type) => {
                     let retreated = ui.combat(monster_type);
 
-                    if retreated {
-                        automove = true;
-                    }
+                    automove = retreated;
                 }
                 Event::Treasure(_) => {
                     println!("IT'S NOW YOURS\n");
