@@ -5,7 +5,7 @@ use self::rand::thread_rng;
 use self::rand::seq::SliceRandom;
 
 use room::{Room, RoomType};
-use monster::Monster;
+use monster::{Monster, MonsterType};
 use curse::Curse;
 use treasure::Treasure;
 
@@ -28,6 +28,7 @@ impl Dungeon {
 
         let stair_count = area / 32; // 2 in 8x8
         let item_count = area / 21; // 3 in 8x8
+        let vendor_count = area / 21; // 3 in 8x8
 
         let entrance_x = (xsize - 1) / 2;
 
@@ -72,14 +73,35 @@ impl Dungeon {
             }
 
             // Monsters
-            let monsters_to_place = ::monster::MONSTER_COUNT - 1; // -1 to not count the Vendors
+            let monsters_to_place = [
+                MonsterType::Kobold,
+                MonsterType::Orc,
+                MonsterType::Wolf,
+                MonsterType::Goblin,
+                MonsterType::Ogre,
+                MonsterType::Troll,
+                MonsterType::Bear,
+                MonsterType::Minotaur,
+                MonsterType::Gargoyle,
+                MonsterType::Chimera,
+                MonsterType::Balrog,
+                MonsterType::Dragon,
+                // Not counting Vendors
+            ];
 
-            let monster_with_runestaff = rng.gen_range(0, monsters_to_place);
+            let monster_count = monsters_to_place.len();
 
-            for i in 0..monsters_to_place {
+            let monster_with_runestaff = rng.gen_range(0, monster_count);
+
+            for i in 0..monster_count {
                 let has_runestaff = i == monster_with_runestaff && z == runestaff_level;
 
-                this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(i, has_runestaff)), ..Default::default() });
+                this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(monsters_to_place[i], has_runestaff)), ..Default::default() });
+            }
+
+            // Vendors
+            for _ in 0..vendor_count {
+                this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(MonsterType::Vendor, false)), ..Default::default() });
             }
 
             levels.push(this_level);

@@ -20,6 +20,7 @@ pub enum Event {
     Warp,
     Treasure(Treasure),
     Combat(MonsterType),
+    Vendor,
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -68,6 +69,7 @@ pub struct Game {
     currently_fighting: Option<Monster>,
     bribe_possible: bool,
     retreating:bool,
+    vendors_angry:bool,
 }
 
 impl Game {
@@ -86,6 +88,7 @@ impl Game {
             currently_fighting: None,
             bribe_possible: true,
             retreating: false,
+            vendors_angry: false,
         }
     }
     
@@ -152,6 +155,13 @@ impl Game {
 
     // Handle Monster room effects
     fn room_effect_monster(&mut self, monster:Monster) -> Event {
+
+        // If Vendors are not angry, head into vendor trade state instead of combat
+        if monster.monster_type() == MonsterType::Vendor && !self.vendors_angry {
+            self.state = GameState::Vendor;
+            return Event::Vendor;
+        }
+
         self.currently_fighting = Some(monster.clone());
 
         // TODO check for blind or lethargy

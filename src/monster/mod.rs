@@ -27,8 +27,8 @@ pub struct Monster {
 }
 
 impl Monster {
-    pub fn new(monster_num: usize, has_runestaff: bool) -> Monster {
-        let monster_type = Monster::get_monster_by_id(monster_num);
+    pub fn new(monster_type: MonsterType, has_runestaff: bool) -> Monster {
+        let monster_num = Monster::get_monster_num(monster_type);
 
         let m1 = monster_num + 1; // Change to 1-based
 
@@ -47,22 +47,21 @@ impl Monster {
     }
 
     /// Return a MonsterType for a given ID
-    fn get_monster_by_id(id: usize) -> MonsterType {
-        match id {
-            0 => MonsterType::Kobold,
-            1 => MonsterType::Orc,
-            2 => MonsterType::Wolf,
-            3 => MonsterType::Goblin,
-            4 => MonsterType::Ogre,
-            5 => MonsterType::Troll,
-            6 => MonsterType::Bear,
-            7 => MonsterType::Minotaur,
-            8 => MonsterType::Gargoyle,
-            9 => MonsterType::Chimera,
-            10 => MonsterType::Balrog,
-            11 => MonsterType::Dragon,
-            12 => MonsterType::Vendor,
-            _ => panic!("get_monster_by_id: unknown id")
+    fn get_monster_num(monster_type: MonsterType) -> usize {
+        match monster_type {
+            MonsterType::Kobold => 0,
+            MonsterType::Orc => 1,
+            MonsterType::Wolf => 2,
+            MonsterType::Goblin => 3,
+            MonsterType::Ogre => 4,
+            MonsterType::Troll => 5,
+            MonsterType::Bear => 6,
+            MonsterType::Minotaur => 7,
+            MonsterType::Gargoyle => 8,
+            MonsterType::Chimera => 9,
+            MonsterType::Balrog => 10,
+            MonsterType::Dragon => 11,
+            MonsterType::Vendor => 12,
         }
     }
 

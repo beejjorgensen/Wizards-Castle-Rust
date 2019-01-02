@@ -173,7 +173,13 @@ impl UI {
                         RoomType::Sinkhole => print!("S"),
                         RoomType::CrystalOrb => print!("O"),
                         RoomType::Book => print!("B"),
-                        RoomType::Monster(_) => print!("M"),
+                        RoomType::Monster(ref m) => {
+                            if m.monster_type() == MonsterType::Vendor {
+                                print!("V");
+                            } else {
+                                print!("M");
+                            }
+                        },
                         RoomType::Treasure(_) => print!("T"),
                     }
                 } else {
@@ -788,6 +794,9 @@ fn main() {
                 }
                 Event::Treasure(_) => {
                     println!("IT'S NOW YOURS\n");
+                }
+                Event::Vendor => {
+                    println!("[STUB: Vendor trade]");
                 }
                 Event::None => (),
             }
