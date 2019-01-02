@@ -48,6 +48,7 @@ pub enum GameState {
     Move,
 
     Vendor,
+    VendorAttack, // True just after a player has initiated an attack on a vendor
 
     PlayerAttack,
     MonsterAttack,
@@ -384,6 +385,17 @@ impl Game {
             }
             Direction::East => p.x = (p.x + 1) % xsize,
         }
+    }
+
+    /// Attack a vendor
+    pub fn vendor_attack(&mut self) {
+        self.vendors_angry = true;
+        self.state = GameState::VendorAttack;
+    }
+
+    /// Complete vendor interactions
+    pub fn vendor_complete(&mut self) {
+        self.state = GameState::Move;
     }
 
     /// Roll a die (1d6, 2d7, etc.)

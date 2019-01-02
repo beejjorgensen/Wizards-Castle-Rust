@@ -731,6 +731,43 @@ impl UI {
         // Show turns
         println!("\nAND IT TOOK YOU {} TURNS!\n", self.turn_count);
     }
+    
+    /// Trade with a Vendor
+    fn vendor_trade(&mut self) {
+        println!("[STUB: Vendor trade]");
+    }
+
+    /// Interact with a Vendor
+    pub fn vendor(&mut self) -> bool {
+        println!("YOU MAY TRADE WITH, ATTACK, OR IGNORE THE VENDOR");
+
+        let mut fighting_vendor = false;
+
+        loop {
+            let choice = UI::get_input(Some("\nYOUR CHOICE? "));
+
+            match choice.get(..1) {
+                Some("T") => {
+                    self.vendor_trade();
+                    self.game.vendor_complete();
+                    break;
+                },
+                Some("A") => {
+                    println!("\nYOU'LL BE SORRY YOU DID THAT");
+                    self.game.vendor_attack();
+                    fighting_vendor = true;
+                    break;
+                },
+                Some("I") => {
+                    self.game.vendor_complete();
+                    break;
+                },
+                _ => println!("\n** NICE SHOT, {}.", self.race_str()),
+            }
+        };
+
+        fighting_vendor
+    }
 
 }
 
@@ -767,11 +804,13 @@ fn main() {
 
             println!();
 
-            ui.print_location();
-            ui.print_stats();
+            if ui.game.state() != GameState::VendorAttack {
+                ui.print_location();
+                ui.print_stats();
 
-            ui.print_room();
-            
+                ui.print_room();
+            }
+                
             let mut automove = false;
 
             match ui.game.room_effect() {
@@ -796,7 +835,7 @@ fn main() {
                     println!("IT'S NOW YOURS\n");
                 }
                 Event::Vendor => {
-                    println!("[STUB: Vendor trade]");
+                    ui.vendor();
                 }
                 Event::None => (),
             }
@@ -805,6 +844,11 @@ fn main() {
             if ui.game.state() == GameState::Dead {
                 alive = false;
                 continue;
+            }
+
+            // If we're chosen to fight the vendor, let's do that
+            if ui.game.state() == GameState::VendorAttack {
+                automove = true;
             }
 
             if automove {
