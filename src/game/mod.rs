@@ -3,7 +3,7 @@ extern crate rand;
 use dungeon::Dungeon;
 use player::Player;
 use room::RoomType;
-use treasure::Treasure;
+use treasure::{Treasure,TreasureType};
 use monster::{Monster,MonsterType};
 use weapon::{Weapon,WeaponType};
 use error::Error;
@@ -261,6 +261,8 @@ impl Game {
             return Err(Error::WrongState);
         }
 
+        self.bribe_possible = false;
+
         // TODO check for web breaking
 
         // TODO check for stuck in web
@@ -320,6 +322,52 @@ impl Game {
         self.retreating = true;
 
         Ok(())
+    }
+
+    /// Handle bribe
+    /// 
+    /// Returns true if the bribe is successful
+    pub fn bribe(&mut self, treasure_type:Option<TreasureType>) -> bool {
+        if !self.bribe_possible() {
+            return false;
+        }
+
+        if self.state != GameState::PlayerAttack {
+            return false;
+        }
+
+        match treasure_type {
+            Some(t_type) => {
+                if self.player.remove_treasure(t_type) {
+                    // Player had the treasure
+                    self.state = GameState::Move;
+
+                    // Check if we're bribing a vendor
+                    let roomtype = &self.dungeon.room_at(self.player.x, self.player.y, self.player.z).roomtype;
+
+                    match roomtype {
+                        RoomType::Monster(m) => {
+                            if m.monster_type() == MonsterType::Vendor {
+                                // If we are, make them unangry
+                                self.vendors_angry = false;
+                            }
+                        },
+                        _ => { return false; },
+                    }
+
+                    true
+                } else {
+                    // Player did not own the treasure
+                    self.state = GameState::MonsterAttack;
+                    false
+                }
+            }
+            None => {
+                // Player declined the bribe
+                self.state = GameState::MonsterAttack;
+                false
+            }
+        }
     }
 
     /// After the monster's final attack

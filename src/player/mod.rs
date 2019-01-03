@@ -311,4 +311,19 @@ impl Player {
     pub fn get_treasures(&self) -> &Vec<TreasureType> {
         &self.treasures
     }
+
+    /// Remove a specific treasure from the list
+    /// 
+    /// Returns true on success (if the player had the treasure)
+    pub fn remove_treasure(&mut self, treasure_type:TreasureType) -> bool {
+
+        // Find the element
+        match self.treasures.iter().position(|&t| t == treasure_type) {
+            Some(i) => {
+                self.treasures.remove(i);
+                true
+            },
+            None => false
+        }
+    }
 }

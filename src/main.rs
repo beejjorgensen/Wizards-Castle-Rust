@@ -4,6 +4,7 @@ extern crate rand;
 use std::io::{stdin,stdout,Write};
 
 use self::rand::Rng;
+use self::rand::rngs::ThreadRng;
 use self::rand::thread_rng;
 
 use wizardscastle::game::{Game,Direction,Event,CombatEvent,GameState};
@@ -16,12 +17,13 @@ use wizardscastle::monster::MonsterType;
 
 struct UI {
     game: Game,
+    rng: ThreadRng,
     turn_count: usize,
 }
 
 impl UI {
     /// Return a random monster name
-    fn rand_monster_str() -> String {
+    fn rand_monster_str(&mut self) -> String {
         let monster = [
             MonsterType::Kobold,
             MonsterType::Orc,
@@ -37,9 +39,7 @@ impl UI {
             MonsterType::Dragon,
         ];
 
-        let mut rng = thread_rng();
-
-        let i = rng.gen_range(0, monster.len());
+        let i = self.rng.gen_range(0, monster.len());
 
         UI::monster_name(monster[i])
     }
@@ -112,7 +112,7 @@ impl UI {
                     format!("{} {}", UI::get_article(&mon_str), mon_str)
                 }
             RoomType::Treasure(t) => {
-                format!("THE {}", UI::treasure_name(t.treasure_type()))
+                format!("{}", UI::treasure_name(t.treasure_type()))
             }
         }
     }
@@ -334,7 +334,7 @@ impl UI {
                 Some("L") => break self.game.player.purchase_armor(ArmorType::Leather, false),
                 Some("N") => break self.game.player.purchase_armor(ArmorType::None, false),
                 _ => {
-                    let mon_str = UI::rand_monster_str();
+                    let mon_str = self.rand_monster_str();
                     let article = UI::get_article(&mon_str);
 
                     println!("\n** ARE YOU A {} OR {} {}? TYPE P,C,L OR N", self.race_str(), article, mon_str);
@@ -565,12 +565,48 @@ impl UI {
                     break;
                 }
                 _ => {
-                    println!("\n** ANSWER YES OR NO");
+                    println!("\n** DON'T PRESS YOUR LUCK {}", self.race_str());
                 }
             }
         }
 
         self.game.retreat_dir(dir);
+    }
+
+    /// Handle Bribe
+    fn combat_bribe(&mut self) -> bool {
+        let mut treasure_type: Option<TreasureType> = None;
+
+        {
+            let treasures = self.game.player.get_treasures();
+
+            let count = treasures.len();
+
+            if count == 0 {
+                println!("\n'ALL I WANT IS YOUR LIFE!'");
+            } else {
+                let i = self.rng.gen_range(0, count);
+                let t_type = treasures.get(i).unwrap();
+                let tname = UI::treasure_name(t_type);
+
+                loop {
+                    let yn = UI::get_input(Some(&format!("\nI WANT {}, WILL YOU GIVE IT TO ME? ", tname)));
+
+                    match yn.get(..1) {
+                        Some("Y") => {
+                            treasure_type = Some(*t_type);
+                            break;
+                        },
+                        Some("N") => {
+                            break;
+                        },
+                        _ => println!("\n** ANSWER YES OR NO"),
+                    }
+                };
+            }
+        }
+
+        self.game.bribe(treasure_type)
     }
 
     /// Handle combat
@@ -613,9 +649,11 @@ impl UI {
                         Some("R") => self.combat_retreat(),
                         Some("B") => {
                             if can_bribe {
-                                // TODO
+                                if self.combat_bribe() {
+                                    println!("\nOK, JUST DON'T TELL ANYONE");
+                                }
                             } else {
-                                println!("{}", err_str)
+                                println!("{}", err_str);
                             }
                         }
                         Some("C") => {
@@ -783,6 +821,7 @@ fn main() {
 
         let mut ui = UI {
             game: game,
+            rng: thread_rng(),
             turn_count: 0,
         };
 
@@ -797,63 +836,71 @@ fn main() {
 
         let mut alive = true;
 
+        let mut map_requested = false;
+
         while alive {
             ui.turn_count += 1;
 
             ui.game.dungeon.discover(ui.game.player.x, ui.game.player.y, ui.game.player.z);
 
-            println!();
-
-            if ui.game.state() != GameState::VendorAttack {
+            if map_requested {
                 ui.print_location();
-                ui.print_stats();
+            } else {
+                println!();
 
-                ui.print_room();
-            }
+                if ui.game.state() != GameState::VendorAttack {
+                    ui.print_location();
+                    ui.print_stats();
+
+                    ui.print_room();
+                }
                 
-            let mut automove = false;
+                let mut automove = false;
 
-            match ui.game.room_effect() {
-                Event::FoundGold(_) => {
-                    println!("YOU HAVE {}", ui.game.player.gp);
-                },
-                Event::FoundFlares(_) => {
-                    println!("YOU HAVE {}", ui.game.player.flares);
-                },
-                Event::Sinkhole => {
+                match ui.game.room_effect() {
+                    Event::FoundGold(_) => {
+                        println!("YOU HAVE {}", ui.game.player.gp);
+                    },
+                    Event::FoundFlares(_) => {
+                        println!("YOU HAVE {}", ui.game.player.flares);
+                    },
+                    Event::Sinkhole => {
+                        automove = true;
+                    },
+                    Event::Warp => {
+                        automove = true;
+                    },
+                    Event::Combat(monster_type) => {
+                        let retreated = ui.combat(monster_type);
+
+                        automove = retreated;
+                    }
+                    Event::Treasure(_) => {
+                        println!("IT'S NOW YOURS\n");
+                    }
+                    Event::Vendor => {
+                        ui.vendor();
+                    }
+                    Event::None => (),
+                }
+
+                // See if we were killed by something
+                if ui.game.state() == GameState::Dead {
+                    alive = false;
+                    continue;
+                }
+
+                // If we're chosen to fight the vendor, let's do that
+                if ui.game.state() == GameState::VendorAttack {
                     automove = true;
-                },
-                Event::Warp => {
-                    automove = true;
-                },
-                Event::Combat(monster_type) => {
-                    let retreated = ui.combat(monster_type);
-
-                    automove = retreated;
                 }
-                Event::Treasure(_) => {
-                    println!("IT'S NOW YOURS\n");
+
+                if automove {
+                    continue;
                 }
-                Event::Vendor => {
-                    ui.vendor();
-                }
-                Event::None => (),
             }
 
-            // See if we were killed by something
-            if ui.game.state() == GameState::Dead {
-                alive = false;
-                continue;
-            }
-
-            // If we're chosen to fight the vendor, let's do that
-            if ui.game.state() == GameState::VendorAttack {
-                automove = true;
-            }
-
-            if automove {
-                continue;
-            }
+            map_requested = false;
 
             // TODO curse effects (Does this happen before automove??)
 
@@ -865,7 +912,6 @@ fn main() {
 
             // TODO dissolve books
 
-
             let mut valid_command = false;
 
             while !valid_command {
@@ -876,7 +922,10 @@ fn main() {
                 println!();
 
                 match command.get(..1) {
-                    Some("M") => ui.map(true),
+                    Some("M") => {
+                        ui.map(true);
+                        map_requested = true;
+                    },
                     Some("N") => ui.move_dir(Direction::North),
                     Some("S") => ui.move_dir(Direction::South),
                     Some("W") => ui.move_dir(Direction::West),
