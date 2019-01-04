@@ -823,12 +823,16 @@ impl UI {
                 }
             }
         }
-
     }
 
     /// Trade with a Vendor
     fn vendor_trade(&mut self) {
         self.vendor_trade_treasures();
+
+        if self.game.player.gp < 1000 {
+            println!("\n** YOU'RE TOO POOR TO TRADE");
+            return;
+        }
     }
 
     /// Interact with a Vendor
