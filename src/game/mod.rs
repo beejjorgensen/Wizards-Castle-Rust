@@ -284,7 +284,7 @@ impl Game {
                 let damage = monster.damage();
                 let armor_value = self.player.armor().armor_value();
 
-                let st_damage = std::cmp::max(damage - armor_value, 0);
+                let st_damage = std::cmp::max(damage as isize - armor_value as isize, 0) as usize;
                 defeated = self.player.damage_st(st_damage);
 
                 let armor_damage = std::cmp::min(damage, armor_value);
