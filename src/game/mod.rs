@@ -228,6 +228,8 @@ impl Game {
                         self.player.receive_runestaff();
                         got_runestaff = true;
                     }
+
+                    // TODO if defeated vendor, get his wares
                 }
             } else {
                 panic!("not fighting a monster");
