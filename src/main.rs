@@ -11,7 +11,7 @@ use wizardscastle::game::{Game,Direction,Event,CombatEvent,GameState};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
-use wizardscastle::weapon::WeaponType;
+use wizardscastle::weapon::{Weapon, WeaponType};
 use wizardscastle::treasure::TreasureType;
 use wizardscastle::monster::MonsterType;
 use wizardscastle::error::Error;
@@ -829,12 +829,17 @@ impl UI {
     /// Trade armor
     fn vendor_trade_armor(&mut self) {
         let leather_cost = Armor::cost(ArmorType::Leather, true);
-        let chainmail_cost = Armor::cost(ArmorType::Chainmail, true);
-        let plate_cost = Armor::cost(ArmorType::Plate, true);
 
         if self.game.player.gp < leather_cost {
             return;
         }
+
+        let chainmail_cost = Armor::cost(ArmorType::Chainmail, true);
+        let plate_cost = Armor::cost(ArmorType::Plate, true);
+
+        println!("\nOK, {}, YOU HAVE {} GOLD PIECES AND {}",
+            self.race_str(), self.game.player.gp,
+            UI::armor_name(self.game.player.armor().armor_type()));
 
         println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
 
@@ -882,6 +887,67 @@ impl UI {
         }
     }
 
+    /// Trade armor
+    fn vendor_trade_weapons(&mut self) {
+        let dagger_cost = Weapon::cost(WeaponType::Dagger, true);
+
+        if self.game.player.gp < dagger_cost {
+            return;
+        }
+
+        let mace_cost = Weapon::cost(WeaponType::Mace, true);
+        let sword_cost = Weapon::cost(WeaponType::Sword, true);
+
+        println!("\nYOU HAVE {} GP's LEFT WITH {} IN HAND",
+            self.game.player.gp,
+            UI::weapon_name(self.game.player.weapon().weapon_type()));
+
+        println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
+
+        print!("\nNOTHING<0> DAGGER<{}>", dagger_cost);
+
+        if self.game.player.gp >= mace_cost {
+            print!(" MACE<{}>", mace_cost)
+        }
+
+        if self.game.player.gp >= sword_cost {
+            print!(" SWORD<{}>", sword_cost)
+        }
+
+        println!();
+
+        loop {
+            let armor_str = UI::get_input(Some("\nYOUR CHOICE? "));
+
+            match armor_str.get(..1) {
+
+                Some("S") => {
+                    match self.game.player.purchase_weapon(WeaponType::Sword, true) {
+                        Ok(_) => break,
+                        Err(Error::NotEnoughGP) => println!("\n** DUNGEON EXPRESS CARD - YOU LEFT HOME WITHOUT IT!"),
+                        _ => (),
+                    }
+                },
+                Some("M") => {
+                    match self.game.player.purchase_weapon(WeaponType::Mace, true) {
+                        Ok(_) => break,
+                        Err(Error::NotEnoughGP) => println!("\n** SORRY SIR, I DON'T GIVE CREDIT"),
+                        _ => (),
+                    }
+                },
+                Some("D") => {
+                    // If we get to this point we already had enough to buy a dagger
+                    let _ = self.game.player.purchase_weapon(WeaponType::Dagger, true);
+                    break;
+                },
+                Some("N") => break,
+                _ => {
+                    println!("\n** TRY CHOOSING A SELECTION");
+                },
+            }
+        }
+    }
+
     /// Trade with a Vendor
     fn vendor_trade(&mut self) {
         self.vendor_trade_treasures();
@@ -892,6 +958,7 @@ impl UI {
         }
 
         self.vendor_trade_armor();
+        self.vendor_trade_weapons();
     }
 
     /// Interact with a Vendor
