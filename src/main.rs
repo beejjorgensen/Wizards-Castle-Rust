@@ -10,10 +10,11 @@ use self::rand::thread_rng;
 use wizardscastle::game::{Game,Direction,Event,CombatEvent,GameState};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
-use wizardscastle::armor::ArmorType;
+use wizardscastle::armor::{Armor, ArmorType};
 use wizardscastle::weapon::WeaponType;
 use wizardscastle::treasure::TreasureType;
 use wizardscastle::monster::MonsterType;
+use wizardscastle::error::Error;
 
 struct UI {
     game: Game,
@@ -825,6 +826,62 @@ impl UI {
         }
     }
 
+    /// Trade armor
+    fn vendor_trade_armor(&mut self) {
+        let leather_cost = Armor::cost(ArmorType::Leather, true);
+        let chainmail_cost = Armor::cost(ArmorType::Chainmail, true);
+        let plate_cost = Armor::cost(ArmorType::Plate, true);
+
+        if self.game.player.gp < leather_cost {
+            return;
+        }
+
+        println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
+
+        print!("\nNOTHING<0> LEATHER<{}>", leather_cost);
+
+        if self.game.player.gp >= chainmail_cost {
+            print!(" CHAINMAIL<{}>", chainmail_cost)
+        }
+
+        if self.game.player.gp >= plate_cost {
+            print!(" PLATE<{}>", plate_cost)
+        }
+
+        println!();
+
+        loop {
+            let armor_str = UI::get_input(Some("\nYOUR CHOICE? "));
+
+            match armor_str.get(..1) {
+
+                Some("P") => {
+                    match self.game.player.purchase_armor(ArmorType::Plate, true) {
+                        Ok(_) => break,
+                        Err(Error::NotEnoughGP) => println!("\n** YOU CAN'T AFFORD PLATE"),
+                        _ => (),
+                    }
+                },
+                Some("C") => {
+                    match self.game.player.purchase_armor(ArmorType::Chainmail, true) {
+                        Ok(_) => break,
+                        Err(Error::NotEnoughGP) => println!("\n** YOU HAVEN'T GOT THAT MUCH CASH"),
+                        _ => (),
+                    }
+                },
+                Some("L") => {
+                    // If we get to this point we already had enough to buy leather
+                    let _ = self.game.player.purchase_armor(ArmorType::Leather, true);
+                    break;
+                },
+                Some("N") => break,
+                _ => {
+                    println!("\n** DON'T BE SILLY. CHOOSE A SELECTION");
+                },
+            }
+        }
+    }
+
     /// Trade with a Vendor
     fn vendor_trade(&mut self) {
         self.vendor_trade_treasures();
@@ -833,6 +890,8 @@ impl UI {
             println!("\n** YOU'RE TOO POOR TO TRADE");
             return;
         }
+
+        self.vendor_trade_armor();
     }
 
     /// Interact with a Vendor
