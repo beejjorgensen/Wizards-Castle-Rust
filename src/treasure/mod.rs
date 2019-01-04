@@ -15,16 +15,12 @@ pub enum TreasureType {
 #[derive(Debug,PartialEq,Clone)]
 pub struct Treasure {
     pub treasure_type: TreasureType,
-    max_value: usize,
 }
 
 impl Treasure {
     pub fn new(treasure_num: usize) -> Treasure {
-        let max_value = (treasure_num + 1) * 1500;
-
         Treasure {
             treasure_type: Treasure::get_treasure_by_id(treasure_num),
-            max_value,
         }
     }
 
@@ -43,6 +39,28 @@ impl Treasure {
         }
     }
 
+    /// Return treasure identifying number byte type
+    fn get_treasure_num_by_type(treasure_type: TreasureType) -> usize {
+        match treasure_type {
+            TreasureType::RubyRed => 0,
+            TreasureType::NornStone => 1,
+            TreasureType::PalePearl => 2,
+            TreasureType::OpalEye => 3,
+            TreasureType::GreenGem => 4,
+            TreasureType::BlueFlame => 5,
+            TreasureType::Palintir => 6,
+            TreasureType::Silmaril => 7,
+        }
+    }
+
+    /// Return maximum value for a treasure
+    pub fn treasure_max_value(treasure_type:TreasureType) -> usize {
+        let num = Treasure::get_treasure_num_by_type(treasure_type);
+
+        (num + 1) * 1500
+    }
+
+    /// Return TreasureType for this Treasure
     pub fn treasure_type(&self) -> &TreasureType {
         &self.treasure_type
     }

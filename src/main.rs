@@ -783,9 +783,52 @@ impl UI {
         println!("\nAND IT TOOK YOU {} TURNS!\n", self.turn_count);
     }
     
+    /// Sell treasures to a vendor
+    fn vendor_trade_treasures(&mut self) {
+        let treasures = self.game.player.get_treasures().clone();
+
+        if treasures.len() == 0 {
+            return;
+        }
+
+        println!();
+
+        for t in treasures {
+            let price = match self.game.vendor_treasure_offer(t) {
+                Ok(p) => p,
+                Err(err) => panic!("vendor treasure offer: {:#?}", err),
+            };
+
+            loop {
+                let yn = UI::get_input(Some(&format!("DO YOU WANT TO SELL {} FOR {} GP's? ", UI::treasure_name(&t), price)));
+
+                match yn.get(..1) {
+                    Some("Y") => {
+                        match self.game.vendor_treasure_accept() {
+                            Ok(_) => (),
+                            Err(err) => panic!("vendor treasure accept: {:#?}", err),
+                        }
+                        break;
+                    },
+                    Some("N") => {
+                        match self.game.vendor_treasure_reject() {
+                            Ok(_) => (),
+                            Err(err) => panic!("vendor treasure accept: {:#?}", err),
+                        }
+                        break;
+                    }
+                    _ => {
+                        println!("\n** ANSWER YES OR NO");
+                    }
+                }
+            }
+        }
+
+    }
+
     /// Trade with a Vendor
     fn vendor_trade(&mut self) {
-        println!("[STUB: Vendor trade]");
+        self.vendor_trade_treasures();
     }
 
     /// Interact with a Vendor

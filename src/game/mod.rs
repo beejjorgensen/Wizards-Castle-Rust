@@ -72,6 +72,8 @@ pub struct Game {
     bribe_treasure:Option<TreasureType>,
     retreating:bool,
     vendors_angry:bool,
+    vendor_treasure_price:usize,
+    vendor_treasure: Option<TreasureType>,
 }
 
 impl Game {
@@ -92,6 +94,8 @@ impl Game {
             bribe_treasure: None,
             retreating: false,
             vendors_angry: false,
+            vendor_treasure_price: 0,
+            vendor_treasure: None,
         }
     }
     
@@ -354,6 +358,8 @@ impl Game {
                 panic!("we really thought player had a treasure");
             }
 
+            self.bribe_treasure = None;
+
         } else {
             // No current bribeable treasure
             return Err(Error::BribeMustProposition);
@@ -471,6 +477,50 @@ impl Game {
             }
             Direction::East => p.x = (p.x + 1) % xsize,
         }
+    }
+
+    /// Accept selling a treasure
+    pub fn vendor_treasure_accept(&mut self) -> Result<(), Error> {
+        if self.vendor_treasure == None {
+            return Err(Error::VendorMustOfferTreasure);
+        }
+
+        let treasure_type = self.vendor_treasure.unwrap();
+
+        if !self.player.remove_treasure(treasure_type) {
+            panic!("player should have had this treasure");
+        }
+
+        self.player.gp += self.vendor_treasure_price;
+
+        self.vendor_treasure = None;
+
+        Ok(())
+    }
+
+    /// Reject selling a treasure
+    pub fn vendor_treasure_reject(&mut self) -> Result<(), Error> {
+        if self.vendor_treasure == None {
+            return Err(Error::VendorMustOfferTreasure);
+        }
+
+        self.vendor_treasure = None;
+
+        Ok(())
+    }
+    
+
+    /// Begin negotiations to sell a treasure to a vendor
+    pub fn vendor_treasure_offer(&mut self, treasure_type:TreasureType) -> Result<usize, Error> {
+        if self.state != GameState::Vendor {
+            return Err(Error::WrongState);
+        }
+
+        let max_value = Treasure::treasure_max_value(treasure_type);
+        self.vendor_treasure_price = Game::d(1,max_value);
+        self.vendor_treasure = Some(treasure_type);
+
+        return Ok(self.vendor_treasure_price);
     }
 
     /// Attack a vendor
