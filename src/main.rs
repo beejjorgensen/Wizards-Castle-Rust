@@ -575,38 +575,51 @@ impl UI {
 
     /// Handle Bribe
     fn combat_bribe(&mut self) -> bool {
-        let mut treasure_type: Option<TreasureType> = None;
+        let mut bribed = false;
 
-        {
-            let treasures = self.game.player.get_treasures();
-
-            let count = treasures.len();
-
-            if count == 0 {
-                println!("\n'ALL I WANT IS YOUR LIFE!'");
-            } else {
-                let i = self.rng.gen_range(0, count);
-                let t_type = treasures.get(i).unwrap();
-                let tname = UI::treasure_name(t_type);
-
+        match self.game.bribe_proposition() {
+            Ok(Some(t_type)) => {
                 loop {
+                    let tname = UI::treasure_name(&t_type);
+
                     let yn = UI::get_input(Some(&format!("\nI WANT {}, WILL YOU GIVE IT TO ME? ", tname)));
 
                     match yn.get(..1) {
                         Some("Y") => {
-                            treasure_type = Some(*t_type);
+                            match self.game.bribe_accept() {
+                                Ok(_) => {
+                                    bribed = true;
+                                },
+                                Err(err) => {
+                                    panic!("agree to bribe: {:#?}", err);
+                                }
+                            };
                             break;
                         },
                         Some("N") => {
+                            match self.game.bribe_decline() {
+                                Ok(_) => {
+                                    bribed = false;
+                                },
+                                Err(err) => {
+                                    panic!("disagree to bribe: {:#?}", err);
+                                }
+                            };
                             break;
                         },
                         _ => println!("\n** ANSWER YES OR NO"),
                     }
                 };
+            },
+            Ok(None) => {
+                println!("\n'ALL I WANT IS YOUR LIFE!'");
+            },
+            Err(err) => {
+                panic!("bribe proposition: {:#?}", err);
             }
-        }
+        };
 
-        self.game.bribe(treasure_type)
+        bribed
     }
 
     /// Handle combat

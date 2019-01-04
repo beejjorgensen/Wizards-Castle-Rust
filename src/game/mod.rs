@@ -69,6 +69,7 @@ pub struct Game {
     prev_dir: Direction,
     currently_fighting: Option<Monster>,
     bribe_possible: bool,
+    bribe_treasure:Option<TreasureType>,
     retreating:bool,
     vendors_angry:bool,
 }
@@ -88,6 +89,7 @@ impl Game {
             prev_dir: Direction::South,
             currently_fighting: None,
             bribe_possible: true,
+            bribe_treasure: None,
             retreating: false,
             vendors_angry: false,
         }
@@ -325,49 +327,85 @@ impl Game {
     }
 
     /// Handle bribe
-    /// 
-    /// Returns true if the bribe is successful
-    pub fn bribe(&mut self, treasure_type:Option<TreasureType>) -> bool {
-        if !self.bribe_possible() {
-            return false;
-        }
-
+    pub fn bribe_accept(&mut self) -> Result<(), Error> {
         if self.state != GameState::PlayerAttack {
-            return false;
+            return Err(Error::WrongState);
         }
 
-        match treasure_type {
-            Some(t_type) => {
-                if self.player.remove_treasure(t_type) {
-                    // Player had the treasure
-                    self.state = GameState::Move;
+        if !self.bribe_possible() {
+            return Err(Error::BribeNotPossible);
+        }
 
-                    // Check if we're bribing a vendor
-                    let roomtype = &self.dungeon.room_at(self.player.x, self.player.y, self.player.z).roomtype;
+        if let Some(t_type) = self.bribe_treasure {
+            if self.player.remove_treasure(t_type) {
+                // Player had the treasure
+                self.state = GameState::Move;
 
-                    match roomtype {
-                        RoomType::Monster(m) => {
-                            if m.monster_type() == MonsterType::Vendor {
-                                // If we are, make them unangry
-                                self.vendors_angry = false;
-                            }
-                        },
-                        _ => { return false; },
+                // Check if we're bribing a vendor
+                let roomtype = &self.dungeon.room_at(self.player.x, self.player.y, self.player.z).roomtype;
+
+                if let RoomType::Monster(m) = roomtype {
+                    if m.monster_type() == MonsterType::Vendor {
+                        // If we are, make them unangry
+                        self.vendors_angry = false;
                     }
-
-                    true
-                } else {
-                    // Player did not own the treasure
-                    self.state = GameState::MonsterAttack;
-                    false
                 }
+            } else {
+                panic!("we really thought player had a treasure");
             }
-            None => {
-                // Player declined the bribe
-                self.state = GameState::MonsterAttack;
-                false
-            }
+
+        } else {
+            // No current bribeable treasure
+            return Err(Error::BribeMustProposition);
         }
+
+        Ok(())
+    }
+
+    /// Player declines bribe offer
+    pub fn bribe_decline(&mut self) -> Result<(), Error> {
+        if self.state != GameState::PlayerAttack {
+            return Err(Error::WrongState);
+        }
+
+        if !self.bribe_possible() {
+            return Err(Error::BribeNotPossible);
+        }
+
+        self.state = GameState::MonsterAttack;
+
+        Ok(())
+    }
+
+    /// Get the bribe treasure
+    pub fn bribe_proposition(&mut self) -> Result<Option<TreasureType>, Error> {
+        if self.state != GameState::PlayerAttack {
+            return Err(Error::WrongState);
+        }
+
+        if !self.bribe_possible() {
+            return Err(Error::BribeNotPossible);
+        }
+
+        let treasures = self.player.get_treasures();
+
+        let count = treasures.len();
+
+        if count == 0 {
+            // If you try to bribe with no treasures, the monsters attack
+            self.state = GameState::MonsterAttack;
+            return Ok(None);
+        }
+
+        let mut rng = thread_rng();
+
+        let i = rng.gen_range(0, count);
+
+        let t_type = treasures.get(i).unwrap();
+
+        self.bribe_treasure = Some(*t_type);
+
+        Ok(self.bribe_treasure)
     }
 
     /// After the monster's final attack
