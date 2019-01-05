@@ -77,7 +77,7 @@ impl Player {
             treasures: Vec::new(),
 
             orb_of_zot: false,
-            runestaff: true,//false,
+            runestaff: false,
 
             flares: 0,
         }

@@ -148,6 +148,7 @@ impl Dungeon {
                 }
             }
 
+            /*
             // cheater code to reveal Runestaff location
             if z == runestaff_level {
                 for y in 0..ysize {
@@ -177,6 +178,7 @@ impl Dungeon {
                     }
                 }
             }
+            */
 
             // Fix up the stairs up
             if z > 0 {
