@@ -44,7 +44,8 @@ pub struct Player {
     weapon: Weapon,
 
     lamp: bool,
-    pub treasures: Vec<TreasureType>,
+
+    treasures: Vec<TreasureType>,
 
     pub runestaff: bool,
     pub orb_of_zot: bool,
@@ -408,5 +409,14 @@ impl Player {
     // Get additional stat points
     pub fn additional_points(&self) -> &u32 {
         &self.additional_points
+    }
+
+    // Give a treasure to the player
+    pub fn treasure_add(&mut self, treasure: TreasureType) {
+        if self.treasures.contains(&treasure) {
+            return;
+        }
+
+        self.treasures.push(treasure);
     }
 }
