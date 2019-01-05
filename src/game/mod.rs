@@ -231,7 +231,7 @@ impl Game {
                     next_state = GameState::Move;
 
                     if monster.has_runestaff() {
-                        self.player.receive_runestaff();
+                        self.player.give_runestaff(true);
                         got_runestaff = true;
                     }
 
@@ -448,6 +448,46 @@ impl Game {
             RoomType::Monster(m) => self.room_effect_monster(m),
             _ => Event::None,
         }
+    }
+
+    /// True if the player can teleport
+    pub fn can_teleport(&self) -> bool {
+        self.player.has_runestaff()
+    }
+
+    /// Teleport the player
+    /// 
+    /// Returns true if the player found the Orb of Zot
+    pub fn teleport(&mut self, x:usize, y:usize, z:usize) -> Result<bool, Error> {
+        let mut found_orb_of_zot = false;
+
+        if !self.can_teleport() {
+            return Err(Error::CantGo);
+        }
+
+        if x > 7 || y > 7 || z > 7 {
+            return Err(Error::OutOfBounds);
+        }
+
+        {
+            let p = &mut self.player;
+
+            p.set_position(x, y, z);
+
+            let room = self.dungeon.room_at(p.x, p.y, p.z);
+
+            if let RoomType::Warp(true) = room.roomtype {
+                found_orb_of_zot = true;
+                p.give_runestaff(false);
+                p.give_orb_of_zot(true);
+            }
+        }
+
+        if found_orb_of_zot {
+            self.make_current_room_empty();
+        }
+
+        Ok(found_orb_of_zot)
     }
 
     /// Handle going up/down stairs

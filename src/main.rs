@@ -162,6 +162,57 @@ impl UI {
         };
     }
 
+    // Input a coordinate, 1-8
+    fn input_coord(prompt:&str) -> usize {
+        let mut coord = 0;
+        let mut got_num = false;
+
+        while !got_num {
+            let str = UI::get_input(Some(prompt));
+
+            match str.parse::<usize>() {
+                Ok(v) => {
+                    if v >= 1 && v <= 8 {
+                        got_num = true;
+                        coord = v;
+                    }
+                },
+                Err(_) => (),
+            }
+
+            if !got_num {
+                println!("\n** TRY A NUMBER FROM 1 TO 8\n");
+            }
+        }
+
+        coord
+
+    }
+
+    /// Teleport
+    fn teleport(&mut self) {
+
+        if !self.game.can_teleport() {
+            println!("\n** YOU CAN'T TELEPORT WITHOUT THE RUNESTAFF!");
+            return;
+        }
+
+        let x = UI::input_coord("X-COORD (1 = FAR WEST  8 = FAR EAST )? ");
+        let y = UI::input_coord("Y-COORD (1 = FAR NORTH 8 = FAR SOUTH)? ");
+        let z = UI::input_coord("Z-COORD (1 = TOP       8 = BOTTOM   )? ");
+
+        match self.game.teleport(x - 1, y - 1, z - 1) { // back to 0-based
+            Ok(found_orb_of_zot) => {
+                if found_orb_of_zot {
+                    println!("\nGREAT UNMITIGATED ZOT!\n");
+                    println!("YOU JUST FOUND THE ORB OF ZOT!\n");
+                    println!("THE RUNESTAFF IS GONE");
+                }
+            },
+            Err(err) => panic!("{:#?}", err),
+        }
+    }
+
     /// Print a map
     fn map(&mut self, show_all: bool) {
         let z = self.game.player.z;
@@ -1186,6 +1237,7 @@ fn main() {
                     Some("E") => ui.move_dir(Direction::East),
                     Some("U") => ui.move_stairs(Stairs::Up),
                     Some("D") => ui.move_stairs(Stairs::Down),
+                    Some("T") => ui.teleport(),
                     _ => {
                         println!("** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
                         valid_command = false;

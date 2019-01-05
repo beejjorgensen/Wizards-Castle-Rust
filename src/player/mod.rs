@@ -77,7 +77,7 @@ impl Player {
             treasures: Vec::new(),
 
             orb_of_zot: false,
-            runestaff: false,
+            runestaff: true,//false,
 
             flares: 0,
         }
@@ -321,14 +321,19 @@ impl Player {
         self.orb_of_zot
     }
 
+    /// Give the Orb of Zot to the player
+    pub fn give_orb_of_zot(&mut self, has: bool) {
+        self.orb_of_zot = has;
+    }
+
     /// True if the player has the Runestaff
     pub fn has_runestaff(&self) -> bool {
         self.runestaff
     }
 
     /// Give the runestaff to the player
-    pub fn receive_runestaff(&mut self) {
-        self.runestaff = true;
+    pub fn give_runestaff(&mut self, has: bool) {
+        self.runestaff = has;
     }
 
     /// Return a list of players treasures
