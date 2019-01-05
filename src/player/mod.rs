@@ -28,8 +28,9 @@ pub struct Player {
     x: u32,
     y: u32,
     z: u32,
-    pub race: Race,
-    pub gender: Gender,
+
+    race: Race,
+    gender: Gender,
 
     pub gp: u32,
 
@@ -408,5 +409,10 @@ impl Player {
     // Set Z coord
     pub fn set_z(&mut self, z: u32) {
         self.z = z;
+    }
+
+    // Get race
+    pub fn race(&self) -> &Race {
+        &self.race
     }
 }

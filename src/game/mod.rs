@@ -1,7 +1,7 @@
 extern crate rand;
 
 use dungeon::Dungeon;
-use player::{Player, Stat};
+use player::{Player, Stat, Race};
 use room::{Room, RoomType};
 use treasure::{Treasure, TreasureType};
 use monster::{Monster, MonsterType};
@@ -694,5 +694,10 @@ impl Game {
     /// Accessors for player position
     pub fn player_z(&self) -> u32 {
         *self.player.z()
+    }
+
+    /// Accessor for player race
+    pub fn player_race(&self) -> &Race {
+        self.player.race()
     }
 }

@@ -273,7 +273,7 @@ impl UI {
     }
 
     fn race_str(&self) -> &str {
-        match self.game.player.race {
+        match self.game.player_race() {
             Race::Hobbit => "HOBBIT",
             Race::Elf => "ELF",
             Race::Human => "HUMAN",
