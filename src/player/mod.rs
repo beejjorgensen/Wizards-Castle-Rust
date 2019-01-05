@@ -25,9 +25,9 @@ pub enum Race {
 }
 
 pub struct Player {
-    pub x: u32,
-    pub y: u32,
-    pub z: u32,
+    x: u32,
+    y: u32,
+    z: u32,
     pub race: Race,
     pub gender: Gender,
 
@@ -43,12 +43,12 @@ pub struct Player {
     pub lamp: bool,
     pub treasures: Vec<TreasureType>,
 
-    runestaff: bool,
-    orb_of_zot: bool,
+    pub runestaff: bool,
+    pub orb_of_zot: bool,
 
     pub flares: u32,
 
-    blind: bool,
+    pub blind: bool,
 }
 
 impl Player {
@@ -378,5 +378,35 @@ impl Player {
         self.z -= 1;
 
         self.z
+    }
+
+    // Get X coord
+    pub fn x(&self) -> &u32 {
+        &self.x
+    }
+
+    // Get Y coord
+    pub fn y(&self) -> &u32 {
+        &self.y
+    }
+
+    // Get Z coord
+    pub fn z(&self) -> &u32 {
+        &self.z
+    }
+
+    // Set X coord
+    pub fn set_x(&mut self, x: u32) {
+        self.x = x;
+    }
+
+    // Set Y coord
+    pub fn set_y(&mut self, y: u32) {
+        self.y = y;
+    }
+
+    // Set Z coord
+    pub fn set_z(&mut self, z: u32) {
+        self.z = z;
     }
 }

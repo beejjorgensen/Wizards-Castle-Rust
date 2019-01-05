@@ -215,7 +215,7 @@ impl UI {
 
     /// Print a map
     fn map(&mut self, show_all: bool) {
-        let z = self.game.player.z;
+        let z = self.game.player_z();
 
         for y in 0..self.game.dungeon.ysize {
             for x in 0..self.game.dungeon.xsize {
@@ -226,7 +226,7 @@ impl UI {
 
                 let r = self.game.dungeon.room_at(x, y, z);
 
-                let bracket = x == self.game.player.x && y == self.game.player.y;
+                let bracket = x == self.game.player_x() && y == self.game.player_y();
 
                 if bracket {
                     print!("<");
@@ -497,13 +497,12 @@ impl UI {
     /// This version reverses that.
     ///
     fn print_location(&self) {
-        let p = &self.game.player;
-
-        if p.is_blind() {
+        if self.game.player.is_blind() {
             return;
         }
 
-        println!("YOU ARE AT ({},{}) LEVEL {}", p.x + 1, p.y + 1, p.z + 1);
+        println!("YOU ARE AT ({},{}) LEVEL {}", self.game.player_x() + 1,
+            self.game.player_y() + 1, self.game.player_z() + 1);
     }
 
     /// Print player stats
@@ -531,9 +530,7 @@ impl UI {
 
     /// Print the current room
     fn print_room(&mut self) {
-        let p = &self.game.player;
-
-        let room = self.game.dungeon.room_at(p.x, p.y, p.z);
+        let room = self.game.room_at_player();
 
         let room_str = UI::room_name(&room.roomtype);
 
@@ -1146,7 +1143,7 @@ fn main() {
         while alive {
             ui.turn_count += 1;
 
-            ui.game.dungeon.discover(ui.game.player.x, ui.game.player.y, ui.game.player.z);
+            ui.game.discover_room_at_player();
 
             if map_requested {
                 ui.print_location();

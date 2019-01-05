@@ -2,10 +2,10 @@ extern crate rand;
 
 use dungeon::Dungeon;
 use player::{Player, Stat};
-use room::RoomType;
-use treasure::{Treasure,TreasureType};
-use monster::{Monster,MonsterType};
-use weapon::{Weapon,WeaponType};
+use room::{Room, RoomType};
+use treasure::{Treasure, TreasureType};
+use monster::{Monster, MonsterType};
+use weapon::{Weapon, WeaponType};
 use error::Error;
 
 use self::rand::Rng;
@@ -107,9 +107,19 @@ impl Game {
     
     /// Mark the player's current room as empty
     fn make_current_room_empty(&mut self) {
-        let room = self.dungeon.room_at_mut(self.player.x, self.player.y, self.player.z);
+        let room = self.dungeon.room_at_mut(*self.player.x(), *self.player.y(), *self.player.z());
 
         room.make_empty();
+    }
+
+    /// Return the room at the player position
+    pub fn room_at_player(&self) -> &Room {
+        self.dungeon.room_at(*self.player.x(), *self.player.y(), *self.player.z())
+    }
+
+    /// Discover the room at the player position
+    pub fn discover_room_at_player(&mut self) {
+        self.dungeon.discover(*self.player.x(), *self.player.y(), *self.player.z())
     }
 
     /// Handle Gold room effects
@@ -136,7 +146,12 @@ impl Game {
 
     /// Handle Sinkhole room effects
     fn room_effect_sinkhole(&mut self) -> Event {
-        self.player.z = (self.player.z + 1) % self.dungeon.zsize;
+        let p_z;
+        {
+            p_z = *self.player.z();
+        }
+
+        self.player.set_z((p_z + 1) % self.dungeon.zsize);
 
         return Event::Sinkhole;
     }
@@ -149,9 +164,9 @@ impl Game {
         } else {
             let mut rng = thread_rng();
 
-            self.player.x = rng.gen_range(0, self.dungeon.xsize);
-            self.player.y = rng.gen_range(0, self.dungeon.ysize);
-            self.player.z = rng.gen_range(0, self.dungeon.zsize);
+            self.player.set_x(rng.gen_range(0, self.dungeon.xsize));
+            self.player.set_y(rng.gen_range(0, self.dungeon.ysize));
+            self.player.set_z(rng.gen_range(0, self.dungeon.zsize));
         }
 
         return Event::Warp;
@@ -354,7 +369,7 @@ impl Game {
                 self.state = GameState::Move;
 
                 // Check if we're bribing a vendor
-                let roomtype = &self.dungeon.room_at(self.player.x, self.player.y, self.player.z).roomtype;
+                let roomtype = &self.dungeon.room_at(*self.player.x(), *self.player.y(), *self.player.z()).roomtype;
 
                 if let RoomType::Monster(m) = roomtype {
                     if m.monster_type() == MonsterType::Vendor {
@@ -435,7 +450,7 @@ impl Game {
         let roomtype;
 
         {
-            let room = self.dungeon.room_at(self.player.x, self.player.y, self.player.z);
+            let room = self.dungeon.room_at(*self.player.x(), *self.player.y(), *self.player.z());
             roomtype = room.roomtype.clone();
         }
 
@@ -474,7 +489,7 @@ impl Game {
 
             p.set_position(x, y, z);
 
-            let room = self.dungeon.room_at(p.x, p.y, p.z);
+            let room = self.dungeon.room_at(*p.x(), *p.y(), *p.z());
 
             if let RoomType::Warp(true) = room.roomtype {
                 found_orb_of_zot = true;
@@ -494,7 +509,7 @@ impl Game {
     pub fn move_stairs(&mut self, dir:Stairs) -> Result<(), Error> {
         let p = &mut self.player;
 
-        let room = self.dungeon.room_at(p.x, p.y, p.z);
+        let room = self.dungeon.room_at(*p.x(), *p.y(), *p.z());
 
         match dir {
             Stairs::Up => {
@@ -516,38 +531,43 @@ impl Game {
 
     /// Handle a move command
     pub fn move_dir(&mut self, dir:Direction) {
-        let p = &mut self.player;
-
         let xsize = self.dungeon.xsize;
         let ysize = self.dungeon.ysize;
 
-        let room = self.dungeon.room_at(p.x, p.y, p.z);
-
         self.prev_dir = dir;
 
+        let roomtype = self.room_at_player().roomtype.clone();
+
         // Handle exit special case
-        if room.roomtype == RoomType::Entrance && dir == Direction::North {
+        if roomtype == RoomType::Entrance && dir == Direction::North {
             self.state = GameState::Exit;
             return;
         }
 
+        let (p_x, p_y);
+
+        {
+            p_x = *self.player.x();
+            p_y = *self.player.y();
+        }
+
         match dir {
             Direction::North => {
-                if p.y == 0 {
-                    p.y = ysize - 1;
+                if p_y == 0 {
+                    self.player.set_y(ysize - 1);
                 } else {
-                    p.y -= 1;
+                    self.player.set_y(p_y - 1);
                 }
             }
-            Direction::South => p.y = (p.y + 1) % ysize,
+            Direction::South => self.player.set_y((p_y + 1) % ysize),
             Direction::West =>  {
-                if p.x == 0 {
-                    p.x = xsize - 1;
+                if p_x == 0 {
+                    self.player.set_x(xsize - 1);
                 } else {
-                    p.x -= 1;
+                    self.player.set_x(p_x - 1);
                 }
             }
-            Direction::East => p.x = (p.x + 1) % xsize,
+            Direction::East => self.player.set_x((p_x + 1) % xsize),
         }
     }
 
@@ -635,5 +655,20 @@ impl Game {
     /// Return game state
     pub fn state(&self) -> GameState {
         self.state
+    }
+
+    /// Accessors for player position
+    pub fn player_x(&self) -> u32 {
+        *self.player.x()
+    }
+
+    /// Accessors for player position
+    pub fn player_y(&self) -> u32 {
+        *self.player.y()
+    }
+
+    /// Accessors for player position
+    pub fn player_z(&self) -> u32 {
+        *self.player.z()
     }
 }
