@@ -217,14 +217,14 @@ impl UI {
     fn map(&mut self, show_all: bool) {
         let z = self.game.player_z();
 
-        for y in 0..self.game.dungeon.ysize {
-            for x in 0..self.game.dungeon.xsize {
+        for y in 0..self.game.dungeon_ysize() {
+            for x in 0..self.game.dungeon_xsize() {
 
                 if x >= 1 {
                     print!("   ");
                 }
 
-                let r = self.game.dungeon.room_at(x, y, z);
+                let r = self.game.dungeon_room_at(x, y, z);
 
                 let bracket = x == self.game.player_x() && y == self.game.player_y();
 

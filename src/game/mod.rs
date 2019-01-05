@@ -70,14 +70,18 @@ pub enum GameState {
 }
 
 pub struct Game {
-    pub dungeon: Dungeon,
+    dungeon: Dungeon,
     player: Player,
+
     state: GameState,
+
     prev_dir: Direction,
+
     currently_fighting: Option<Monster>,
     bribe_possible: bool,
     bribe_treasure: Option<TreasureType>,
     retreating: bool,
+
     vendors_angry: bool,
     vendor_treasure_price: u32,
     vendor_treasure: Option<TreasureType>,
@@ -109,8 +113,8 @@ impl Game {
     /// Wrap an x coordinate
     fn wrap_x(&self, x: i32) -> u32 {
         if x < 0 {
-            self.dungeon.xsize - 1
-        } else if x >= self.dungeon.xsize as i32 {
+            self.dungeon.xsize() - 1
+        } else if x >= self.dungeon_xsize() as i32 {
             0
         } else {
             x as u32
@@ -120,8 +124,8 @@ impl Game {
     /// Wrap a y coordinate
     fn wrap_y(&self, y: i32) -> u32 {
         if y < 0 {
-            self.dungeon.ysize - 1
-        } else if y >= self.dungeon.ysize as i32 {
+            self.dungeon_ysize() - 1
+        } else if y >= self.dungeon_ysize() as i32 {
             0
         } else {
             y as u32
@@ -131,8 +135,8 @@ impl Game {
     /// Wrap a z coordinate
     fn wrap_z(&self, z: i32) -> u32 {
         if z < 0 {
-            self.dungeon.zsize - 1
-        } else if z >= self.dungeon.zsize as i32 {
+            self.dungeon_zsize() - 1
+        } else if z >= self.dungeon_zsize() as i32 {
             0
         } else {
             z as u32
@@ -197,9 +201,9 @@ impl Game {
         } else {
             let mut rng = thread_rng();
 
-            self.player.set_x(rng.gen_range(0, self.dungeon.xsize));
-            self.player.set_y(rng.gen_range(0, self.dungeon.ysize));
-            self.player.set_z(rng.gen_range(0, self.dungeon.zsize));
+            self.player.set_x(rng.gen_range(0, *self.dungeon.xsize()));
+            self.player.set_y(rng.gen_range(0, *self.dungeon.ysize()));
+            self.player.set_z(rng.gen_range(0, *self.dungeon.zsize()));
         }
 
         return Event::Warp;
@@ -800,5 +804,25 @@ impl Game {
     /// True if the player has the Runestaff
     pub fn player_has_runestaff(&self) -> bool {
         self.player.has_runestaff()
+    }
+
+    /// Return x dimension
+    pub fn dungeon_xsize(&self) -> u32 {
+        *self.dungeon.xsize()
+    }
+
+    /// Return y dimension
+    pub fn dungeon_ysize(&self) -> u32 {
+        *self.dungeon.ysize()
+    }
+
+    /// Return z dimension
+    pub fn dungeon_zsize(&self) -> u32 {
+        *self.dungeon.zsize()
+    }
+
+    /// Return a reference to the room at a location
+    pub fn dungeon_room_at(&self, x: u32, y: u32, z: u32) -> &Room {
+        self.dungeon.room_at(x, y, z)
     }
 }

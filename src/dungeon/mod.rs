@@ -11,10 +11,10 @@ use treasure::Treasure;
 
 #[derive(Debug)]
 pub struct Dungeon {
-    pub levels: Vec<Vec<Room>>,
-    pub xsize: u32,
-    pub ysize: u32,
-    pub zsize: u32,
+    levels: Vec<Vec<Room>>,
+    xsize: u32,
+    ysize: u32,
+    zsize: u32,
 }
 
 impl Dungeon {
@@ -228,9 +228,25 @@ impl Dungeon {
         &mut self.levels[z as usize][i as usize]
     }
 
+    /// Discover a room
     pub fn discover(&mut self, x: u32, y: u32, z: u32) {
         let i = y * self.xsize + x;
 
         self.levels[z as usize][i as usize].discovered = true;
+    }
+
+    /// Return x dimension
+    pub fn xsize(&self) -> &u32 {
+        &self.xsize
+    }
+
+    /// Return y dimension
+    pub fn ysize(&self) -> &u32 {
+        &self.ysize
+    }
+
+    /// Return z dimension
+    pub fn zsize(&self) -> &u32 {
+        &self.zsize
     }
 }
