@@ -47,10 +47,10 @@ pub struct Player {
 
     treasures: Vec<TreasureType>,
 
-    pub runestaff: bool,
-    pub orb_of_zot: bool,
+    runestaff: bool,
+    orb_of_zot: bool,
 
-    pub flares: u32,
+    flares: u32,
 
     pub blind: bool,
 }
@@ -347,7 +347,7 @@ impl Player {
         }
     }
 
-    // Spend some GP
+    /// Spend some GP
     pub fn spend(&mut self, amount:u32) -> Result<(), Error> {
         if amount > self.gp {
             Err(Error::NotEnoughGP)
@@ -357,66 +357,77 @@ impl Player {
         }
     }
 
-    // Go down
+    /// Go down
     pub fn down(&mut self) -> u32 {
         self.z += 1;
 
         self.z
     }
 
-    // Go up
+    /// Go up
     pub fn up(&mut self) -> u32 {
         self.z -= 1;
 
         self.z
     }
 
-    // Get X coord
+    /// Get X coord
     pub fn x(&self) -> &u32 {
         &self.x
     }
 
-    // Get Y coord
+    /// Get Y coord
     pub fn y(&self) -> &u32 {
         &self.y
     }
 
-    // Get Z coord
+    /// Get Z coord
     pub fn z(&self) -> &u32 {
         &self.z
     }
 
-    // Set X coord
+    /// Set X coord
     pub fn set_x(&mut self, x: u32) {
         self.x = x;
     }
 
-    // Set Y coord
+    /// Set Y coord
     pub fn set_y(&mut self, y: u32) {
         self.y = y;
     }
 
-    // Set Z coord
+    /// Set Z coord
     pub fn set_z(&mut self, z: u32) {
         self.z = z;
     }
 
-    // Get race
+    /// Get race
     pub fn race(&self) -> &Race {
         &self.race
     }
 
-    // Get additional stat points
+    /// Get additional stat points
     pub fn additional_points(&self) -> &u32 {
         &self.additional_points
     }
 
-    // Give a treasure to the player
+    /// Give a treasure to the player
     pub fn treasure_add(&mut self, treasure: TreasureType) {
         if self.treasures.contains(&treasure) {
             return;
         }
 
         self.treasures.push(treasure);
+    }
+
+    /// change flares value
+    pub fn change_flares(&mut self, delta: i32) -> u32 {
+        let mut f = self.flares as i32;
+
+        f = std::cmp::max(0, f + delta);
+
+        self.flares = f as u32;
+
+        self.flares
     }
 }

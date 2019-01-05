@@ -1166,7 +1166,7 @@ fn main() {
                         println!("YOU HAVE {}", ui.game.player_gp());
                     },
                     Event::FoundFlares(_) => {
-                        println!("YOU HAVE {}", ui.game.player.flares);
+                        println!("YOU HAVE {}", ui.game.player_flares());
                     },
                     Event::Sinkhole => {
                         automove = true;

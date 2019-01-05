@@ -171,7 +171,7 @@ impl Game {
     fn room_effect_flares(&mut self) -> Event {
         let flare_amount = Game::d(1,5);
 
-        self.player.flares += flare_amount;
+        self.player.change_flares(flare_amount as i32);
 
         self.make_current_room_empty();
 
@@ -730,5 +730,10 @@ impl Game {
     /// Accessor for player lamp
     pub fn player_has_lamp(&self) -> bool {
         self.player.has_lamp()
+    }
+
+    /// Accessor for player flares
+    pub fn player_flares(&self) -> u32 {
+        self.player.flares()
     }
 }
