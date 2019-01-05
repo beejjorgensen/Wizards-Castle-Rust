@@ -354,7 +354,9 @@ impl UI {
         println!("\nOK {}, YOU HAVE THESE STATISTICS:\n", self.race_str());
 
         println!("STRENGTH= {} INTELLIGENCE= {} DEXTERITY= {}\n",
-            self.game.player.st, self.game.player.iq, self.game.player.dx);
+            self.game.player_stat(Stat::Strength),
+            self.game.player_stat(Stat::Intelligence),
+            self.game.player_stat(Stat::Dexterity));
 
         println!("AND {} OTHER POINTS TO ALLOCATE AS YOU WISH.\n", self.game.player_additional_points());
 
@@ -436,7 +438,8 @@ impl UI {
                 Some("M") => break self.game.player.purchase_weapon(WeaponType::Mace, false),
                 Some("D") => break self.game.player.purchase_weapon(WeaponType::Dagger, false),
                 Some("N") => break self.game.player.purchase_weapon(WeaponType::None, false),
-                _ => println!("\n** IS YOUR IQ REALLY {}? TYPE S, M, D, OR N", self.game.player.iq),
+                _ => println!("\n** IS YOUR IQ REALLY {}? TYPE S, M, D, OR N",
+                    self.game.player_stat(Stat::Intelligence)),
             }
         };
     }
@@ -507,21 +510,19 @@ impl UI {
 
     /// Print player stats
     fn print_stats(&self) {
-        let p = &self.game.player;
-
         println!("ST={} IQ={} DX={} FLARES={} GP's={}",
-            p.stat(Stat::Strength),
-            p.stat(Stat::Intelligence),
-            p.stat(Stat::Dexterity),
-            p.flares(),
-            p.gp());
+            self.game.player_stat(Stat::Strength),
+            self.game.player_stat(Stat::Intelligence),
+            self.game.player_stat(Stat::Dexterity),
+            self.game.player.flares(),
+            self.game.player_gp());
 
-        let w_name = UI::weapon_name(p.weapon().weapon_type());
-        let a_name = UI::armor_name(p.armor().armor_type());
+        let w_name = UI::weapon_name(self.game.player_weapon_type());
+        let a_name = UI::armor_name(self.game.player_armor_type());
 
         print!( "{} / {}", w_name, a_name);
 
-        if p.has_lamp() {
+        if self.game.player_has_lamp() {
             print!(" / A LAMP");
         }
 
@@ -725,7 +726,8 @@ impl UI {
                     println!(".\n");
 
                     println!("\nYOUR STRENGTH IS {} AND DEXTERITY IS {}.\n",
-                        self.game.player.st, self.game.player.dx);
+                        self.game.player_stat(Stat::Strength),
+                        self.game.player_stat(Stat::Dexterity));
 
                     let err_str = "\n** CHOOSE ONE OF THE OPTIONS LISTED.";
 
@@ -786,13 +788,13 @@ impl UI {
                 println!("\n\nA NOBLE EFFORT, OH FORMERLY LIVING {}\n", self.race_str());
 
                 print!("YOU DIED FROM LACK OF ");
-                if self.game.player.st == 0 {
+                if self.game.player_stat(Stat::Strength) == 0 {
                     println!("STRENGTH");
                 }
-                else if self.game.player.iq == 0 {
+                else if self.game.player_stat(Stat::Intelligence) == 0 {
                     println!("INTELLIGENCE");
                 }
-                else if self.game.player.dx == 0 {
+                else if self.game.player_stat(Stat::Dexterity) == 0 {
                     println!("DEXTERITY");
                 }
 

@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 use error::Error;
 use armor::{Armor, ArmorType};
 use weapon::{Weapon, WeaponType};
 use treasure::TreasureType;
 
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(Eq, Hash, PartialEq, Copy, Clone, Debug)]
 pub enum Stat {
     Strength,
     Dexterity,
@@ -35,9 +37,8 @@ pub struct Player {
     gp: u32,
 
     additional_points: u32,
-    pub st: u32, // TODO make these a map
-    pub dx: u32,
-    pub iq: u32,
+
+    stat: HashMap<Stat, u32>,
 
     pub armor: Armor,
     pub weapon: Weapon,
@@ -66,9 +67,7 @@ impl Player {
 
             additional_points: 0,
 
-            st: 0,
-            dx: 0,
-            iq: 0,
+            stat: HashMap::new(),
 
             blind: false,
 
@@ -96,9 +95,9 @@ impl Player {
 
         let race_id = Player::get_id_by_race(&race);
 
-        self.st = 2 + (race_id + 1) * 2;
-        self.dx = 14 - (race_id + 1) * 2;
-        self.iq = 8;
+        self.stat.insert(Stat::Strength, 2 + (race_id + 1) * 2);
+        self.stat.insert(Stat::Dexterity, 14 - (race_id + 1) * 2);
+        self.stat.insert(Stat::Intelligence, 8);
 
         if race == Race::Hobbit {
             self.additional_points = 4;
@@ -131,46 +130,32 @@ impl Player {
     }
 
     /// Allocate points to a stat
-    /// 
-    /// TODO: support deallocation of points
     pub fn allocate_points(&mut self, stat:&Stat, points:u32) -> Result<u32, Error> {
         if points > self.additional_points {
             return Err(Error::NotEnoughPoints);
         }
 
-        match stat {
-            Stat::Strength => self.st += points,
-            Stat::Dexterity => self.dx += points,
-            Stat::Intelligence => self.iq += points,
-        };
+        self.change_stat(stat, points as i32);
 
         self.additional_points -= points;
 
         Ok(self.additional_points)
     }
 
-    pub fn add_stat(&mut self, stat:&Stat, points:u32) -> u32 {
-        let new_total;
+    /// Modify a stat
+    pub fn change_stat(&mut self, stat:&Stat, delta: i32) -> u32 {
+        let mut val = *self.stat.get(stat).unwrap() as i32;
 
-        match stat {
-            Stat::Strength => {
-                self.st += points;
-                self.st = std::cmp::min(18, self.st);
-                new_total = self.st;
-            },
-            Stat::Dexterity => {
-                self.dx += points;
-                self.dx = std::cmp::min(18, self.dx);
-                new_total = self.dx;
-            },
-            Stat::Intelligence => {
-                self.iq += points;
-                self.iq = std::cmp::min(18, self.iq);
-                new_total = self.iq;
-            },
-        };
+        val += delta;
 
-        new_total
+        val = std::cmp::max(0, val); // clamp in range 0-18
+        val = std::cmp::min(18, val);
+
+        let result = val as u32;
+
+        self.stat.insert(*stat, result);
+
+        result
     }
 
     // Give the player some armor
@@ -245,12 +230,8 @@ impl Player {
     }
 
     /// Return a player stat
-    pub fn stat(&self, stat:Stat) -> u32 {
-        match stat {
-            Stat::Strength => self.st,
-            Stat::Intelligence => self.iq,
-            Stat::Dexterity => self.dx,
-        }
+    pub fn stat(&self, stat:&Stat) -> &u32 {
+        self.stat.get(stat).unwrap()
     }
 
     /// Return flare count
@@ -292,17 +273,11 @@ impl Player {
     ///
     /// Returns true if the player has died
     pub fn damage_st(&mut self, damage:u32) -> bool {
-        let defeated;
+        let delta = -(damage as i32);
 
-        if damage >= self.st {
-            self.st = 0;
-            defeated = true;
-        } else {
-            self.st -= damage;
-            defeated = false;
-        }
+        let new_st = self.change_stat(&Stat::Strength, delta);
 
-        defeated
+        new_st < 1
     }
 
     /// Damage armor
@@ -320,7 +295,9 @@ impl Player {
 
     /// Returns true if the player is dead
     pub fn is_dead(&self) -> bool {
-        self.st == 0 || self.iq == 0 || self.dx == 0
+        *self.stat(&Stat::Strength) == 0 ||
+        *self.stat(&Stat::Intelligence) == 0 ||
+        *self.stat(&Stat::Dexterity) == 0
     }
 
     /// True if the player has the Orb of Zot

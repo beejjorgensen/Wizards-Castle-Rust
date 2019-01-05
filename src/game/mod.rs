@@ -6,6 +6,7 @@ use room::{Room, RoomType};
 use treasure::{Treasure, TreasureType};
 use monster::{Monster, MonsterType};
 use weapon::{Weapon, WeaponType};
+use armor::ArmorType;
 use error::Error;
 
 use self::rand::Rng;
@@ -242,7 +243,7 @@ impl Game {
 
     /// True if the player can cast a spell
     pub fn spell_possible(&self) -> bool {
-        self.player.iq > 14
+        *self.player.stat(&Stat::Intelligence) > 14
     }
 
     /// Handle player attacking monster
@@ -256,7 +257,7 @@ impl Game {
             return Ok(CombatEvent::NoWeapon);
         }
 
-        let hit = self.player.dx >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
+        let hit = *self.player.stat(&Stat::Dexterity) >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
 
         if hit {
             let damage = self.player.weapon.damage();
@@ -328,7 +329,7 @@ impl Game {
 
         // TODO check for stuck in web
 
-        let hit = self.player.dx < (Game::d(3,7) + (self.player.is_blind() as u32) * 3);
+        let hit = *self.player.stat(&Stat::Dexterity) < (Game::d(3,7) + (self.player.is_blind() as u32) * 3);
 
         let mut combat_event = None;
         let mut defeated = false;
@@ -636,7 +637,7 @@ impl Game {
 
         let addition = Game::d(1,6);
 
-        Ok(self.player.add_stat(&stat, addition))
+        Ok(self.player.change_stat(&stat, addition as i32))
     }
 
     /// Begin negotiations to sell a treasure to a vendor
@@ -709,5 +710,25 @@ impl Game {
     /// Accessor for player additional points
     pub fn player_additional_points(&self) -> u32 {
         *self.player.additional_points()
+    }
+
+    /// Accessor for player stats
+    pub fn player_stat(&self, stat: Stat) -> u32 {
+        *self.player.stat(&stat)
+    }
+
+    /// Accessor for player armor type
+    pub fn player_armor_type(&self) -> ArmorType {
+        self.player.armor().armor_type()
+    }
+
+    /// Accessor for player weapon type
+    pub fn player_weapon_type(&self) -> WeaponType {
+        self.player.weapon().weapon_type()
+    }
+
+    /// Accessor for player lamp
+    pub fn player_has_lamp(&self) -> bool {
+        self.player.has_lamp()
     }
 }
