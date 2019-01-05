@@ -334,7 +334,7 @@ impl UI {
             }
         };
 
-        self.game.player.init(race);
+        self.game.player_init(race);
 
         let gender = loop {
             let gender_str = UI::get_input(Some("\nWHICH SEX TO YOU PREFER? "));
@@ -346,7 +346,7 @@ impl UI {
             }
         };
 
-        self.game.player.set_gender(gender);
+        self.game.player_set_gender(gender);
     }
 
     /// Allocate additional stat points
@@ -379,7 +379,7 @@ impl UI {
                     },
                 };
 
-                if let Ok(_) = self.game.player.allocate_points(&stats[i], points_to_add) {
+                if let Ok(_) = self.game.player_allocate_points(&stats[i], points_to_add) {
                     ok = true;
                 } else {
                     print!("\n** ");
@@ -406,10 +406,10 @@ impl UI {
 
             match armor_str.get(..1) {
 
-                Some("P") => break self.game.player.purchase_armor(ArmorType::Plate, false),
-                Some("C") => break self.game.player.purchase_armor(ArmorType::Chainmail, false),
-                Some("L") => break self.game.player.purchase_armor(ArmorType::Leather, false),
-                Some("N") => break self.game.player.purchase_armor(ArmorType::None, false),
+                Some("P") => break self.game.player_purchase_armor(ArmorType::Plate, false),
+                Some("C") => break self.game.player_purchase_armor(ArmorType::Chainmail, false),
+                Some("L") => break self.game.player_purchase_armor(ArmorType::Leather, false),
+                Some("N") => break self.game.player_purchase_armor(ArmorType::None, false),
                 _ => {
                     let mon_str = self.rand_monster_str();
                     let article = UI::get_article(&mon_str);
@@ -434,10 +434,10 @@ impl UI {
 
             match armor_str.get(..1) {
 
-                Some("S") => break self.game.player.purchase_weapon(WeaponType::Sword, false),
-                Some("M") => break self.game.player.purchase_weapon(WeaponType::Mace, false),
-                Some("D") => break self.game.player.purchase_weapon(WeaponType::Dagger, false),
-                Some("N") => break self.game.player.purchase_weapon(WeaponType::None, false),
+                Some("S") => break self.game.player_purchase_weapon(WeaponType::Sword, false),
+                Some("M") => break self.game.player_purchase_weapon(WeaponType::Mace, false),
+                Some("D") => break self.game.player_purchase_weapon(WeaponType::Dagger, false),
+                Some("N") => break self.game.player_purchase_weapon(WeaponType::None, false),
                 _ => println!("\n** IS YOUR IQ REALLY {}? TYPE S, M, D, OR N",
                     self.game.player_stat(Stat::Intelligence)),
             }
@@ -446,7 +446,7 @@ impl UI {
 
     /// Buy lamp
     fn buy_lamp(&mut self) {
-        if !self.game.player.can_purchase_lamp() {
+        if !self.game.player_can_purchase_lamp() {
             return;
         }
 
@@ -454,8 +454,8 @@ impl UI {
             let lamp_str = UI::get_input(Some("\nWANT TO BUY A LAMP FOR 20 GP's? "));
 
             match lamp_str.get(..1) {
-                Some("Y") => break self.game.player.purchase_lamp(true),
-                Some("N") => break self.game.player.purchase_lamp(false),
+                Some("Y") => break self.game.player_purchase_lamp(true),
+                Some("N") => break self.game.player_purchase_lamp(false),
                 _ => println!("\n** ANSWER YES OR NO"),
             }
         };
@@ -463,7 +463,7 @@ impl UI {
 
     /// Buy flares
     fn buy_flares(&mut self) {
-        let max_flares = self.game.player.max_flares();
+        let max_flares = self.game.player_max_flares();
 
         if max_flares == 0 {
             return;
@@ -484,7 +484,7 @@ impl UI {
                 },
             };
 
-            match self.game.player.purchase_flares(flare_count) {
+            match self.game.player_purchase_flares(flare_count) {
                 Ok(_) => break,
                 Err(_) => {
                     print!("** YOU CAN ONLY AFFORD {}\n\n", max_flares);
@@ -500,7 +500,7 @@ impl UI {
     /// This version reverses that.
     ///
     fn print_location(&self) {
-        if self.game.player.is_blind() {
+        if self.game.player_is_blind() {
             return;
         }
 
@@ -514,7 +514,7 @@ impl UI {
             self.game.player_stat(Stat::Strength),
             self.game.player_stat(Stat::Intelligence),
             self.game.player_stat(Stat::Dexterity),
-            self.game.player.flares(),
+            self.game.player_flares(),
             self.game.player_gp());
 
         let w_name = UI::weapon_name(self.game.player_weapon_type());
@@ -802,7 +802,7 @@ impl UI {
             },
 
             GameState::Exit => {
-                let win = self.game.player.has_orb_of_zot();
+                let win = self.game.player_has_orb_of_zot();
 
                 print!("YOU LEFT THE CASTLE WITH");
 
@@ -827,29 +827,29 @@ impl UI {
         }
 
         // List treasures
-        for t in self.game.player.get_treasures() {
+        for t in self.game.player_get_treasures() {
             println!("{}", UI::treasure_name(t));
         }
 
         // Show weapon
-        println!("{}", UI::weapon_name(self.game.player.weapon().weapon_type()));
+        println!("{}", UI::weapon_name(self.game.player_weapon_type()));
 
         // Show armor
-        println!("{}", UI::armor_name(self.game.player.armor().armor_type()));
+        println!("{}", UI::armor_name(self.game.player_armor_type()));
 
         // Show lamp
-        if self.game.player.has_lamp() {
+        if self.game.player_has_lamp() {
             println!("A LAMP");
         }
 
         // Show flares
-        println!("{} FLARES", self.game.player.flares());
+        println!("{} FLARES", self.game.player_flares());
 
         // Show GPs
         println!("{} GP's", self.game.player_gp());
 
         // Show Runestaff
-        if self.game.player.has_runestaff() {
+        if self.game.player_has_runestaff() {
             println!("THE RUNESTAFF");
         }
 
@@ -859,7 +859,7 @@ impl UI {
     
     /// Sell treasures to a vendor
     fn vendor_trade_treasures(&mut self) {
-        let treasures = self.game.player.get_treasures().clone();
+        let treasures = self.game.player_get_treasures().clone();
 
         if treasures.len() == 0 {
             return;
@@ -912,7 +912,7 @@ impl UI {
 
         println!("\nOK, {}, YOU HAVE {} GOLD PIECES AND {}",
             self.race_str(), self.game.player_gp(),
-            UI::armor_name(self.game.player.armor().armor_type()));
+            UI::armor_name(self.game.player_armor_type()));
 
         println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
 
@@ -934,14 +934,14 @@ impl UI {
             match armor_str.get(..1) {
 
                 Some("P") => {
-                    match self.game.player.purchase_armor(ArmorType::Plate, true) {
+                    match self.game.player_purchase_armor(ArmorType::Plate, true) {
                         Ok(_) => break,
                         Err(Error::NotEnoughGP) => println!("\n** YOU CAN'T AFFORD PLATE"),
                         _ => (),
                     }
                 },
                 Some("C") => {
-                    match self.game.player.purchase_armor(ArmorType::Chainmail, true) {
+                    match self.game.player_purchase_armor(ArmorType::Chainmail, true) {
                         Ok(_) => break,
                         Err(Error::NotEnoughGP) => println!("\n** YOU HAVEN'T GOT THAT MUCH CASH"),
                         _ => (),
@@ -949,7 +949,7 @@ impl UI {
                 },
                 Some("L") => {
                     // If we get to this point we already had enough to buy leather
-                    let _ = self.game.player.purchase_armor(ArmorType::Leather, true);
+                    let _ = self.game.player_purchase_armor(ArmorType::Leather, true);
                     break;
                 },
                 Some("N") => break,
@@ -973,7 +973,7 @@ impl UI {
 
         println!("\nYOU HAVE {} GP's LEFT WITH {} IN HAND",
             self.game.player_gp(),
-            UI::weapon_name(self.game.player.weapon().weapon_type()));
+            UI::weapon_name(self.game.player_weapon_type()));
 
         println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
 
@@ -995,14 +995,14 @@ impl UI {
             match armor_str.get(..1) {
 
                 Some("S") => {
-                    match self.game.player.purchase_weapon(WeaponType::Sword, true) {
+                    match self.game.player_purchase_weapon(WeaponType::Sword, true) {
                         Ok(_) => break,
                         Err(Error::NotEnoughGP) => println!("\n** DUNGEON EXPRESS CARD - YOU LEFT HOME WITHOUT IT!"),
                         _ => (),
                     }
                 },
                 Some("M") => {
-                    match self.game.player.purchase_weapon(WeaponType::Mace, true) {
+                    match self.game.player_purchase_weapon(WeaponType::Mace, true) {
                         Ok(_) => break,
                         Err(Error::NotEnoughGP) => println!("\n** SORRY SIR, I DON'T GIVE CREDIT"),
                         _ => (),
@@ -1010,7 +1010,7 @@ impl UI {
                 },
                 Some("D") => {
                     // If we get to this &point we already had enough to buy a dagger
-                    let _ = self.game.player.purchase_weapon(WeaponType::Dagger, true);
+                    let _ = self.game.player_purchase_weapon(WeaponType::Dagger, true);
                     break;
                 },
                 Some("N") => break,

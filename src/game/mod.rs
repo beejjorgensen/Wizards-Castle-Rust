@@ -1,7 +1,7 @@
 extern crate rand;
 
 use dungeon::Dungeon;
-use player::{Player, Stat, Race};
+use player::{Player, Stat, Race, Gender};
 use room::{Room, RoomType};
 use treasure::{Treasure, TreasureType};
 use monster::{Monster, MonsterType};
@@ -71,7 +71,7 @@ pub enum GameState {
 
 pub struct Game {
     pub dungeon: Dungeon,
-    pub player: Player,
+    player: Player,
     state: GameState,
     prev_dir: Direction,
     currently_fighting: Option<Monster>,
@@ -735,5 +735,70 @@ impl Game {
     /// Accessor for player flares
     pub fn player_flares(&self) -> u32 {
         self.player.flares()
+    }
+
+    /// Init the player
+    pub fn player_init(&mut self, race: Race) {
+        self.player.init(race);
+    }
+
+    /// Set player's gender
+    pub fn player_set_gender(&mut self, gender:Gender) {
+        self.player.set_gender(gender);
+    }
+
+    /// Allocate player stat points
+    pub fn player_allocate_points(&mut self, stat:&Stat, points:u32) -> Result<u32, Error> {
+        self.player.allocate_points(stat, points)
+    }
+
+    /// Give the player some armor
+    pub fn player_purchase_armor(&mut self, a:ArmorType, is_vendor:bool) -> Result<(), Error> {
+        self.player.purchase_armor(a, is_vendor)
+    }
+
+    /// Give the player a weapon
+    pub fn player_purchase_weapon(&mut self, w:WeaponType, is_vendor:bool) -> Result<(), Error> {
+        self.player.purchase_weapon(w, is_vendor)
+    }
+
+    /// True if the player can afford a lamp
+    pub fn player_can_purchase_lamp(&self) -> bool {
+        self.player.can_purchase_lamp()
+    }
+
+    /// Purchase a lamp
+    pub fn player_purchase_lamp(&mut self, lamp:bool) -> Result<(), Error> {
+        self.player.purchase_lamp(lamp)
+    }
+
+    /// Return the max number of flares a player can afford
+    pub fn player_max_flares(&self) -> u32 {
+        self.player.max_flares()
+    }
+
+    /// Purchase flares
+    pub fn player_purchase_flares(&mut self, flares:u32) -> Result<(), Error> {
+        self.player.purchase_flares(flares)
+    }
+
+    /// Return true if the player is blind
+    pub fn player_is_blind(&self) -> bool {
+        self.player.is_blind()
+    }
+
+    /// True if the player has the Orb of Zot
+    pub fn player_has_orb_of_zot(&self) -> bool {
+        self.player.has_orb_of_zot()
+    }
+
+    /// Return a list of players treasures
+    pub fn player_get_treasures(&self) -> &Vec<TreasureType> {
+        self.player.get_treasures()
+    }
+
+    /// True if the player has the Runestaff
+    pub fn player_has_runestaff(&self) -> bool {
+        self.player.has_runestaff()
     }
 }

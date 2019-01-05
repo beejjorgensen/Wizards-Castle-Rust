@@ -160,7 +160,7 @@ impl Player {
         result
     }
 
-    // Give the player some armor
+    /// Give the player some armor
     pub fn purchase_armor(&mut self, a:ArmorType, is_vendor:bool) -> Result<(), Error> {
         let armor_cost = Armor::cost(a, is_vendor);
 
@@ -175,7 +175,7 @@ impl Player {
         Ok(())
     }
 
-    // Give the player a weapon
+    /// Give the player a weapon
     pub fn purchase_weapon(&mut self, w:WeaponType, is_vendor:bool) -> Result<(), Error> {
         let weapon_cost = Weapon::cost(w, is_vendor);
 
@@ -227,6 +227,7 @@ impl Player {
         Ok(())
     }
 
+    /// Return true if the player is blind
     pub fn is_blind(&self) -> bool {
         self.blind
     }
