@@ -7,7 +7,7 @@ use self::rand::Rng;
 use self::rand::rngs::ThreadRng;
 use self::rand::thread_rng;
 
-use wizardscastle::game::{Game,Direction,Event,CombatEvent,GameState};
+use wizardscastle::game::{Game,Direction,Stairs,Event,CombatEvent,GameState};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
@@ -89,6 +89,13 @@ impl UI {
         }
     }
 
+    fn stair_name(s:Stairs) -> String {
+        match s {
+            Stairs::Up => String::from("UP"),
+            Stairs::Down => String::from("DOWN"),
+        }
+    }
+
     fn treasure_name(t:&TreasureType) -> String {
         match t {
             TreasureType::RubyRed => String::from("THE RUBY RED"),
@@ -145,6 +152,14 @@ impl UI {
     /// Move a direction
     fn move_dir(&mut self, dir:Direction) {
         self.game.move_dir(dir)
+    }
+
+    /// Take some stairs
+    fn move_stairs(&mut self, stairs:Stairs) {
+        match self.game.move_stairs(stairs) {
+            Err(_) => println!("** OH {}, NO STAIRS GOING {} IN HERE", self.race_str(), UI::stair_name(stairs)),
+            Ok(_) => (),
+        };
     }
 
     /// Print a map
@@ -1169,6 +1184,8 @@ fn main() {
                     Some("S") => ui.move_dir(Direction::South),
                     Some("W") => ui.move_dir(Direction::West),
                     Some("E") => ui.move_dir(Direction::East),
+                    Some("U") => ui.move_stairs(Stairs::Up),
+                    Some("D") => ui.move_stairs(Stairs::Down),
                     _ => {
                         println!("** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
                         valid_command = false;

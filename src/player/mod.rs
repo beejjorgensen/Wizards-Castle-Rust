@@ -360,4 +360,18 @@ impl Player {
             Ok(())
         }
     }
+
+    // Go down
+    pub fn down(&mut self) -> usize {
+        self.z += 1;
+
+        self.z
+    }
+
+    // Go up
+    pub fn up(&mut self) -> usize {
+        self.z -= 1;
+
+        self.z
+    }
 }

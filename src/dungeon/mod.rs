@@ -148,7 +148,21 @@ impl Dungeon {
                 }
             }
 
-            /*
+            // cheater code to reveal Runestaff location
+            if z == runestaff_level {
+                for y in 0..ysize {
+                    for x in 0..xsize {
+                        let i = y * xsize + x;
+
+                        if let RoomType::Monster(ref m) = levels[z][i].roomtype {
+                            if m.has_runestaff() {
+                                println!("\n>>> RUNESTAFF IS AT {},{},{} <<<\n", x+1, y+1, z+1);
+                            }
+                        }
+                    }
+                }
+            }
+
             // cheater code to reveal Orb of Zot location
             if z == orb_of_zot_level {
                 for y in 0..ysize {
@@ -163,7 +177,6 @@ impl Dungeon {
                     }
                 }
             }
-            */
 
             // Fix up the stairs up
             if z > 0 {

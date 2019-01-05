@@ -42,6 +42,12 @@ pub enum Direction {
 }
 
 #[derive(Debug,Clone,Copy,PartialEq)]
+pub enum Stairs {
+    Up,
+    Down,
+}
+
+#[derive(Debug,Clone,Copy,PartialEq)]
 pub enum GameState {
     Init,
 
@@ -442,6 +448,30 @@ impl Game {
             RoomType::Monster(m) => self.room_effect_monster(m),
             _ => Event::None,
         }
+    }
+
+    /// Handle going up/down stairs
+    pub fn move_stairs(&mut self, dir:Stairs) -> Result<(), Error> {
+        let p = &mut self.player;
+
+        let room = self.dungeon.room_at(p.x, p.y, p.z);
+
+        match dir {
+            Stairs::Up => {
+                if room.roomtype != RoomType::StairsUp {
+                    return Err(Error::CantGo);
+                }
+                p.up();
+            },
+            Stairs::Down => {
+                if room.roomtype != RoomType::StairsDown {
+                    return Err(Error::CantGo);
+                }
+                p.down();
+            },
+        }
+
+        Ok(())
     }
 
     /// Handle a move command
