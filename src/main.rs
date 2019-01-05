@@ -393,7 +393,7 @@ impl UI {
 
     /// Buy armor
     fn buy_armor(&mut self) {
-        println!("\nOK, {}, YOU HAVE {} GOLD PIECES (GP's)\n", self.race_str(), self.game.player.gp);
+        println!("\nOK, {}, YOU HAVE {} GOLD PIECES (GP's)\n", self.race_str(), self.game.player_gp());
 
         println!("HERE IS A LIST OF ARMOR YOU CAN BUY (WITH COST IN <>)\n");
 
@@ -421,7 +421,7 @@ impl UI {
     /// Buy weapon
     fn buy_weapon(&mut self) {
 
-        println!("\nOK, BOLD {}, YOU HAVE {} GP's LEFT\n", self.race_str(), self.game.player.gp);
+        println!("\nOK, BOLD {}, YOU HAVE {} GP's LEFT\n", self.race_str(), self.game.player_gp());
 
         println!("HERE IS A LIST OF WEAPONS YOU CAN BUY (WITH COST IN <>)\n");
 
@@ -466,7 +466,7 @@ impl UI {
             return;
         }
 
-        println!("\nOK, {}, YOU HAVE {} GOLD PIECES LEFT\n", self.race_str(), self.game.player.gp);
+        println!("\nOK, {}, YOU HAVE {} GOLD PIECES LEFT\n", self.race_str(), self.game.player_gp());
 
         loop {
             let flare_str = UI::get_input(Some("FLARES COST 1 GP EACH, HOW MANY DO YOU WANT? "));
@@ -844,7 +844,7 @@ impl UI {
         println!("{} FLARES", self.game.player.flares());
 
         // Show GPs
-        println!("{} GP's", self.game.player.gp());
+        println!("{} GP's", self.game.player_gp());
 
         // Show Runestaff
         if self.game.player.has_runestaff() {
@@ -901,7 +901,7 @@ impl UI {
     fn vendor_trade_armor(&mut self) {
         let leather_cost = Armor::cost(ArmorType::Leather, true);
 
-        if self.game.player.gp < leather_cost {
+        if self.game.player_gp() < leather_cost {
             return;
         }
 
@@ -909,18 +909,18 @@ impl UI {
         let plate_cost = Armor::cost(ArmorType::Plate, true);
 
         println!("\nOK, {}, YOU HAVE {} GOLD PIECES AND {}",
-            self.race_str(), self.game.player.gp,
+            self.race_str(), self.game.player_gp(),
             UI::armor_name(self.game.player.armor().armor_type()));
 
         println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
 
         print!("\nNOTHING<0> LEATHER<{}>", leather_cost);
 
-        if self.game.player.gp >= chainmail_cost {
+        if self.game.player_gp() >= chainmail_cost {
             print!(" CHAINMAIL<{}>", chainmail_cost)
         }
 
-        if self.game.player.gp >= plate_cost {
+        if self.game.player_gp() >= plate_cost {
             print!(" PLATE<{}>", plate_cost)
         }
 
@@ -962,7 +962,7 @@ impl UI {
     fn vendor_trade_weapons(&mut self) {
         let dagger_cost = Weapon::cost(WeaponType::Dagger, true);
 
-        if self.game.player.gp < dagger_cost {
+        if self.game.player_gp() < dagger_cost {
             return;
         }
 
@@ -970,18 +970,18 @@ impl UI {
         let sword_cost = Weapon::cost(WeaponType::Sword, true);
 
         println!("\nYOU HAVE {} GP's LEFT WITH {} IN HAND",
-            self.game.player.gp,
+            self.game.player_gp(),
             UI::weapon_name(self.game.player.weapon().weapon_type()));
 
         println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
 
         print!("\nNOTHING<0> DAGGER<{}>", dagger_cost);
 
-        if self.game.player.gp >= mace_cost {
+        if self.game.player_gp() >= mace_cost {
             print!(" MACE<{}>", mace_cost)
         }
 
-        if self.game.player.gp >= sword_cost {
+        if self.game.player_gp() >= sword_cost {
             print!(" SWORD<{}>", sword_cost)
         }
 
@@ -1067,7 +1067,7 @@ impl UI {
     fn vendor_trade(&mut self) {
         self.vendor_trade_treasures();
 
-        if self.game.player.gp < 1000 {
+        if self.game.player_gp() < 1000 {
             println!("\n** YOU'RE TOO POOR TO TRADE");
             return;
         }
@@ -1161,7 +1161,7 @@ fn main() {
 
                 match ui.game.room_effect() {
                     Event::FoundGold(_) => {
-                        println!("YOU HAVE {}", ui.game.player.gp);
+                        println!("YOU HAVE {}", ui.game.player_gp());
                     },
                     Event::FoundFlares(_) => {
                         println!("YOU HAVE {}", ui.game.player.flares);

@@ -159,7 +159,7 @@ impl Game {
     fn room_effect_gold(&mut self) -> Event {
         let gold_amount = Game::d(1,10);
 
-        self.player.gp += gold_amount;
+        self.player.add_gp(gold_amount);
 
         self.make_current_room_empty();
 
@@ -297,7 +297,7 @@ impl Game {
                 treasure = 0;
             }
 
-            self.player.gp += treasure;
+            self.player.add_gp(treasure);
 
             self.state = next_state;
             return Ok(CombatEvent::Hit(damage, broke_weapon, defeated, treasure, got_runestaff));
@@ -607,7 +607,7 @@ impl Game {
             panic!("player should have had this treasure");
         }
 
-        self.player.gp += self.vendor_treasure_price;
+        self.player.add_gp(self.vendor_treasure_price);
 
         self.vendor_treasure = None;
 
@@ -627,7 +627,7 @@ impl Game {
     
     /// Check if you can afford stats
     pub fn vendor_can_afford_stat(&self) -> bool {
-        self.player.gp() >= 1000
+        self.player_gp() >= 1000
     }
 
     /// Buy stats from a vendor
@@ -699,5 +699,10 @@ impl Game {
     /// Accessor for player race
     pub fn player_race(&self) -> &Race {
         self.player.race()
+    }
+
+    /// Accessor for player gold pieces
+    pub fn player_gp(&self) -> u32 {
+        *self.player.gp()
     }
 }

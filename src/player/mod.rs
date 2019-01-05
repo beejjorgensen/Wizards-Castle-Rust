@@ -32,7 +32,7 @@ pub struct Player {
     race: Race,
     gender: Gender,
 
-    pub gp: u32,
+    gp: u32,
 
     pub additional_points: u32,
     pub st: u32, // TODO make these a map
@@ -84,6 +84,7 @@ impl Player {
         }
     }
 
+    /// Set player position
     pub fn set_position(&mut self, x: u32, y: u32, z: u32) {
         self.x = x;
         self.y = y;
@@ -258,8 +259,13 @@ impl Player {
     }
 
     /// Return number of gold pieces
-    pub fn gp(&self) -> u32 {
-        self.gp
+    pub fn gp(&self) -> &u32 {
+        &self.gp
+    }
+
+    /// Add gold pieces
+    pub fn add_gp(&mut self, amount: u32) {
+        self.gp += amount;
     }
 
     /// Return player's weapon
