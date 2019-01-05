@@ -7,7 +7,7 @@ use self::rand::Rng;
 use self::rand::rngs::ThreadRng;
 use self::rand::thread_rng;
 
-use wizardscastle::game::{Game,Direction,Stairs,Event,CombatEvent,GameState};
+use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent, DrinkEvent, GameState};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
@@ -96,7 +96,7 @@ impl UI {
         }
     }
 
-    fn treasure_name(t:&TreasureType) -> String {
+    fn treasure_name(t: &TreasureType) -> String {
         match t {
             TreasureType::RubyRed => String::from("THE RUBY RED"),
             TreasureType::NornStone => String::from("THE NORN STONE"),
@@ -109,7 +109,7 @@ impl UI {
         }
     }
 
-    fn room_name(r:&RoomType) -> String {
+    fn room_name(r: &RoomType) -> String {
         match r {
             RoomType::Empty => String::from("AN EMPTY ROOM"),
             RoomType::Entrance => String::from("THE ENTRANCE"),
@@ -130,6 +130,13 @@ impl UI {
             RoomType::Treasure(t) => {
                 format!("{}", UI::treasure_name(t.treasure_type()))
             }
+        }
+    }
+
+    fn gender_name(g: Gender) -> String {
+        match g {
+            Gender::Female => String::from("FEMALE"),
+            Gender::Male => String::from("MALE"),
         }
     }
 
@@ -211,6 +218,46 @@ impl UI {
             },
             Err(err) => panic!("{:#?}", err),
         }
+    }
+
+    /// Drink
+    fn drink(&mut self) {
+        let s;
+
+        match self.game.drink() {
+            Ok(DrinkEvent::Stronger) => {
+                s = String::from("FEEL STRONGER");
+            },
+            Ok(DrinkEvent::Weaker) => {
+                s = String::from("FEEL WEAKER");
+            },
+            Ok(DrinkEvent::Smarter) => {
+                s = String::from("FEEL SMARTER");
+            },
+            Ok(DrinkEvent::Dumber) => {
+                s = String::from("FEEL DUMBER");
+            },
+            Ok(DrinkEvent::Nimbler) => {
+                s = String::from("FEEL NIMBLER");
+            },
+            Ok(DrinkEvent::Clumsier) => {
+                s = String::from("FEEL CLUMSIER");
+            },
+            Ok(DrinkEvent::ChangeRace) => {
+                s = format!("TURN INTO A {}", self.race_str());
+            },
+            Ok(DrinkEvent::ChangeGender) => {
+                s = format!("TURN INTO A {} {}",
+                    UI::gender_name(*self.game.player_gender()), self.race_str());
+            },
+            Err(Error::CantGo) => {
+                println!("** IF YOU WANT A DRINK, FIND A POOL");
+                return;
+            },
+            Err(err) => panic!("{:#?}", err),
+        }
+
+        print!("YOU TAKE A DRINK AND {}\n", s);
     }
 
     /// Print a map
@@ -1224,6 +1271,14 @@ fn main() {
                 let command = UI::get_input(Some("\nYOUR MOVE? "));
 
                 println!();
+
+                match command.get(..2) {
+                    Some("DR") => {
+                        ui.drink();
+                        break;
+                    }
+                    _ => ()
+                }
 
                 match command.get(..1) {
                     Some("M") => {

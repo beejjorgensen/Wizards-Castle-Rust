@@ -34,6 +34,18 @@ pub enum CombatEvent {
     MonsterHit(u32, bool, bool),
 }
 
+#[derive(Debug,Clone,Copy)]
+pub enum DrinkEvent {
+    Stronger,
+    Weaker,
+    Smarter,
+    Dumber,
+    Nimbler,
+    Clumsier,
+    ChangeRace,
+    ChangeGender,
+}
+
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Direction {
     North,
@@ -668,6 +680,69 @@ impl Game {
         self.state = GameState::Move;
     }
 
+    /// Drink
+    pub fn drink(&mut self) -> Result<DrinkEvent, Error> {
+        let roomtype = self.room_at_player().room_type().clone();
+
+        if roomtype != RoomType::Pool {
+            return Err(Error::CantGo);
+        }
+
+        match Game::d(1,8) {
+            1 => {
+                self.player.change_stat(&Stat::Strength, Game::d(1,3) as i32);
+                Ok(DrinkEvent::Stronger)
+            },
+            2 => {
+                self.player.change_stat(&Stat::Strength, -(Game::d(1,3) as i32));
+                Ok(DrinkEvent::Weaker)
+            },
+            3 => {
+                self.player.change_stat(&Stat::Intelligence, Game::d(1,3) as i32);
+                Ok(DrinkEvent::Smarter)
+            },
+            4 => {
+                self.player.change_stat(&Stat::Intelligence, -(Game::d(1,3) as i32));
+                Ok(DrinkEvent::Dumber)
+            },
+            5 => {
+                self.player.change_stat(&Stat::Dexterity, Game::d(1,3) as i32);
+                Ok(DrinkEvent::Nimbler)
+            },
+            6 => {
+                self.player.change_stat(&Stat::Dexterity, -(Game::d(1,3) as i32));
+                Ok(DrinkEvent::Clumsier)
+            },
+            7 => {
+                let races = [Race::Dwarf, Race::Elf, Race::Hobbit, Race::Human];
+
+                let n = Game::d(1,3) - 1;
+                let mut i = 0;
+
+                for _ in 0..n {
+                    if races[i] == *self.player.race() {
+                        i += 1;
+                    }
+                    i += 1;
+                }
+
+                self.player.set_race(races[i]);
+
+                Ok(DrinkEvent::ChangeRace)
+            },
+            8 => {
+                if *self.player.gender() == Gender::Male {
+                    self.player.set_gender(Gender::Female);
+                } else {
+                    self.player.set_gender(Gender::Male);
+                }
+
+                Ok(DrinkEvent::ChangeGender)
+            }
+            _ => panic!("should not happen")
+        }
+    }
+
     /// Roll a die (1d6, 2d7, etc.)
     pub fn d(count: u32, sides: u32) -> u32 {
         let mut total = 0;
@@ -824,5 +899,10 @@ impl Game {
     /// Return a reference to the room at a location
     pub fn dungeon_room_at(&self, x: u32, y: u32, z: u32) -> &Room {
         self.dungeon.room_at(x, y, z)
+    }
+
+    /// Get character gender
+    pub fn player_gender(&self) -> &Gender {
+        self.player.gender()
     }
 }

@@ -126,6 +126,11 @@ impl Player {
         }
     }
 
+    /// Get character gender
+    pub fn gender(&self) -> &Gender {
+        &self.gender
+    }
+
     /// Set character gender
     pub fn set_gender(&mut self, gender: Gender) {
         self.gender = gender;
@@ -405,6 +410,11 @@ impl Player {
     /// Get race
     pub fn race(&self) -> &Race {
         &self.race
+    }
+
+    /// Set race
+    pub fn set_race(&mut self, race: Race) {
+        self.race = race;
     }
 
     /// Get additional stat points
