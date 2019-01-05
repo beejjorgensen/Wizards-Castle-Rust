@@ -705,4 +705,9 @@ impl Game {
     pub fn player_gp(&self) -> u32 {
         *self.player.gp()
     }
+
+    /// Accessor for player additional points
+    pub fn player_additional_points(&self) -> u32 {
+        *self.player.additional_points()
+    }
 }

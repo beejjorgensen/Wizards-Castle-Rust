@@ -34,7 +34,7 @@ pub struct Player {
 
     gp: u32,
 
-    pub additional_points: u32,
+    additional_points: u32,
     pub st: u32, // TODO make these a map
     pub dx: u32,
     pub iq: u32,
@@ -420,5 +420,10 @@ impl Player {
     // Get race
     pub fn race(&self) -> &Race {
         &self.race
+    }
+
+    // Get additional stat points
+    pub fn additional_points(&self) -> &u32 {
+        &self.additional_points
     }
 }

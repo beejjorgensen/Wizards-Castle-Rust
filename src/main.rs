@@ -356,7 +356,7 @@ impl UI {
         println!("STRENGTH= {} INTELLIGENCE= {} DEXTERITY= {}\n",
             self.game.player.st, self.game.player.iq, self.game.player.dx);
 
-        println!("AND {} OTHER POINTS TO ALLOCATE AS YOU WISH.\n", self.game.player.additional_points);
+        println!("AND {} OTHER POINTS TO ALLOCATE AS YOU WISH.\n", self.game.player_additional_points());
 
         let stats = vec!(Stat::Intelligence, Stat::Strength, Stat::Dexterity);
         let stat_names = vec!("INTELLIGENCE", "STRENGTH", "DEXTERITY");
@@ -385,7 +385,7 @@ impl UI {
                 }
             }
 
-            if self.game.player.additional_points == 0 {
+            if self.game.player_additional_points() == 0 {
                 return;
             }
         }
