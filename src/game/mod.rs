@@ -252,7 +252,7 @@ impl Game {
             return Err(Error::WrongState);
         }
 
-        if self.player.weapon.weapon_type() == WeaponType::None {
+        if self.player.weapon().weapon_type() == WeaponType::None {
             self.state = GameState::MonsterAttack;
             return Ok(CombatEvent::NoWeapon);
         }
@@ -260,7 +260,7 @@ impl Game {
         let hit = *self.player.stat(&Stat::Dexterity) >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
 
         if hit {
-            let damage = self.player.weapon.damage();
+            let damage = self.player.weapon().damage();
             let mut broke_weapon = false;
             let mut next_state = GameState::MonsterAttack;
             let defeated;
@@ -270,7 +270,7 @@ impl Game {
             if let Some(ref mut monster) = self.currently_fighting {
                 if monster.can_break_weapon() && Game::d(1,8) == 1 {
                     broke_weapon = true;
-                    self.player.weapon = Weapon::new(WeaponType::None);
+                    self.player.set_weapon(Weapon::new(WeaponType::None));
                 }
 
                 defeated = monster.take_damage(damage);

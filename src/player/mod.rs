@@ -40,9 +40,10 @@ pub struct Player {
 
     stat: HashMap<Stat, u32>,
 
-    pub armor: Armor,
-    pub weapon: Weapon,
-    pub lamp: bool,
+    armor: Armor,
+    weapon: Weapon,
+
+    lamp: bool,
     pub treasures: Vec<TreasureType>,
 
     pub runestaff: bool,
@@ -252,6 +253,11 @@ impl Player {
     /// Return player's weapon
     pub fn weapon(&self) -> &Weapon {
         &self.weapon
+    }
+
+    /// Return player's weapon
+    pub fn set_weapon(&mut self, weapon: Weapon) {
+        self.weapon = weapon;
     }
 
     /// Return player's armor

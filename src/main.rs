@@ -542,7 +542,7 @@ impl UI {
     fn combat_attack(&mut self, m_art:&str, m_name:&str) {
         // Need to do this before the attack since the weapon might
         // break during it
-        let weapon_type = self.game.player.weapon.weapon_type();
+        let weapon_type = self.game.player_weapon_type();
 
         match self.game.attack() {
             Ok(CombatEvent::NoWeapon) =>  {
