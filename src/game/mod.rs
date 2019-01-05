@@ -1,7 +1,7 @@
 extern crate rand;
 
 use dungeon::Dungeon;
-use player::Player;
+use player::{Player, Stat};
 use room::RoomType;
 use treasure::{Treasure,TreasureType};
 use monster::{Monster,MonsterType};
@@ -511,6 +511,19 @@ impl Game {
         Ok(())
     }
     
+    /// Check if you can afford stats
+    pub fn vendor_can_afford_stat(&self) -> bool {
+        self.player.gp() >= 1000
+    }
+
+    /// Buy stats from a vendor
+    pub fn vendor_buy_stat(&mut self, stat:Stat) -> Result<usize, Error> {
+        self.player.spend(1000)?;
+
+        let addition = Game::d(1,6);
+
+        Ok(self.player.add_stat(&stat, addition))
+    }
 
     /// Begin negotiations to sell a treasure to a vendor
     pub fn vendor_treasure_offer(&mut self, treasure_type:TreasureType) -> Result<usize, Error> {

@@ -63,6 +63,14 @@ impl UI {
         }
     }
 
+    fn stat_name(s:Stat) -> String {
+        match s {
+            Stat::Strength => String::from("STRENGTH"),
+            Stat::Intelligence => String::from("INTELLIGENCE"),
+            Stat::Dexterity => String::from("DEXTERITY"),
+        }
+    }
+
     fn weapon_name(w:WeaponType) -> String {
         match w {
             WeaponType::None => String::from("NO WEAPON"),
@@ -936,7 +944,7 @@ impl UI {
                     }
                 },
                 Some("D") => {
-                    // If we get to this point we already had enough to buy a dagger
+                    // If we get to this &point we already had enough to buy a dagger
                     let _ = self.game.player.purchase_weapon(WeaponType::Dagger, true);
                     break;
                 },
@@ -946,6 +954,50 @@ impl UI {
                 },
             }
         }
+    }
+
+    /// Buy stats from a Vendor
+    fn vendor_buy_stats(&mut self) {
+
+        let stats = [Stat::Strength, Stat::Intelligence, Stat::Dexterity];
+
+        let mut i = 0;
+
+        while i < 3 {
+
+            let s = &stats[i];
+
+            if !self.game.vendor_can_afford_stat() {
+                break;
+            }
+
+            let stat_name = UI::stat_name(*s);
+
+            loop {
+                let play_again = UI::get_input(Some(&format!("\nWANT TO BUY A POTION OF {} FOR 1000 GP's? ", stat_name)));
+
+                match play_again.get(..1) {
+                    Some("Y") => {
+                        match self.game.vendor_buy_stat(*s) {
+                            Ok(new_value) => {
+                                println!("\nYOUR {} IS NOW {}", stat_name, new_value);
+                            },
+                            Err(err) => panic!("{:#?}", err),
+                        }
+                        break;
+                    },
+                    Some("N") => {
+                        i += 1;
+                        break;
+                    },
+                    _ => {
+                        println!("\n** ANSWER YES OR NO");
+                    },
+                }
+            }
+
+        }
+
     }
 
     /// Trade with a Vendor
@@ -959,6 +1011,7 @@ impl UI {
 
         self.vendor_trade_armor();
         self.vendor_trade_weapons();
+        self.vendor_buy_stats();
     }
 
     /// Interact with a Vendor

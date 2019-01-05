@@ -3,20 +3,20 @@ use armor::{Armor, ArmorType};
 use weapon::{Weapon, WeaponType};
 use treasure::TreasureType;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum Stat {
     Strength,
     Dexterity,
     Intelligence,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum Gender {
     Male,
     Female,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum Race {
     Hobbit,
     Elf,
@@ -34,7 +34,7 @@ pub struct Player {
     pub gp: usize,
 
     pub additional_points: usize,
-    pub st: usize,
+    pub st: usize, // TODO make these a map
     pub dx: usize,
     pub iq: usize,
 
@@ -145,6 +145,30 @@ impl Player {
         self.additional_points -= points;
 
         Ok(self.additional_points)
+    }
+
+    pub fn add_stat(&mut self, stat:&Stat, points:usize) -> usize {
+        let new_total;
+
+        match stat {
+            Stat::Strength => {
+                self.st += points;
+                self.st = std::cmp::min(18, self.st);
+                new_total = self.st;
+            },
+            Stat::Dexterity => {
+                self.dx += points;
+                self.dx = std::cmp::min(18, self.dx);
+                new_total = self.dx;
+            },
+            Stat::Intelligence => {
+                self.iq += points;
+                self.iq = std::cmp::min(18, self.iq);
+                new_total = self.iq;
+            },
+        };
+
+        new_total
     }
 
     // Give the player some armor
@@ -324,6 +348,16 @@ impl Player {
                 true
             },
             None => false
+        }
+    }
+
+    // Spend some GP
+    pub fn spend(&mut self, amount:usize) -> Result<(), Error> {
+        if amount > self.gp {
+            Err(Error::NotEnoughGP)
+        } else {
+            self.gp -= amount;
+            Ok(())
         }
     }
 }
