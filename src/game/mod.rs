@@ -179,12 +179,11 @@ impl Game {
 
     /// Handle Sinkhole room effects
     fn room_effect_sinkhole(&mut self) -> Event {
-        let p_z;
-        {
-            p_z = *self.player.z();
-        }
+        let p_z = *self.player.z() as i32;
 
-        self.player.set_z((p_z + 1) % self.dungeon.zsize);
+        let new_z = self.wrap_z(p_z + 1);
+
+        self.player.set_z(new_z);
 
         return Event::Sinkhole;
     }
