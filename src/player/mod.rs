@@ -52,7 +52,7 @@ pub struct Player {
 
     flares: u32,
 
-    pub blind: bool,
+    blind: bool,
 }
 
 impl Player {
