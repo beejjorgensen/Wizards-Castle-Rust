@@ -19,7 +19,7 @@ pub struct Dungeon {
 
 impl Dungeon {
 
-    pub fn new(xsize: u32, ysize: u32, zsize:u32) -> Dungeon {
+    pub fn new(xsize: u32, ysize: u32, zsize: u32) -> Dungeon {
         let mut levels: Vec<Vec<Room>> = Vec::new();
 
         let mut rng = thread_rng();
@@ -228,7 +228,7 @@ impl Dungeon {
         &mut self.levels[z as usize][i as usize]
     }
 
-    pub fn discover(&mut self, x:u32, y:u32, z:u32) {
+    pub fn discover(&mut self, x: u32, y: u32, z: u32) {
         let i = y * self.xsize + x;
 
         self.levels[z as usize][i as usize].discovered = true;

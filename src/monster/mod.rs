@@ -78,7 +78,7 @@ impl Monster {
     /// Damage the monster
     ///
     /// Return true if defeated
-    pub fn take_damage(&mut self, damage:u32) -> bool {
+    pub fn take_damage(&mut self, damage: u32) -> bool {
         if damage < self.hp {
             self.hp -= damage;
             return false;

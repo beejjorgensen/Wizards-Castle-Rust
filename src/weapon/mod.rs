@@ -11,13 +11,13 @@ pub struct Weapon {
 }
 
 impl Weapon {
-    pub fn new(w:WeaponType) -> Weapon {
+    pub fn new(w: WeaponType) -> Weapon {
         Weapon {
             weapon_type: w,
         }
     }
 
-    pub fn cost(w:WeaponType, is_vendor:bool) -> u32 {
+    pub fn cost(w: WeaponType, is_vendor: bool) -> u32 {
         let value;
 
         if is_vendor {
@@ -39,7 +39,7 @@ impl Weapon {
         value
     }
 
-    pub fn damage_by_type(w:WeaponType) -> u32 {
+    pub fn damage_by_type(w: WeaponType) -> u32 {
         match w {
             WeaponType::None => 0,
             WeaponType::Dagger => 1,

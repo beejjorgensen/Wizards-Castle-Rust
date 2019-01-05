@@ -45,7 +45,7 @@ impl UI {
         UI::monster_name(monster[i])
     }
 
-    fn monster_name(m:MonsterType) -> String {
+    fn monster_name(m: MonsterType) -> String {
         match m {
             MonsterType::Kobold => String::from("KOBOLD"),
             MonsterType::Orc => String::from("ORC"),
@@ -63,7 +63,7 @@ impl UI {
         }
     }
 
-    fn stat_name(s:Stat) -> String {
+    fn stat_name(s: Stat) -> String {
         match s {
             Stat::Strength => String::from("STRENGTH"),
             Stat::Intelligence => String::from("INTELLIGENCE"),
@@ -71,7 +71,7 @@ impl UI {
         }
     }
 
-    fn weapon_name(w:WeaponType) -> String {
+    fn weapon_name(w: WeaponType) -> String {
         match w {
             WeaponType::None => String::from("NO WEAPON"),
             WeaponType::Dagger => String::from("DAGGER"),
@@ -80,7 +80,7 @@ impl UI {
         }
     }
 
-    fn armor_name(a:ArmorType) -> String {
+    fn armor_name(a: ArmorType) -> String {
         match a {
             ArmorType::None => String::from("NO ARMOR"),
             ArmorType::Leather => String::from("LEATHER"),
@@ -89,7 +89,7 @@ impl UI {
         }
     }
 
-    fn stair_name(s:Stairs) -> String {
+    fn stair_name(s: Stairs) -> String {
         match s {
             Stairs::Up => String::from("UP"),
             Stairs::Down => String::from("DOWN"),
@@ -150,12 +150,12 @@ impl UI {
     }
 
     /// Move a direction
-    fn move_dir(&mut self, dir:Direction) {
+    fn move_dir(&mut self, dir: Direction) {
         self.game.move_dir(dir)
     }
 
     /// Take some stairs
-    fn move_stairs(&mut self, stairs:Stairs) {
+    fn move_stairs(&mut self, stairs: Stairs) {
         match self.game.move_stairs(stairs) {
             Err(_) => println!("** OH {}, NO STAIRS GOING {} IN HERE", self.race_str(), UI::stair_name(stairs)),
             Ok(_) => (),
@@ -696,7 +696,7 @@ impl UI {
     }
 
     /// Handle combat
-    fn combat(&mut self, monster_type:MonsterType) -> bool {
+    fn combat(&mut self, monster_type: MonsterType) -> bool {
 
         let m_name = UI::monster_name(monster_type);
         let m_art = UI::get_article(&m_name);

@@ -127,12 +127,12 @@ impl Player {
     }
 
     /// Set character gender
-    pub fn set_gender(&mut self, gender:Gender) {
+    pub fn set_gender(&mut self, gender: Gender) {
         self.gender = gender;
     }
 
     /// Allocate points to a stat
-    pub fn allocate_points(&mut self, stat:&Stat, points:u32) -> Result<u32, Error> {
+    pub fn allocate_points(&mut self, stat:&Stat, points: u32) -> Result<u32, Error> {
         if points > self.additional_points {
             return Err(Error::NotEnoughPoints);
         }
@@ -161,7 +161,7 @@ impl Player {
     }
 
     /// Give the player some armor
-    pub fn purchase_armor(&mut self, a:ArmorType, is_vendor:bool) -> Result<(), Error> {
+    pub fn purchase_armor(&mut self, a: ArmorType, is_vendor: bool) -> Result<(), Error> {
         let armor_cost = Armor::cost(a, is_vendor);
 
         if armor_cost > self.gp {
@@ -176,7 +176,7 @@ impl Player {
     }
 
     /// Give the player a weapon
-    pub fn purchase_weapon(&mut self, w:WeaponType, is_vendor:bool) -> Result<(), Error> {
+    pub fn purchase_weapon(&mut self, w: WeaponType, is_vendor: bool) -> Result<(), Error> {
         let weapon_cost = Weapon::cost(w, is_vendor);
 
         if weapon_cost > self.gp {
@@ -196,7 +196,7 @@ impl Player {
     }
 
     /// Purchase a lamp
-    pub fn purchase_lamp(&mut self, lamp:bool) -> Result<(), Error> {
+    pub fn purchase_lamp(&mut self, lamp: bool) -> Result<(), Error> {
         if !self.can_purchase_lamp() {
             return Err(Error::NotEnoughGP);
         }
@@ -216,7 +216,7 @@ impl Player {
     }
 
     /// Purchase flares
-    pub fn purchase_flares(&mut self, flares:u32) -> Result<(), Error> {
+    pub fn purchase_flares(&mut self, flares: u32) -> Result<(), Error> {
         if flares > self.max_flares() {
             return Err(Error::NotEnoughGP);
         }
@@ -280,7 +280,7 @@ impl Player {
     /// Damage the player
     ///
     /// Returns true if the player has died
-    pub fn damage_st(&mut self, damage:u32) -> bool {
+    pub fn damage_st(&mut self, damage: u32) -> bool {
         let delta = -(damage as i32);
 
         let new_st = self.change_stat(&Stat::Strength, delta);
@@ -291,7 +291,7 @@ impl Player {
     /// Damage armor
     /// 
     /// Return true if the armor is destroyed
-    pub fn damage_armor(&mut self, damage:u32) -> bool {
+    pub fn damage_armor(&mut self, damage: u32) -> bool {
         let armor_destroyed = self.armor_mut().damage(damage) && self.armor().armor_type() != ArmorType::None;
 
         if armor_destroyed {
@@ -336,7 +336,7 @@ impl Player {
     /// Remove a specific treasure from the list
     /// 
     /// Returns true on success (if the player had the treasure)
-    pub fn remove_treasure(&mut self, treasure_type:TreasureType) -> bool {
+    pub fn remove_treasure(&mut self, treasure_type: TreasureType) -> bool {
 
         // Find the element
         match self.treasures.iter().position(|&t| t == treasure_type) {
@@ -349,7 +349,7 @@ impl Player {
     }
 
     /// Spend some GP
-    pub fn spend(&mut self, amount:u32) -> Result<(), Error> {
+    pub fn spend(&mut self, amount: u32) -> Result<(), Error> {
         if amount > self.gp {
             Err(Error::NotEnoughGP)
         } else {

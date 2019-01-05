@@ -76,10 +76,10 @@ pub struct Game {
     prev_dir: Direction,
     currently_fighting: Option<Monster>,
     bribe_possible: bool,
-    bribe_treasure:Option<TreasureType>,
-    retreating:bool,
-    vendors_angry:bool,
-    vendor_treasure_price:u32,
+    bribe_treasure: Option<TreasureType>,
+    retreating: bool,
+    vendors_angry: bool,
+    vendor_treasure_price: u32,
     vendor_treasure: Option<TreasureType>,
 }
 
@@ -190,7 +190,7 @@ impl Game {
     }
 
     /// Handle Warp room effects
-    fn room_effect_warp(&mut self, orb_of_zot:bool) -> Event {
+    fn room_effect_warp(&mut self, orb_of_zot: bool) -> Event {
         if orb_of_zot {
             let prev_dir = self.prev_dir;
             self.move_dir(prev_dir);
@@ -206,7 +206,7 @@ impl Game {
     }
 
     /// Handle Treasure room effects
-    fn room_effect_treasure(&mut self, treasure:Treasure) -> Event {
+    fn room_effect_treasure(&mut self, treasure: Treasure) -> Event {
         self.make_current_room_empty();
 
         self.player.treasure_add(treasure.treasure_type);
@@ -215,7 +215,7 @@ impl Game {
     }
 
     // Handle Monster room effects
-    fn room_effect_monster(&mut self, monster:Monster) -> Event {
+    fn room_effect_monster(&mut self, monster: Monster) -> Event {
 
         // If Vendors are not angry, head into vendor trade state instead of combat
         if monster.monster_type() == MonsterType::Vendor && !self.vendors_angry {
@@ -471,7 +471,7 @@ impl Game {
     }
 
     /// After the monster's final attack
-    pub fn retreat_dir(&mut self, dir:Direction) {
+    pub fn retreat_dir(&mut self, dir: Direction) {
         self.state = GameState::Move;
 
         self.move_dir(dir);
@@ -506,7 +506,7 @@ impl Game {
     /// Teleport the player
     /// 
     /// Returns true if the player found the Orb of Zot
-    pub fn teleport(&mut self, x:u32, y:u32, z:u32) -> Result<bool, Error> {
+    pub fn teleport(&mut self, x: u32, y: u32, z: u32) -> Result<bool, Error> {
         let mut found_orb_of_zot = false;
 
         if !self.can_teleport() {
@@ -539,7 +539,7 @@ impl Game {
     }
 
     /// Handle going up/down stairs
-    pub fn move_stairs(&mut self, dir:Stairs) -> Result<(), Error> {
+    pub fn move_stairs(&mut self, dir: Stairs) -> Result<(), Error> {
         let p = &mut self.player;
 
         let room = self.dungeon.room_at(*p.x(), *p.y(), *p.z());
@@ -563,7 +563,7 @@ impl Game {
     }
 
     /// Handle a move command
-    pub fn move_dir(&mut self, dir:Direction) {
+    pub fn move_dir(&mut self, dir: Direction) {
         self.prev_dir = dir;
 
         let roomtype = self.room_at_player().roomtype.clone();
@@ -632,7 +632,7 @@ impl Game {
     }
 
     /// Buy stats from a vendor
-    pub fn vendor_buy_stat(&mut self, stat:Stat) -> Result<u32, Error> {
+    pub fn vendor_buy_stat(&mut self, stat: Stat) -> Result<u32, Error> {
         self.player.spend(1000)?;
 
         let addition = Game::d(1,6);
@@ -641,7 +641,7 @@ impl Game {
     }
 
     /// Begin negotiations to sell a treasure to a vendor
-    pub fn vendor_treasure_offer(&mut self, treasure_type:TreasureType) -> Result<u32, Error> {
+    pub fn vendor_treasure_offer(&mut self, treasure_type: TreasureType) -> Result<u32, Error> {
         if self.state != GameState::Vendor {
             return Err(Error::WrongState);
         }
@@ -665,7 +665,7 @@ impl Game {
     }
 
     /// Roll a die (1d6, 2d7, etc.)
-    pub fn d(count:u32, sides:u32) -> u32 {
+    pub fn d(count: u32, sides: u32) -> u32 {
         let mut total = 0;
 
         let mut rng = thread_rng();
@@ -743,22 +743,22 @@ impl Game {
     }
 
     /// Set player's gender
-    pub fn player_set_gender(&mut self, gender:Gender) {
+    pub fn player_set_gender(&mut self, gender: Gender) {
         self.player.set_gender(gender);
     }
 
     /// Allocate player stat points
-    pub fn player_allocate_points(&mut self, stat:&Stat, points:u32) -> Result<u32, Error> {
+    pub fn player_allocate_points(&mut self, stat:&Stat, points: u32) -> Result<u32, Error> {
         self.player.allocate_points(stat, points)
     }
 
     /// Give the player some armor
-    pub fn player_purchase_armor(&mut self, a:ArmorType, is_vendor:bool) -> Result<(), Error> {
+    pub fn player_purchase_armor(&mut self, a: ArmorType, is_vendor: bool) -> Result<(), Error> {
         self.player.purchase_armor(a, is_vendor)
     }
 
     /// Give the player a weapon
-    pub fn player_purchase_weapon(&mut self, w:WeaponType, is_vendor:bool) -> Result<(), Error> {
+    pub fn player_purchase_weapon(&mut self, w: WeaponType, is_vendor: bool) -> Result<(), Error> {
         self.player.purchase_weapon(w, is_vendor)
     }
 
@@ -768,7 +768,7 @@ impl Game {
     }
 
     /// Purchase a lamp
-    pub fn player_purchase_lamp(&mut self, lamp:bool) -> Result<(), Error> {
+    pub fn player_purchase_lamp(&mut self, lamp: bool) -> Result<(), Error> {
         self.player.purchase_lamp(lamp)
     }
 
@@ -778,7 +778,7 @@ impl Game {
     }
 
     /// Purchase flares
-    pub fn player_purchase_flares(&mut self, flares:u32) -> Result<(), Error> {
+    pub fn player_purchase_flares(&mut self, flares: u32) -> Result<(), Error> {
         self.player.purchase_flares(flares)
     }
 

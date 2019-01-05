@@ -1,4 +1,4 @@
-pub const CURSE_COUNT:u32 = 3;
+pub const CURSE_COUNT: u32 = 3;
 
 #[derive(Debug)]
 pub enum CurseType {

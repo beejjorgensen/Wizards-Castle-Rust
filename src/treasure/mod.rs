@@ -1,4 +1,4 @@
-pub const TREASURE_COUNT:u32 = 8;
+pub const TREASURE_COUNT: u32 = 8;
 
 #[derive(Debug,PartialEq,Copy,Clone)]
 pub enum TreasureType {
@@ -54,7 +54,7 @@ impl Treasure {
     }
 
     /// Return maximum value for a treasure
-    pub fn treasure_max_value(treasure_type:TreasureType) -> u32 {
+    pub fn treasure_max_value(treasure_type: TreasureType) -> u32 {
         let num = Treasure::get_treasure_num_by_type(treasure_type);
 
         (num + 1) * 1500
