@@ -104,6 +104,39 @@ impl Game {
             vendor_treasure: None,
         }
     }
+
+    /// Wrap an x coordinate
+    fn wrap_x(&self, x: i32) -> u32 {
+        if x < 0 {
+            self.dungeon.xsize - 1
+        } else if x >= self.dungeon.xsize as i32 {
+            0
+        } else {
+            x as u32
+        }
+    }
+    
+    /// Wrap a y coordinate
+    fn wrap_y(&self, y: i32) -> u32 {
+        if y < 0 {
+            self.dungeon.ysize - 1
+        } else if y >= self.dungeon.ysize as i32 {
+            0
+        } else {
+            y as u32
+        }
+    }
+    
+    /// Wrap a z coordinate
+    fn wrap_z(&self, z: i32) -> u32 {
+        if z < 0 {
+            self.dungeon.zsize - 1
+        } else if z >= self.dungeon.zsize as i32 {
+            0
+        } else {
+            z as u32
+        }
+    }
     
     /// Mark the player's current room as empty
     fn make_current_room_empty(&mut self) {
@@ -531,9 +564,6 @@ impl Game {
 
     /// Handle a move command
     pub fn move_dir(&mut self, dir:Direction) {
-        let xsize = self.dungeon.xsize;
-        let ysize = self.dungeon.ysize;
-
         self.prev_dir = dir;
 
         let roomtype = self.room_at_player().roomtype.clone();
@@ -544,30 +574,25 @@ impl Game {
             return;
         }
 
-        let (p_x, p_y);
-
-        {
-            p_x = *self.player.x();
-            p_y = *self.player.y();
-        }
+        let (p_x, p_y) = (*self.player.x() as i32, *self.player.y() as i32);
 
         match dir {
             Direction::North => {
-                if p_y == 0 {
-                    self.player.set_y(ysize - 1);
-                } else {
-                    self.player.set_y(p_y - 1);
-                }
-            }
-            Direction::South => self.player.set_y((p_y + 1) % ysize),
-            Direction::West =>  {
-                if p_x == 0 {
-                    self.player.set_x(xsize - 1);
-                } else {
-                    self.player.set_x(p_x - 1);
-                }
-            }
-            Direction::East => self.player.set_x((p_x + 1) % xsize),
+                let new_y = self.wrap_y(p_y - 1);
+                self.player.set_y(new_y);
+            },
+            Direction::South => {
+                let new_y = self.wrap_y(p_y + 1);
+                self.player.set_y(new_y);
+            },
+            Direction::West => {
+                let new_x = self.wrap_x(p_x - 1);
+                self.player.set_x(new_x);
+            },
+            Direction::East => {
+                let new_x = self.wrap_x(p_x + 1);
+                self.player.set_x(new_x);
+            },
         }
     }
 
