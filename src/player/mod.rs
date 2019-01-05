@@ -25,18 +25,18 @@ pub enum Race {
 }
 
 pub struct Player {
-    pub x: usize,
-    pub y: usize,
-    pub z: usize,
+    pub x: u32,
+    pub y: u32,
+    pub z: u32,
     pub race: Race,
     pub gender: Gender,
 
-    pub gp: usize,
+    pub gp: u32,
 
-    pub additional_points: usize,
-    pub st: usize, // TODO make these a map
-    pub dx: usize,
-    pub iq: usize,
+    pub additional_points: u32,
+    pub st: u32, // TODO make these a map
+    pub dx: u32,
+    pub iq: u32,
 
     pub armor: Armor,
     pub weapon: Weapon,
@@ -46,7 +46,7 @@ pub struct Player {
     runestaff: bool,
     orb_of_zot: bool,
 
-    pub flares: usize,
+    pub flares: u32,
 
     blind: bool,
 }
@@ -83,7 +83,7 @@ impl Player {
         }
     }
 
-    pub fn set_position(&mut self, x: usize, y: usize, z: usize) {
+    pub fn set_position(&mut self, x: u32, y: u32, z: u32) {
         self.x = x;
         self.y = y;
         self.z = z;
@@ -114,7 +114,7 @@ impl Player {
     }
 
     /// Get a race number by race type
-    fn get_id_by_race(race: &Race) -> usize {
+    fn get_id_by_race(race: &Race) -> u32 {
         match race {
             Race::Hobbit => 0,
             Race::Elf => 1,
@@ -131,7 +131,7 @@ impl Player {
     /// Allocate points to a stat
     /// 
     /// TODO: support deallocation of points
-    pub fn allocate_points(&mut self, stat:&Stat, points:usize) -> Result<usize, Error> {
+    pub fn allocate_points(&mut self, stat:&Stat, points:u32) -> Result<u32, Error> {
         if points > self.additional_points {
             return Err(Error::NotEnoughPoints);
         }
@@ -147,7 +147,7 @@ impl Player {
         Ok(self.additional_points)
     }
 
-    pub fn add_stat(&mut self, stat:&Stat, points:usize) -> usize {
+    pub fn add_stat(&mut self, stat:&Stat, points:u32) -> u32 {
         let new_total;
 
         match stat {
@@ -222,12 +222,12 @@ impl Player {
     }
 
     /// Return the max number of flares a player can afford
-    pub fn max_flares(&self) -> usize {
+    pub fn max_flares(&self) -> u32 {
         self.gp
     }
 
     /// Purchase flares
-    pub fn purchase_flares(&mut self, flares:usize) -> Result<(), Error> {
+    pub fn purchase_flares(&mut self, flares:u32) -> Result<(), Error> {
         if flares > self.max_flares() {
             return Err(Error::NotEnoughGP);
         }
@@ -243,7 +243,7 @@ impl Player {
     }
 
     /// Return a player stat
-    pub fn stat(&self, stat:Stat) -> usize {
+    pub fn stat(&self, stat:Stat) -> u32 {
         match stat {
             Stat::Strength => self.st,
             Stat::Intelligence => self.iq,
@@ -252,12 +252,12 @@ impl Player {
     }
 
     /// Return flare count
-    pub fn flares(&self) -> usize {
+    pub fn flares(&self) -> u32 {
         self.flares
     }
 
     /// Return number of gold pieces
-    pub fn gp(&self) -> usize {
+    pub fn gp(&self) -> u32 {
         self.gp
     }
 
@@ -284,7 +284,7 @@ impl Player {
     /// Damage the player
     ///
     /// Returns true if the player has died
-    pub fn damage_st(&mut self, damage:usize) -> bool {
+    pub fn damage_st(&mut self, damage:u32) -> bool {
         let defeated;
 
         if damage >= self.st {
@@ -301,7 +301,7 @@ impl Player {
     /// Damage armor
     /// 
     /// Return true if the armor is destroyed
-    pub fn damage_armor(&mut self, damage:usize) -> bool {
+    pub fn damage_armor(&mut self, damage:u32) -> bool {
         let armor_destroyed = self.armor_mut().damage(damage) && self.armor().armor_type() != ArmorType::None;
 
         if armor_destroyed {
@@ -357,7 +357,7 @@ impl Player {
     }
 
     // Spend some GP
-    pub fn spend(&mut self, amount:usize) -> Result<(), Error> {
+    pub fn spend(&mut self, amount:u32) -> Result<(), Error> {
         if amount > self.gp {
             Err(Error::NotEnoughGP)
         } else {
@@ -367,14 +367,14 @@ impl Player {
     }
 
     // Go down
-    pub fn down(&mut self) -> usize {
+    pub fn down(&mut self) -> u32 {
         self.z += 1;
 
         self.z
     }
 
     // Go up
-    pub fn up(&mut self) -> usize {
+    pub fn up(&mut self) -> u32 {
         self.z -= 1;
 
         self.z

@@ -1,4 +1,4 @@
-pub const MONSTER_COUNT: usize = 13;
+pub const MONSTER_COUNT: u32 = 13;
 
 #[derive(Debug,PartialEq,Copy,Clone)]
 pub enum MonsterType {
@@ -20,8 +20,8 @@ pub enum MonsterType {
 #[derive(Debug,PartialEq,Clone)]
 pub struct Monster {
     monster_type: MonsterType,
-    hp: usize,
-    damage: usize,
+    hp: u32,
+    damage: u32,
     break_weapon: bool,
     has_runestaff: bool,
 }
@@ -47,7 +47,7 @@ impl Monster {
     }
 
     /// Return a MonsterType for a given ID
-    fn get_monster_num(monster_type: MonsterType) -> usize {
+    fn get_monster_num(monster_type: MonsterType) -> u32 {
         match monster_type {
             MonsterType::Kobold => 0,
             MonsterType::Orc => 1,
@@ -78,7 +78,7 @@ impl Monster {
     /// Damage the monster
     ///
     /// Return true if defeated
-    pub fn take_damage(&mut self, damage:usize) -> bool {
+    pub fn take_damage(&mut self, damage:u32) -> bool {
         if damage < self.hp {
             self.hp -= damage;
             return false;
@@ -89,7 +89,7 @@ impl Monster {
     }
 
     /// Return damage inflicted
-    pub fn damage(&self) -> usize {
+    pub fn damage(&self) -> u32 {
         self.damage
     }
 

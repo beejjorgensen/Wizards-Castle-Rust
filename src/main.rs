@@ -19,7 +19,7 @@ use wizardscastle::error::Error;
 struct UI {
     game: Game,
     rng: ThreadRng,
-    turn_count: usize,
+    turn_count: u32,
 }
 
 impl UI {
@@ -163,14 +163,14 @@ impl UI {
     }
 
     // Input a coordinate, 1-8
-    fn input_coord(prompt:&str) -> usize {
+    fn input_coord(prompt:&str) -> u32 {
         let mut coord = 0;
         let mut got_num = false;
 
         while !got_num {
             let str = UI::get_input(Some(prompt));
 
-            match str.parse::<usize>() {
+            match str.parse::<u32>() {
                 Ok(v) => {
                     if v >= 1 && v <= 8 {
                         got_num = true;
@@ -369,7 +369,7 @@ impl UI {
 
                 let points_to_add;
                 
-                match s.parse::<usize>() {
+                match s.parse::<u32>() {
                     Ok(p) => points_to_add = p,
                     Err(_) => {
                         print!("\n** ");
@@ -473,7 +473,7 @@ impl UI {
 
             let flare_count;
             
-            match flare_str.parse::<usize>() {
+            match flare_str.parse::<u32>() {
                 Ok(f) => flare_count = f,
                 Err(_) => {
                     print!("** IF YOU DON'T WANT ANY JUST TYPE 0 (ZERO)\n\n");

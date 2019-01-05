@@ -1,4 +1,4 @@
-pub const TREASURE_COUNT:usize = 8;
+pub const TREASURE_COUNT:u32 = 8;
 
 #[derive(Debug,PartialEq,Copy,Clone)]
 pub enum TreasureType {
@@ -18,14 +18,14 @@ pub struct Treasure {
 }
 
 impl Treasure {
-    pub fn new(treasure_num: usize) -> Treasure {
+    pub fn new(treasure_num: u32) -> Treasure {
         Treasure {
             treasure_type: Treasure::get_treasure_by_id(treasure_num),
         }
     }
 
     /// Return a treasure for a given ID
-    fn get_treasure_by_id(id: usize) -> TreasureType {
+    fn get_treasure_by_id(id: u32) -> TreasureType {
         match id {
             0 => TreasureType::RubyRed,
             1 => TreasureType::NornStone,
@@ -40,7 +40,7 @@ impl Treasure {
     }
 
     /// Return treasure identifying number byte type
-    fn get_treasure_num_by_type(treasure_type: TreasureType) -> usize {
+    fn get_treasure_num_by_type(treasure_type: TreasureType) -> u32 {
         match treasure_type {
             TreasureType::RubyRed => 0,
             TreasureType::NornStone => 1,
@@ -54,7 +54,7 @@ impl Treasure {
     }
 
     /// Return maximum value for a treasure
-    pub fn treasure_max_value(treasure_type:TreasureType) -> usize {
+    pub fn treasure_max_value(treasure_type:TreasureType) -> u32 {
         let num = Treasure::get_treasure_num_by_type(treasure_type);
 
         (num + 1) * 1500

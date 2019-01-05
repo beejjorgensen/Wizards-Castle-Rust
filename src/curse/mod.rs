@@ -1,4 +1,4 @@
-pub const CURSE_COUNT:usize = 3;
+pub const CURSE_COUNT:u32 = 3;
 
 #[derive(Debug)]
 pub enum CurseType {
@@ -12,7 +12,7 @@ pub struct Curse {
 }
 
 impl Curse {
-    pub fn get_curse_by_id(id: usize) -> CurseType {
+    pub fn get_curse_by_id(id: u32) -> CurseType {
         match id {
             0 => CurseType::Forgetfulness,
             1 => CurseType::TheLeech,

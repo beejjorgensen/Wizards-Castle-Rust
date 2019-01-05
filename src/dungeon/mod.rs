@@ -12,14 +12,14 @@ use treasure::Treasure;
 #[derive(Debug)]
 pub struct Dungeon {
     pub levels: Vec<Vec<Room>>,
-    pub xsize: usize,
-    pub ysize: usize,
-    pub zsize: usize,
+    pub xsize: u32,
+    pub ysize: u32,
+    pub zsize: u32,
 }
 
 impl Dungeon {
 
-    pub fn new(xsize: usize, ysize: usize, zsize:usize) -> Dungeon {
+    pub fn new(xsize: u32, ysize: u32, zsize:u32) -> Dungeon {
         let mut levels: Vec<Vec<Room>> = Vec::new();
 
         let mut rng = thread_rng();
@@ -109,7 +109,7 @@ impl Dungeon {
 
         // Add curse rooms
         for i in 0..::curse::CURSE_COUNT {
-            let curse_level = rng.gen_range(0, zsize);
+            let curse_level = rng.gen_range(0, zsize) as usize;
 
             let curse = Curse::get_curse_by_id(i);
 
@@ -117,7 +117,7 @@ impl Dungeon {
         }
 
         for i in 0..::treasure::TREASURE_COUNT {
-            let treasure_level = rng.gen_range(0, zsize);
+            let treasure_level = rng.gen_range(0, zsize) as usize;
 
             levels[treasure_level].push(Room { roomtype: RoomType::Treasure(Treasure::new(i)), ..Default::default() })
         }
@@ -125,9 +125,9 @@ impl Dungeon {
         // Run through the levels, padding them with empty rooms, shuffling
         // them, and moving certain rooms to their proper positions.
 
-        for z in 0..zsize {
+        for z in 0..zsize as usize {
             // Fill the rest with empty
-            while levels[z].len() < area {
+            while levels[z].len() < area as usize {
                 levels[z].push(Room{ roomtype: RoomType::Empty, ..Default::default() });
             }
 
@@ -135,13 +135,13 @@ impl Dungeon {
             levels[z].shuffle(&mut rng);
 
             // Fix up the entrance
-            for y in 0..ysize {
-                for x in 0..xsize {
-                    let i = y * xsize + x;
+            for y in 0..ysize as usize {
+                for x in 0..xsize as usize {
+                    let i = y * xsize as usize + x;
 
                     // Swap the entrance
                     if levels[z][i].roomtype == RoomType::Entrance {
-                        let i2 = 0 * xsize + entrance_x;
+                        let i2 = (0 * xsize + entrance_x) as usize;
 
                         levels[z].swap(i, i2);
                     }
@@ -151,9 +151,9 @@ impl Dungeon {
             /*
             // cheater code to reveal Runestaff location
             if z == runestaff_level {
-                for y in 0..ysize {
-                    for x in 0..xsize {
-                        let i = y * xsize + x;
+                for y in 0..ysize as usize {
+                    for x in 0..xsize as usize {
+                        let i = y as usize * xsize + x as usize;
 
                         if let RoomType::Monster(ref m) = levels[z][i].roomtype {
                             if m.has_runestaff() {
@@ -166,9 +166,9 @@ impl Dungeon {
 
             // cheater code to reveal Orb of Zot location
             if z == orb_of_zot_level {
-                for y in 0..ysize {
-                    for x in 0..xsize {
-                        let i = y * xsize + x;
+                for y in 0..ysize as usize {
+                    for x in 0..xsize as usize {
+                        let i = y as usize * xsize + x as usize;
 
                         if let RoomType::Warp(oz) = levels[z][i].roomtype {
                             if oz {
@@ -185,13 +185,13 @@ impl Dungeon {
                 let mut downs = Vec::new();
                 let mut ups = Vec::new();
 
-                for i in 0..xsize * ysize {
+                for i in 0..area as usize {
                     if levels[z-1][i].roomtype == RoomType::StairsDown {
                         downs.push(i);
                     }
                 }
 
-                for i in 0..xsize * ysize {
+                for i in 0..area as usize {
                     if levels[z][i].roomtype == RoomType::StairsUp {
                         ups.push(i);
                     }
@@ -210,27 +210,27 @@ impl Dungeon {
     }
 
     /// Get the entrance x position
-    pub fn entrance_x(&self) -> usize {
+    pub fn entrance_x(&self) -> u32 {
         return (self.xsize - 1) / 2;
     }
 
     /// Return a reference to the room at a location
-    pub fn room_at(&self, x: usize, y: usize, z: usize) -> &Room { // TODO: Result
+    pub fn room_at(&self, x: u32, y: u32, z: u32) -> &Room { // TODO: Result
         let i = y * self.xsize + x;
 
-        &self.levels[z][i]
+        &self.levels[z as usize][i as usize]
     }
 
     /// Return a reference to the room at a location
-    pub fn room_at_mut(&mut self, x: usize, y: usize, z: usize) -> &mut Room { // TODO: Result
+    pub fn room_at_mut(&mut self, x: u32, y: u32, z: u32) -> &mut Room { // TODO: Result
         let i = y * self.xsize + x;
 
-        &mut self.levels[z][i]
+        &mut self.levels[z as usize][i as usize]
     }
 
-    pub fn discover(&mut self, x:usize, y:usize, z:usize) {
+    pub fn discover(&mut self, x:u32, y:u32, z:u32) {
         let i = y * self.xsize + x;
 
-        self.levels[z][i].discovered = true;
+        self.levels[z as usize][i as usize].discovered = true;
     }
 }

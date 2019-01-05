@@ -17,7 +17,7 @@ impl Weapon {
         }
     }
 
-    pub fn cost(w:WeaponType, is_vendor:bool) -> usize {
+    pub fn cost(w:WeaponType, is_vendor:bool) -> u32 {
         let value;
 
         if is_vendor {
@@ -39,7 +39,7 @@ impl Weapon {
         value
     }
 
-    pub fn damage_by_type(w:WeaponType) -> usize {
+    pub fn damage_by_type(w:WeaponType) -> u32 {
         match w {
             WeaponType::None => 0,
             WeaponType::Dagger => 1,
@@ -48,7 +48,7 @@ impl Weapon {
         }
     }
 
-    pub fn damage(&self) -> usize {
+    pub fn damage(&self) -> u32 {
         Weapon::damage_by_type(self.weapon_type)
     }
 

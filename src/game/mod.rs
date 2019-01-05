@@ -14,8 +14,8 @@ use self::rand::thread_rng;
 #[derive(Debug,Clone)]
 pub enum Event {
     None,
-    FoundGold(usize),
-    FoundFlares(usize),
+    FoundGold(u32),
+    FoundFlares(u32),
     Sinkhole,
     Warp,
     Treasure(Treasure),
@@ -28,9 +28,9 @@ pub enum CombatEvent {
     NoWeapon,
     //BookHands,
     Miss,
-    Hit(usize, bool, bool, usize, bool),
+    Hit(u32, bool, bool, u32, bool),
     MonsterMiss,
-    MonsterHit(usize, bool, bool),
+    MonsterHit(u32, bool, bool),
 }
 
 #[derive(Debug,Clone,Copy,PartialEq)]
@@ -78,12 +78,12 @@ pub struct Game {
     bribe_treasure:Option<TreasureType>,
     retreating:bool,
     vendors_angry:bool,
-    vendor_treasure_price:usize,
+    vendor_treasure_price:u32,
     vendor_treasure: Option<TreasureType>,
 }
 
 impl Game {
-    pub fn new(xsize: usize, ysize: usize, zsize: usize) -> Game {
+    pub fn new(xsize: u32, ysize: u32, zsize: u32) -> Game {
 
         let dungeon = Dungeon::new(xsize, ysize, zsize);
 
@@ -209,7 +209,7 @@ impl Game {
             return Ok(CombatEvent::NoWeapon);
         }
 
-        let hit = self.player.dx >= (Game::d(1, 20) + (self.player.is_blind() as usize) * 3);
+        let hit = self.player.dx >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
 
         if hit {
             let damage = self.player.weapon.damage();
@@ -281,7 +281,7 @@ impl Game {
 
         // TODO check for stuck in web
 
-        let hit = self.player.dx < (Game::d(3,7) + (self.player.is_blind() as usize) * 3);
+        let hit = self.player.dx < (Game::d(3,7) + (self.player.is_blind() as u32) * 3);
 
         let mut combat_event = None;
         let mut defeated = false;
@@ -292,7 +292,7 @@ impl Game {
                 let damage = monster.damage();
                 let armor_value = self.player.armor().armor_value();
 
-                let st_damage = std::cmp::max(damage as isize - armor_value as isize, 0) as usize;
+                let st_damage = std::cmp::max(damage as isize - armor_value as isize, 0) as u32;
                 defeated = self.player.damage_st(st_damage);
 
                 let armor_damage = std::cmp::min(damage, armor_value);
@@ -458,7 +458,7 @@ impl Game {
     /// Teleport the player
     /// 
     /// Returns true if the player found the Orb of Zot
-    pub fn teleport(&mut self, x:usize, y:usize, z:usize) -> Result<bool, Error> {
+    pub fn teleport(&mut self, x:u32, y:u32, z:u32) -> Result<bool, Error> {
         let mut found_orb_of_zot = false;
 
         if !self.can_teleport() {
@@ -587,7 +587,7 @@ impl Game {
     }
 
     /// Buy stats from a vendor
-    pub fn vendor_buy_stat(&mut self, stat:Stat) -> Result<usize, Error> {
+    pub fn vendor_buy_stat(&mut self, stat:Stat) -> Result<u32, Error> {
         self.player.spend(1000)?;
 
         let addition = Game::d(1,6);
@@ -596,7 +596,7 @@ impl Game {
     }
 
     /// Begin negotiations to sell a treasure to a vendor
-    pub fn vendor_treasure_offer(&mut self, treasure_type:TreasureType) -> Result<usize, Error> {
+    pub fn vendor_treasure_offer(&mut self, treasure_type:TreasureType) -> Result<u32, Error> {
         if self.state != GameState::Vendor {
             return Err(Error::WrongState);
         }
@@ -620,7 +620,7 @@ impl Game {
     }
 
     /// Roll a die (1d6, 2d7, etc.)
-    pub fn d(count:usize, sides:usize) -> usize {
+    pub fn d(count:u32, sides:u32) -> u32 {
         let mut total = 0;
 
         let mut rng = thread_rng();

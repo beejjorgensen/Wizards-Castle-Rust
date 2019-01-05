@@ -8,7 +8,7 @@ pub enum ArmorType {
 
 pub struct Armor {
     armor_type: ArmorType,
-    health: usize,
+    health: u32,
 }
 
 impl Armor {
@@ -29,7 +29,7 @@ impl Armor {
     }
 
     /// Return the cost in GP of some armor in a given context
-    pub fn cost(a:ArmorType, is_vendor:bool) -> usize {
+    pub fn cost(a:ArmorType, is_vendor:bool) -> u32 {
         let value;
 
         if is_vendor {
@@ -55,7 +55,7 @@ impl Armor {
     }
 
     /// Convert an armor type to its internal ID
-    fn to_id(a:ArmorType) -> usize {
+    fn to_id(a:ArmorType) -> u32 {
         match a {
             ArmorType::None => 9999,
             ArmorType::Leather => 0,
@@ -65,7 +65,7 @@ impl Armor {
     }
 
     /// Return protection value of this armor
-    pub fn armor_value(&self) -> usize {
+    pub fn armor_value(&self) -> u32 {
         match self.armor_type {
             ArmorType::None => 0,
             ArmorType::Leather => 1,
@@ -82,7 +82,7 @@ impl Armor {
     /// Damage the armor
     /// 
     /// Return true if the armor is destroyed
-    pub fn damage(&mut self, damage:usize) -> bool {
+    pub fn damage(&mut self, damage:u32) -> bool {
 
         if damage > self.health {
             self.health = 0;
