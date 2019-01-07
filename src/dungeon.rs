@@ -216,6 +216,7 @@ impl Dungeon {
 
     /// Return a reference to the room at a location
     pub fn room_at(&self, x: u32, y: u32, z: u32) -> &Room { // TODO: Result
+        // TODO modify this so that it returns unknown for undiscovered rooms
         let i = y * self.xsize + x;
 
         &self.levels[z as usize][i as usize]
