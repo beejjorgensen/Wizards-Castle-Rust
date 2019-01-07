@@ -7,7 +7,7 @@ use self::rand::Rng;
 use self::rand::rngs::ThreadRng;
 use self::rand::thread_rng;
 
-use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent, DrinkEvent, GameState};
+use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent, DrinkEvent, OrbEvent, GameState};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
@@ -162,11 +162,16 @@ impl UI {
     }
 
     /// Take some stairs
-    fn move_stairs(&mut self, stairs: Stairs) {
+    fn move_stairs(&mut self, stairs: Stairs) -> bool{
         match self.game.move_stairs(stairs) {
-            Err(_) => println!("** OH {}, NO STAIRS GOING {} IN HERE", self.race_str(), UI::stair_name(stairs)),
+            Err(_) => {
+                println!("** OH {}, NO STAIRS GOING {} IN HERE", self.race_str(), UI::stair_name(stairs));
+                return false;
+            },
             Ok(_) => (),
         };
+
+        true
     }
 
     // Input a coordinate, 1-8
@@ -197,11 +202,11 @@ impl UI {
     }
 
     /// Teleport
-    fn teleport(&mut self) {
+    fn teleport(&mut self) -> bool{
 
         if !self.game.can_teleport() {
-            println!("\n** YOU CAN'T TELEPORT WITHOUT THE RUNESTAFF!");
-            return;
+            println!("** YOU CAN'T TELEPORT WITHOUT THE RUNESTAFF!");
+            return false;
         }
 
         let x = UI::input_coord("X-COORD (1 = FAR WEST  8 = FAR EAST )? ");
@@ -218,6 +223,8 @@ impl UI {
             },
             Err(err) => panic!("{:#?}", err),
         }
+
+        true
     }
 
     /// Drink
@@ -1250,6 +1257,44 @@ impl UI {
         true
     }
 
+    /// Gaze into an Orb
+    pub fn gaze(&mut self) -> bool {
+        if let Ok(event) = self.game.gaze() {
+            print!("YOU SEE ");
+
+            match event {
+                OrbEvent::BloodyHeap => {
+                    println!("YOURSELF IN A BLOODY HEAP")
+                }
+                OrbEvent::Polymorph(m) => {
+                    let mon_str = UI::monster_name(m);
+                    println!("YOURSELF DRINKING FROM A POOL AND BECOMING {} {}", UI::get_article(&mon_str), mon_str);
+                }
+                OrbEvent::GazeBack(m) => {
+                    let mon_str = UI::monster_name(m);
+                    println!("{} {} GAZING BACK AT YOU", UI::get_article(&mon_str), mon_str);
+                }
+                OrbEvent::Item(room_type, x, y, z) => {
+                    println!("{} AT ({},{}) LEVEL {}", UI::room_name(&room_type), x, y, z);
+                }
+                OrbEvent::OrbOfZot(x, y, z) => {
+                    println!("THE ORB OF ZOT AT ({},{}) LEVEL {}", x, y, z);
+                }
+                OrbEvent::SoapOpera => {
+                    println!("A SOAP OPERA RERUN");
+                }
+            }
+
+            println!();
+
+            true
+
+        } else {
+            println!("** NO ORB - NO GAZE");
+            false
+        }
+    }
+
 }
 
 /// Main
@@ -1331,9 +1376,21 @@ fn main() {
                         Some("S") => ui.move_dir(Direction::South),
                         Some("W") => ui.move_dir(Direction::West),
                         Some("E") => ui.move_dir(Direction::East),
-                        Some("U") => ui.move_stairs(Stairs::Up),
-                        Some("D") => ui.move_stairs(Stairs::Down),
-                        Some("T") => ui.teleport(),
+                        Some("U") => {
+                            if !ui.move_stairs(Stairs::Up) {
+                                quiet = true;
+                            }
+                        },
+                        Some("D") => {
+                            if !ui.move_stairs(Stairs::Down) {
+                                quiet = true;
+                            }
+                        },
+                        Some("T") => {
+                            if !ui.teleport() {
+                                quiet = true;
+                            }
+                        },
                         Some("L") => {
                             ui.lamp();
                             quiet = true;
@@ -1345,6 +1402,11 @@ fn main() {
                             print_stats = false;
                             resolve_room_effects = false;
                         }
+                        Some("G") => {
+                            if !ui.gaze() {
+                                quiet = true;
+                            }
+                        },
                         _ => {
                             println!("** STUPID {} THAT WASN'T A VALID COMMAND", ui.race_str());
                             valid_command = false;

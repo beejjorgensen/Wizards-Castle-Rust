@@ -46,6 +46,16 @@ pub enum DrinkEvent {
     ChangeGender,
 }
 
+#[derive(Debug, Clone)]
+pub enum OrbEvent {
+    BloodyHeap,
+    Polymorph(MonsterType),
+    GazeBack(MonsterType),
+    Item(RoomType, u32, u32, u32),
+    OrbOfZot(u32, u32, u32),
+    SoapOpera,
+}
+
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Direction {
     North,
@@ -803,6 +813,90 @@ impl Game {
         }
 
         Ok(())
+    }
+
+    /// Gaze into an Orb
+    pub fn gaze(&mut self) -> Result<OrbEvent, Error> {
+        {
+            let room_type = self.room_at_player().room_type();
+
+            if *room_type != RoomType::CrystalOrb {
+                return Err(Error::CantGo);
+            }
+        }
+
+        let monster_list = [
+            MonsterType::Kobold,
+            MonsterType::Orc,
+            MonsterType::Wolf,
+            MonsterType::Goblin,
+            MonsterType::Ogre,
+            MonsterType::Troll,
+            MonsterType::Bear,
+            MonsterType::Minotaur,
+            MonsterType::Gargoyle,
+            MonsterType::Chimera,
+            MonsterType::Balrog,
+            MonsterType::Dragon,
+        ];
+
+        let mut rng = thread_rng();
+
+        match Game::d(1,6) {
+            1 => {
+                self.player.change_stat(&Stat::Strength, -(Game::d(1,2) as i32));
+                self.make_current_room_empty();
+                Ok(OrbEvent::BloodyHeap)
+            },
+
+            2 => {
+                let i = rng.gen_range(0, monster_list.len());
+                Ok(OrbEvent::Polymorph(monster_list[i]))
+            }
+
+            3 => {
+                let i = rng.gen_range(0, monster_list.len());
+                Ok(OrbEvent::GazeBack(monster_list[i]))
+            }
+
+            4 => {
+                let x = rng.gen_range(0, self.dungeon.xsize());
+                let y = rng.gen_range(0, self.dungeon.ysize());
+                let z = rng.gen_range(0, self.dungeon.zsize());
+
+                let room_type = self.dungeon.room_at(x, y, z).room_type().clone();
+
+                self.dungeon.room_at_mut(x, y, z).set_discovered(true);
+
+                Ok(OrbEvent::Item(room_type, x, y, z))
+            }
+
+            5 => {
+                let (x, y, z);
+
+                if Game::d(1,8) <= 3 {
+                    // Actual location
+                    let loc = self.dungeon.orb_of_zot_location();
+                    x = loc.0;
+                    y = loc.1;
+                    z = loc.2;
+                } else {
+                    // Fake location
+                    x = rng.gen_range(0, self.dungeon.xsize());
+                    y = rng.gen_range(0, self.dungeon.ysize());
+                    z = rng.gen_range(0, self.dungeon.zsize());
+                }
+
+                Ok(OrbEvent::OrbOfZot(x, y, z))
+            }
+
+            6 => {
+                Ok(OrbEvent::SoapOpera)
+            }
+
+            _ => panic!("SNH"),
+        }
+
     }
 
     /// Roll a die (1d6, 2d7, etc.)

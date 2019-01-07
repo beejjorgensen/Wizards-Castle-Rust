@@ -15,6 +15,7 @@ pub struct Dungeon {
     xsize: u32,
     ysize: u32,
     zsize: u32,
+    orb_of_zot: (u32, u32, u32),
 }
 
 impl Dungeon {
@@ -125,6 +126,8 @@ impl Dungeon {
         // Run through the levels, padding them with empty rooms, shuffling
         // them, and moving certain rooms to their proper positions.
 
+        let mut orb_of_zot = (0, 0, 0);
+
         for z in 0..zsize as usize {
             // Fill the rest with empty
             while levels[z].len() < area as usize {
@@ -148,6 +151,21 @@ impl Dungeon {
                 }
             }
 
+            // Find Orb of Zot
+            if z as u32 == orb_of_zot_level {
+                for y in 0..ysize {
+                    for x in 0..xsize {
+                        let i = (y * xsize + x) as usize;
+
+                        if let RoomType::Warp(oz) = levels[z][i].roomtype {
+                            if oz {
+                                orb_of_zot = (x, y, z as u32);
+                            }
+                        }
+                    }
+                }
+            }
+
             /*
             // cheater code to reveal Runestaff location
             if z == runestaff_level {
@@ -165,18 +183,8 @@ impl Dungeon {
             }
 
             // cheater code to reveal Orb of Zot location
-            if z == orb_of_zot_level {
-                for y in 0..ysize as usize {
-                    for x in 0..xsize as usize {
-                        let i = y as usize * xsize + x as usize;
-
-                        if let RoomType::Warp(oz) = levels[z][i].roomtype {
-                            if oz {
-                                println!("\n>>> ORB OF ZOT IS AT {},{},{} <<<\n", x+1, y+1, z+1);
-                            }
-                        }
-                    }
-                }
+            if z == orb_of_zot_level as usize {
+                println!("\n>>> ORB OF ZOT IS AT {},{},{} <<<\n", orb_of_zot.0, orb_of_zot.1, orb_of_zot.2);
             }
             */
 
@@ -206,7 +214,7 @@ impl Dungeon {
             }
         }
 
-        Dungeon{levels, xsize, ysize, zsize}
+        Dungeon{levels, xsize, ysize, zsize, orb_of_zot}
     }
 
     /// Get the entrance x position
@@ -249,5 +257,10 @@ impl Dungeon {
     /// Return z dimension
     pub fn zsize(&self) -> &u32 {
         &self.zsize
+    }
+
+    /// Return Orb of Zot location
+    pub fn orb_of_zot_location(&self) -> (u32, u32, u32) {
+        self.orb_of_zot
     }
 }
