@@ -587,7 +587,7 @@ impl UI {
 
         let room_str = UI::room_name(&room.roomtype);
 
-        println!("HERE YOU FIND {}\n", room_str);
+        println!("HERE YOU FIND {}", room_str);
     }
 
     // Attack a monster
@@ -1164,10 +1164,10 @@ impl UI {
     }
 
     /// Shine the lamp into another room
-    pub fn lamp(&mut self) {
+    pub fn lamp(&mut self) -> bool {
         if !self.game.player_has_lamp() {
-            println!("** YOU DON'T HAVE A LAMP\n");
-            return;
+            println!("** YOU DON'T HAVE A LAMP");
+            return false;
         }
 
         let dir;
@@ -1180,8 +1180,8 @@ impl UI {
             Some("W") => dir = Direction::West,
             Some("E") => dir = Direction::East,
             _ => {
-                println!("\n** TURKEY! THAT'S NOT A DIRECTION\n");
-                return;
+                println!("\n** TURKEY! THAT'S NOT A DIRECTION");
+                return false;
             },
         }
 
@@ -1201,14 +1201,16 @@ impl UI {
 
         let room_str = UI::room_name(&room_type);
 
-        println!("THERE YOU'LL FIND {}\n", room_str);
+        println!("THERE YOU'LL FIND {}", room_str);
+
+        true
     }
 
     /// Set off a flare
-    pub fn flare(&mut self) {
+    pub fn flare(&mut self) -> bool {
         if self.game.player_flares() == 0 {
-            println!("** HEY BRIGHT ONE, YOU'RE OUT OF FLARES\n");
-            return;
+            println!("** HEY BRIGHT ONE, YOU'RE OUT OF FLARES");
+            return false;
         }
 
         match self.game.flare() {
@@ -1245,8 +1247,7 @@ impl UI {
             println!("\n");
         }
 
-
-
+        true
     }
 
 }
@@ -1274,37 +1275,108 @@ fn main() {
         ui.buy_lamp();
         ui.buy_flares();
 
-        println!("\nOK {}, YOU ENTER THE CASTLE AND BEGIN.\n", ui.race_str());
+        println!("\n\nOK {}, YOU ENTER THE CASTLE AND BEGIN.", ui.race_str());
 
         let mut alive = true;
-
-        let mut map_requested = false;
+        let mut automove = false;
 
         while alive {
             ui.turn_count += 1;
 
             ui.game.discover_room_at_player();
 
-            if map_requested {
-                ui.print_location();
+            // TODO curse effects (Does this happen before automove??)
+
+            // TODO curse check
+
+            // TODO random message
+
+            // TODO cure blindness
+
+            // TODO dissolve books
+
+            let mut print_location = true;
+            let mut print_stats = true;
+            let mut resolve_room_effects = true;
+            let mut quiet = false;
+
+            if automove {
+                println!("\n");
             } else {
-                println!();
+                let mut valid_command = false;
 
-                if ui.game.state() != GameState::VendorAttack {
-                    ui.print_location();
-                    ui.print_stats();
+                while !valid_command {
+                    valid_command = true;
 
-                    ui.print_room();
+                    let command = UI::get_input(Some("\n\nYOUR MOVE? "));
+
+                    println!();
+
+                    match command.get(..2) {
+                        Some("DR") => {
+                            ui.drink();
+                            quiet = true;
+                            break;
+                        }
+                        _ => ()
+                    }
+
+                    match command.get(..1) {
+                        Some("M") => {
+                            ui.map(false);
+                            print_stats = false;
+                            resolve_room_effects = false;
+                        },
+                        Some("N") => ui.move_dir(Direction::North),
+                        Some("S") => ui.move_dir(Direction::South),
+                        Some("W") => ui.move_dir(Direction::West),
+                        Some("E") => ui.move_dir(Direction::East),
+                        Some("U") => ui.move_stairs(Stairs::Up),
+                        Some("D") => ui.move_stairs(Stairs::Down),
+                        Some("T") => ui.teleport(),
+                        Some("L") => {
+                            ui.lamp();
+                            quiet = true;
+                        },
+                        Some("F") => {
+                            if !ui.flare() {
+                                print_location = false;
+                            }
+                            print_stats = false;
+                            resolve_room_effects = false;
+                        }
+                        _ => {
+                            println!("** STUPID {} THAT WASN'T A VALID COMMAND", ui.race_str());
+                            valid_command = false;
+                        },
+                    }
                 }
-                
-                let mut automove = false;
+            } // if !automove
 
+            if quiet {
+                print_location = false;
+                print_stats = false;
+                resolve_room_effects = false;
+            }
+
+            automove = false;
+
+            if print_location {
+                ui.print_location();
+            }
+            
+            if print_stats {
+                ui.print_stats();
+                ui.print_room();
+            }
+
+            if resolve_room_effects {                
                 match ui.game.room_effect() {
                     Event::FoundGold(_) => {
-                        println!("YOU HAVE {}", ui.game.player_gp());
+                        println!("\nYOU HAVE {}", ui.game.player_gp());
                     },
                     Event::FoundFlares(_) => {
-                        println!("YOU HAVE {}", ui.game.player_flares());
+                        println!("\nYOU HAVE {}", ui.game.player_flares());
                     },
                     Event::Sinkhole => {
                         automove = true;
@@ -1318,78 +1390,24 @@ fn main() {
                         automove = retreated;
                     }
                     Event::Treasure(_) => {
-                        println!("IT'S NOW YOURS\n");
+                        println!("\nIT'S NOW YOURS\n");
                     }
                     Event::Vendor => {
                         ui.vendor();
                     }
                     Event::None => (),
                 }
+            } // if resolve_room_effects
 
-                // See if we were killed by something
-                if ui.game.state() == GameState::Dead {
-                    alive = false;
-                    continue;
-                }
-
-                // If we're chosen to fight the vendor, let's do that
-                if ui.game.state() == GameState::VendorAttack {
-                    automove = true;
-                }
-
-                if automove {
-                    continue;
-                }
+            // If we're chosen to fight the vendor, let's do that
+            if ui.game.state() == GameState::VendorAttack {
+                automove = true;
             }
 
-            map_requested = false;
-
-            // TODO curse effects (Does this happen before automove??)
-
-            // TODO curse check
-
-            // TODO random message
-
-            // TODO cure blindness
-
-            // TODO dissolve books
-
-            let mut valid_command = false;
-
-            while !valid_command {
-                valid_command = true;
-
-                let command = UI::get_input(Some("\nYOUR MOVE? "));
-
-                println!();
-
-                match command.get(..2) {
-                    Some("DR") => {
-                        ui.drink();
-                        break;
-                    }
-                    _ => ()
-                }
-
-                match command.get(..1) {
-                    Some("M") => {
-                        ui.map(false);
-                        map_requested = true;
-                    },
-                    Some("N") => ui.move_dir(Direction::North),
-                    Some("S") => ui.move_dir(Direction::South),
-                    Some("W") => ui.move_dir(Direction::West),
-                    Some("E") => ui.move_dir(Direction::East),
-                    Some("U") => ui.move_stairs(Stairs::Up),
-                    Some("D") => ui.move_stairs(Stairs::Down),
-                    Some("T") => ui.teleport(),
-                    Some("L") => ui.lamp(),
-                    Some("F") => ui.flare(),
-                    _ => {
-                        println!("** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
-                        valid_command = false;
-                    }
-                }
+            // See if we were killed by something
+            if ui.game.state() == GameState::Dead {
+                alive = false;
+                continue;
             }
 
             // See if the player walked out
@@ -1397,7 +1415,6 @@ fn main() {
                 alive = false;
                 continue;
             }
-
         } // while alive
 
         ui.game_summary();
