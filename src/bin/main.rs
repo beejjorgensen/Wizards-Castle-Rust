@@ -1158,6 +1158,33 @@ impl UI {
         fighting_vendor
     }
 
+    /// Shine the lamp into another room
+    pub fn lamp(&mut self) {
+
+        let dir;
+
+        let dir_str = UI::get_input(Some("WHERE DO YOU WANT TO SHINE THE LAMP (N,S,E, OR W)? "));
+
+        match dir_str.get(..1) {
+            Some("N") => dir = Direction::North,
+            Some("S") => dir = Direction::South,
+            Some("W") => dir = Direction::West,
+            Some("E") => dir = Direction::East,
+            _ => {
+                println!("\n** TURKEY! THAT'S NOT A DIRECTION\n");
+                return;
+            },
+        }
+
+        let (x, y, z, room_type) = self.game.shine_lamp(dir);
+
+        println!("\nTHE LAMP SHINES INTO ({},{}) LEVEL {}\n", x+1, y+1, z+1);
+
+        let room_str = UI::room_name(&room_type);
+
+        println!("THERE YOU'LL FIND {}\n", room_str);
+    }
+
 }
 
 /// Main
@@ -1282,7 +1309,7 @@ fn main() {
 
                 match command.get(..1) {
                     Some("M") => {
-                        ui.map(true);
+                        ui.map(false);
                         map_requested = true;
                     },
                     Some("N") => ui.move_dir(Direction::North),
@@ -1292,6 +1319,7 @@ fn main() {
                     Some("U") => ui.move_stairs(Stairs::Up),
                     Some("D") => ui.move_stairs(Stairs::Down),
                     Some("T") => ui.teleport(),
+                    Some("L") => ui.lamp(),
                     _ => {
                         println!("** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
                         valid_command = false;

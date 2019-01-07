@@ -743,6 +743,38 @@ impl Game {
         }
     }
 
+    /// Shine the lamp
+    pub fn shine_lamp(&mut self, dir: Direction) -> (u32, u32, u32, RoomType) {
+        let (x, y);
+        
+        match dir {
+            Direction::North => {
+                x = *self.player.x();
+                y = self.wrap_y(*self.player.y() as i32 - 1);
+            },
+            Direction::South => {
+                x = *self.player.x();
+                y = self.wrap_y(*self.player.y() as i32 + 1);
+            },
+            Direction::West => {
+                x = self.wrap_x(*self.player.x() as i32 - 1);
+                y = *self.player.y();
+            },
+            Direction::East => {
+                x = self.wrap_x(*self.player.x() as i32 + 1);
+                y = *self.player.y();
+            },
+        }
+
+        let z = *self.player.z();
+
+        let room = self.dungeon.room_at_mut(x, y, z);
+
+        room.set_discovered(true);
+
+        (x, y, z, room.room_type().clone())
+    }
+
     /// Roll a die (1d6, 2d7, etc.)
     pub fn d(count: u32, sides: u32) -> u32 {
         let mut total = 0;

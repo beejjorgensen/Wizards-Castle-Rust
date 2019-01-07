@@ -47,5 +47,10 @@ impl Room {
     pub fn room_type(&self) -> &RoomType {
         &self.roomtype
     }
+
+    /// Mark room as discovered
+    pub fn set_discovered(&mut self, discovered: bool) {
+        self.discovered = discovered;
+    }
 }
 
