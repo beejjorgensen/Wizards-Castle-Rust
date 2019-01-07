@@ -53,6 +53,7 @@ pub struct Player {
     flares: u32,
 
     blind: bool,
+    book_stuck: bool,
 }
 
 impl Player {
@@ -72,6 +73,7 @@ impl Player {
             stat: HashMap::new(),
 
             blind: false,
+            book_stuck: false,
 
             armor: Armor::new(ArmorType::None),
             weapon: Weapon::new(WeaponType::None),
@@ -137,7 +139,7 @@ impl Player {
     }
 
     /// Allocate points to a stat
-    pub fn allocate_points(&mut self, stat:&Stat, points: u32) -> Result<u32, Error> {
+    pub fn allocate_points(&mut self, stat: &Stat, points: u32) -> Result<u32, Error> {
         if points > self.additional_points {
             return Err(Error::NotEnoughPoints);
         }
@@ -150,7 +152,7 @@ impl Player {
     }
 
     /// Modify a stat
-    pub fn change_stat(&mut self, stat:&Stat, delta: i32) -> u32 {
+    pub fn change_stat(&mut self, stat: &Stat, delta: i32) -> u32 {
         let mut val = *self.stat.get(stat).unwrap() as i32;
 
         val += delta;
@@ -163,6 +165,15 @@ impl Player {
         self.stat.insert(*stat, result);
 
         result
+    }
+
+    /// Set a stat
+    pub fn set_stat(&mut self, stat: &Stat, mut val: u32) -> u32 {
+        val = std::cmp::min(18, val);
+
+        self.stat.insert(*stat, val);
+
+        val
     }
 
     /// Give the player some armor
@@ -235,6 +246,11 @@ impl Player {
     /// Return true if the player is blind
     pub fn is_blind(&self) -> bool {
         self.blind
+    }
+
+    /// Set the player's blind status
+    pub fn set_blind(&mut self, blind: bool) {
+        self.blind = blind;
     }
 
     /// Return a player stat
@@ -353,6 +369,11 @@ impl Player {
         }
     }
 
+    /// True if the player has a specific treasure
+    pub fn has_treasure(&self, treasure_type: TreasureType) -> bool {
+        self.treasures.contains(&treasure_type)
+    }
+
     /// Spend some GP
     pub fn spend(&mut self, amount: u32) -> Result<(), Error> {
         if amount > self.gp {
@@ -440,5 +461,15 @@ impl Player {
         self.flares = f as u32;
 
         self.flares
+    }
+
+    /// True if a book is stuck to the player's hands
+    pub fn book_stuck(&self) -> &bool {
+        &self.book_stuck
+    }
+
+    /// Set book stuck status
+    pub fn set_book_stuck(&mut self, stuck: bool) {
+        self.book_stuck = stuck;
     }
 }

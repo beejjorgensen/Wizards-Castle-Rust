@@ -7,7 +7,7 @@ use self::rand::Rng;
 use self::rand::rngs::ThreadRng;
 use self::rand::thread_rng;
 
-use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent, DrinkEvent, OrbEvent, GameState};
+use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent, DrinkEvent, OrbEvent, BookEvent, GameState};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
@@ -606,6 +606,10 @@ impl UI {
         match self.game.attack() {
             Ok(CombatEvent::NoWeapon) =>  {
                 println!("\n** POUNDING ON {} {} WON'T HURT IT", m_art, m_name);
+            },
+
+            Ok(CombatEvent::BookHands) =>  {
+                println!("\n** YOU CAN'T BEAT IT TO DEATH WITH A BOOK");
             },
 
             Ok(CombatEvent::Hit(_, weapon_broke, defeated, treasure, got_runestaff)) =>  {
@@ -1295,6 +1299,44 @@ impl UI {
         }
     }
 
+    /// Open a chest
+    fn open_chest(&mut self) {
+        println!("[STUB: Open chest]\n");
+    }
+
+    /// Open a book
+    fn open_book(&mut self) {
+        match self.game.open_book() {
+            Ok(event) => match event {
+                BookEvent::Blind => println!("FLASH! OH NO! YOU ARE NOW A BLIND {}", self.race_str()),
+                BookEvent::Poetry => println!("IT'S ANOTHER VOLUME OF ZOT'S POETRY! - YEECH!"),
+                BookEvent::PlayMonster(m) => println!("IT'S AN OLD COPY OF PLAY{}", UI::monster_name(m)),
+                BookEvent::Dexterity => println!("IT'S A MANUAL OF DEXTERITY!"),
+                BookEvent::Strength => println!("IT'S A MANUAL OF STRENGTH!"),
+                BookEvent::Sticky => println!("THE BOOK STICKS TO YOUR HANDS -\n\nNOW YOU CAN'T DRAW YOUR WEAPON!"),
+            }
+            Err(err) => panic!(err),
+        }
+
+        println!();
+    }
+
+    /// Open a book or chest
+    pub fn open(&mut self) -> bool {
+        let room_type = self.game.room_at_player().room_type().clone();
+
+        match room_type {
+            RoomType::Chest => self.open_chest(),
+            RoomType::Book => self.open_book(),
+            _ => {
+                println!("** THE ONLY THING YOU OPENED WAS YOUR BIG MOUTH");
+                return false;
+            }
+        }
+
+        true
+    }
+
 }
 
 /// Main
@@ -1336,9 +1378,15 @@ fn main() {
 
             // TODO random message
 
-            // TODO cure blindness
+            // Cure blindness
+            if ui.game.cure_blindness() {
+                println!("\nTHE OPAL EYE CURES YOUR BLINDNESS");
+            }
 
-            // TODO dissolve books
+            // Cure book stuck to hands
+            if ui.game.cure_book() {
+                println!("\nTHE BLUE FLAME DISSOLVES THE BOOK");
+            }
 
             let mut print_location = true;
             let mut print_stats = true;
@@ -1407,6 +1455,11 @@ fn main() {
                                 quiet = true;
                             }
                         },
+                        Some("O") => {
+                            if !ui.open() {
+                                quiet = true;
+                            }
+                        }
                         _ => {
                             println!("** STUPID {} THAT WASN'T A VALID COMMAND", ui.race_str());
                             valid_command = false;

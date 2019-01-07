@@ -151,7 +151,7 @@ impl Dungeon {
                 }
             }
 
-            // Find Orb of Zot
+            // Find Orb of Zot (for gazing into orbs)
             if z as u32 == orb_of_zot_level {
                 for y in 0..ysize {
                     for x in 0..xsize {

@@ -27,7 +27,7 @@ pub enum Event {
 #[derive(Debug,Clone,Copy)]
 pub enum CombatEvent {
     NoWeapon,
-    //BookHands,
+    BookHands,
     Miss,
     Hit(u32, bool, bool, u32, bool),
     MonsterMiss,
@@ -54,6 +54,16 @@ pub enum OrbEvent {
     Item(RoomType, u32, u32, u32),
     OrbOfZot(u32, u32, u32),
     SoapOpera,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum BookEvent {
+    Blind,
+    Poetry,
+    PlayMonster(MonsterType),
+    Dexterity,
+    Strength,
+    Sticky,
 }
 
 #[derive(Debug,Clone,Copy,PartialEq)]
@@ -130,6 +140,28 @@ impl Game {
             vendor_treasure_price: 0,
             vendor_treasure: None,
         }
+    }
+
+    /// Get a random monster type
+    fn rand_monster_type() -> MonsterType {
+        let monster_list = [
+            MonsterType::Kobold,
+            MonsterType::Orc,
+            MonsterType::Wolf,
+            MonsterType::Goblin,
+            MonsterType::Ogre,
+            MonsterType::Troll,
+            MonsterType::Bear,
+            MonsterType::Minotaur,
+            MonsterType::Gargoyle,
+            MonsterType::Chimera,
+            MonsterType::Balrog,
+            MonsterType::Dragon,
+        ];
+
+        let mut rng = thread_rng();
+
+        monster_list[rng.gen_range(0, monster_list.len())]
     }
 
     /// Wrap an x coordinate
@@ -281,6 +313,11 @@ impl Game {
         if self.player.weapon().weapon_type() == WeaponType::None {
             self.state = GameState::MonsterAttack;
             return Ok(CombatEvent::NoWeapon);
+        }
+
+        if *self.player.book_stuck() {
+            self.state = GameState::MonsterAttack;
+            return Ok(CombatEvent::BookHands);
         }
 
         let hit = *self.player.stat(&Stat::Dexterity) >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
@@ -827,21 +864,6 @@ impl Game {
             }
         }
 
-        let monster_list = [
-            MonsterType::Kobold,
-            MonsterType::Orc,
-            MonsterType::Wolf,
-            MonsterType::Goblin,
-            MonsterType::Ogre,
-            MonsterType::Troll,
-            MonsterType::Bear,
-            MonsterType::Minotaur,
-            MonsterType::Gargoyle,
-            MonsterType::Chimera,
-            MonsterType::Balrog,
-            MonsterType::Dragon,
-        ];
-
         let mut rng = thread_rng();
 
         match Game::d(1,6) {
@@ -852,13 +874,11 @@ impl Game {
             },
 
             2 => {
-                let i = rng.gen_range(0, monster_list.len());
-                Ok(OrbEvent::Polymorph(monster_list[i]))
+                Ok(OrbEvent::Polymorph(Game::rand_monster_type()))
             }
 
             3 => {
-                let i = rng.gen_range(0, monster_list.len());
-                Ok(OrbEvent::GazeBack(monster_list[i]))
+                Ok(OrbEvent::GazeBack(Game::rand_monster_type()))
             }
 
             4 => {
@@ -899,6 +919,65 @@ impl Game {
             _ => panic!("SNH"),
         }
 
+    }
+
+    /// Open a book
+    pub fn open_book(&mut self) -> Result<BookEvent, Error> {
+        {
+            let room_type = self.room_at_player().room_type();
+
+            if *room_type != RoomType::Book {
+                return Err(Error::CantGo);
+            }
+        }
+
+        self.make_current_room_empty();
+
+        match Game::d(1,6) {
+            1 => {
+                self.player.set_blind(true);
+                Ok(BookEvent::Blind)
+            }
+            2 => Ok(BookEvent::Poetry),
+            3 => Ok(BookEvent::PlayMonster(Game::rand_monster_type())),
+            4 => {
+                self.player.set_stat(&Stat::Dexterity, 18);
+                Ok(BookEvent::Dexterity)
+            }
+            5 => {
+                self.player.set_stat(&Stat::Strength, 18);
+                Ok(BookEvent::Strength)
+            }
+            6 => {
+                self.player.set_book_stuck(true);
+                Ok(BookEvent::Sticky)
+            }
+            _ => panic!("SNH"),
+        }
+    }
+
+    /// Cure blindness
+    /// 
+    /// True if blindness was cured
+    pub fn cure_blindness(&mut self) -> bool {
+        if self.player.is_blind() && self.player.has_treasure(TreasureType::OpalEye) {
+            self.player.set_blind(false);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Cure book stuck to hands
+    /// 
+    /// True if the book was dissolved
+    pub fn cure_book(&mut self) -> bool {
+        if *self.player.book_stuck() && self.player.has_treasure(TreasureType::BlueFlame) {
+            self.player.set_book_stuck(false);
+            true
+        } else {
+            false
+        }
     }
 
     /// Roll a die (1d6, 2d7, etc.)
