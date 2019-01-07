@@ -795,6 +795,8 @@ impl Game {
             return Err(Error::CantGo);
         }
 
+        self.player.change_flares(-1);
+
         let xm1 = *self.player.x() as i32 - 1;
         let ym1 = *self.player.y() as i32 - 1;
 
