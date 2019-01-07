@@ -123,7 +123,7 @@ impl Game {
     }
 
     /// Wrap an x coordinate
-    fn wrap_x(&self, x: i32) -> u32 {
+    pub fn wrap_x(&self, x: i32) -> u32 {
         if x < 0 {
             self.dungeon.xsize() - 1
         } else if x >= self.dungeon_xsize() as i32 {
@@ -134,7 +134,7 @@ impl Game {
     }
     
     /// Wrap a y coordinate
-    fn wrap_y(&self, y: i32) -> u32 {
+    pub fn wrap_y(&self, y: i32) -> u32 {
         if y < 0 {
             self.dungeon_ysize() - 1
         } else if y >= self.dungeon_ysize() as i32 {
@@ -145,7 +145,7 @@ impl Game {
     }
     
     /// Wrap a z coordinate
-    fn wrap_z(&self, z: i32) -> u32 {
+    pub fn wrap_z(&self, z: i32) -> u32 {
         if z < 0 {
             self.dungeon_zsize() - 1
         } else if z >= self.dungeon_zsize() as i32 {
@@ -744,7 +744,11 @@ impl Game {
     }
 
     /// Shine the lamp
-    pub fn shine_lamp(&mut self, dir: Direction) -> (u32, u32, u32, RoomType) {
+    pub fn shine_lamp(&mut self, dir: Direction) -> Result<(u32, u32, u32, RoomType), Error> {
+        if !self.player.has_lamp() {
+            return Err(Error::CantGo);
+        }
+
         let (x, y);
         
         match dir {
@@ -772,7 +776,33 @@ impl Game {
 
         room.set_discovered(true);
 
-        (x, y, z, room.room_type().clone())
+        Ok((x, y, z, room.room_type().clone()))
+    }
+
+    /// Fire a flare from the player location
+    pub fn flare(&mut self) -> Result<(), Error> {
+        if self.player.flares() == 0 {
+            return Err(Error::CantGo);
+        }
+
+        let xm1 = *self.player.x() as i32 - 1;
+        let ym1 = *self.player.y() as i32 - 1;
+
+        let z = *self.player.z();
+
+        for y in ym1..(ym1 + 3) {
+
+            let yw = self.wrap_y(y);
+
+            for x in xm1..(xm1 + 3) {
+
+                let xw = self.wrap_x(x);
+
+                self.dungeon.room_at_mut(xw, yw, z).set_discovered(true);
+            }
+        }
+
+        Ok(())
     }
 
     /// Roll a die (1d6, 2d7, etc.)
@@ -931,6 +961,11 @@ impl Game {
     /// Return a reference to the room at a location
     pub fn dungeon_room_at(&self, x: u32, y: u32, z: u32) -> &Room {
         self.dungeon.room_at(x, y, z)
+    }
+
+    /// Return a mutable reference to the room at a location
+    pub fn dungeon_room_at_mut(&mut self, x: u32, y: u32, z: u32) -> &Room {
+        self.dungeon.room_at_mut(x, y, z)
     }
 
     /// Get character gender

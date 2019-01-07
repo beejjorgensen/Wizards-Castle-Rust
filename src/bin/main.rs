@@ -260,6 +260,32 @@ impl UI {
         print!("YOU TAKE A DRINK AND {}\n", s);
     }
 
+    /// Get the printable character for a room
+    fn room_char(room_type: &RoomType) -> char {
+        match room_type {
+            RoomType::Empty => '.',
+            RoomType::Entrance => 'E',
+            RoomType::StairsDown => 'D',
+            RoomType::StairsUp => 'U',
+            RoomType::Gold => 'G',
+            RoomType::Pool => 'P',
+            RoomType::Chest => 'C',
+            RoomType::Flares => 'F',
+            RoomType::Warp(_) => 'W',
+            RoomType::Sinkhole => 'S',
+            RoomType::CrystalOrb => 'O',
+            RoomType::Book => 'B',
+            RoomType::Monster(ref m) => {
+                if m.monster_type() == MonsterType::Vendor {
+                    'V'
+                } else {
+                    'M'
+                }
+            },
+            RoomType::Treasure(_) => 'T',
+        }
+    }
+
     /// Print a map
     fn map(&mut self, show_all: bool) {
         let z = self.game.player_z();
@@ -282,28 +308,7 @@ impl UI {
                 }
 
                 if r.discovered || show_all {
-                    match r.roomtype {
-                        RoomType::Empty => print!("."),
-                        RoomType::Entrance => print!("E"),
-                        RoomType::StairsDown => print!("D"),
-                        RoomType::StairsUp => print!("U"),
-                        RoomType::Gold => print!("G"),
-                        RoomType::Pool => print!("P"),
-                        RoomType::Chest => print!("C"),
-                        RoomType::Flares => print!("F"),
-                        RoomType::Warp(_) => print!("W"),
-                        RoomType::Sinkhole => print!("S"),
-                        RoomType::CrystalOrb => print!("O"),
-                        RoomType::Book => print!("B"),
-                        RoomType::Monster(ref m) => {
-                            if m.monster_type() == MonsterType::Vendor {
-                                print!("V");
-                            } else {
-                                print!("M");
-                            }
-                        },
-                        RoomType::Treasure(_) => print!("T"),
-                    }
+                    print!("{}", UI::room_char(&r.roomtype));
                 } else {
                     print!("?");
                 }
@@ -1160,6 +1165,10 @@ impl UI {
 
     /// Shine the lamp into another room
     pub fn lamp(&mut self) {
+        if !self.game.player_has_lamp() {
+            println!("** YOU DON'T HAVE A LAMP\n");
+            return;
+        }
 
         let dir;
 
@@ -1176,13 +1185,68 @@ impl UI {
             },
         }
 
-        let (x, y, z, room_type) = self.game.shine_lamp(dir);
+        let (x, y, z, room_type);
+
+        match self.game.shine_lamp(dir) {
+            Ok((tx, ty, tz, troom_type)) => {
+                x = tx;
+                y = ty;
+                z = tz;
+                room_type = troom_type;
+            },
+            Err(err) => panic!(err),
+        }
 
         println!("\nTHE LAMP SHINES INTO ({},{}) LEVEL {}\n", x+1, y+1, z+1);
 
         let room_str = UI::room_name(&room_type);
 
         println!("THERE YOU'LL FIND {}\n", room_str);
+    }
+
+    /// Set off a flare
+    pub fn flare(&mut self) {
+        if self.game.player_flares() == 0 {
+            println!("** HEY BRIGHT ONE, YOU'RE OUT OF FLARES\n");
+            return;
+        }
+
+        match self.game.flare() {
+            Err(err) => panic!(err),
+            _ => (),
+        };
+
+        let xm1 = self.game.player_x() as i32 - 1;
+        let ym1 = self.game.player_y() as i32 - 1;
+
+        let z = self.game.player_z();
+
+        for y in ym1..(ym1 + 3) {
+
+            let yw = self.game.wrap_y(y);
+
+            for x in xm1..(xm1 + 3) {
+
+                let xw = self.game.wrap_x(x);
+
+                let room_type = self.game.dungeon_room_at(xw, yw, z).room_type();
+
+                if x == xm1 {
+                    print!(" ");
+                }
+
+                print!("{}", UI::room_char(&room_type));
+
+                if x == xm1 || x == xm1 + 1 {
+                    print!("     ");
+                }
+            }
+
+            println!("\n");
+        }
+
+
+
     }
 
 }
@@ -1320,6 +1384,7 @@ fn main() {
                     Some("D") => ui.move_stairs(Stairs::Down),
                     Some("T") => ui.teleport(),
                     Some("L") => ui.lamp(),
+                    Some("F") => ui.flare(),
                     _ => {
                         println!("** STUPID {} THAT WASN'T A VALID COMMAND\n", ui.race_str());
                         valid_command = false;
