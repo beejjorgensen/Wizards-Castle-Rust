@@ -7,7 +7,8 @@ use self::rand::Rng;
 use self::rand::rngs::ThreadRng;
 use self::rand::thread_rng;
 
-use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent, DrinkEvent, OrbEvent, BookEvent, GameState};
+use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent};
+use wizardscastle::game::{DrinkEvent, OrbEvent, BookEvent, ChestEvent, GameState};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
@@ -19,7 +20,6 @@ use wizardscastle::error::Error;
 struct UI {
     game: Game,
     rng: ThreadRng,
-    turn_count: u32,
 }
 
 impl UI {
@@ -921,7 +921,7 @@ impl UI {
         }
 
         // Show turns
-        println!("\nAND IT TOOK YOU {} TURNS!\n", self.turn_count);
+        println!("\nAND IT TOOK YOU {} TURNS!\n", *self.game.turn());
     }
     
     /// Sell treasures to a vendor
@@ -1305,7 +1305,17 @@ impl UI {
 
     /// Open a chest
     fn open_chest(&mut self) {
-        println!("[STUB: Open chest]\n");
+        match self.game.open_chest() {
+            Ok(event) => match event {
+                ChestEvent::Explode => println!("KABOOM! IT EXPLODES"),
+                ChestEvent::Gas => println!("GAS! YOU STAGGER FROM THE ROOM"),
+                ChestEvent::Treasure(amount) => println!("YOU FIND {} GOLD PIECES", amount),
+            }
+
+            Err(err) => panic!(err),
+        }
+
+        println!();
     }
 
     /// Open a book
@@ -1356,7 +1366,6 @@ fn main() {
         let mut ui = UI {
             game: game,
             rng: thread_rng(),
-            turn_count: 0,
         };
 
         ui.race_gender_select();
@@ -1377,7 +1386,13 @@ fn main() {
         let mut resolve_room_effects = true;
 
         while alive {
-            ui.turn_count += 1;
+            // See if we were killed by something
+            if ui.game.state() == GameState::Dead {
+                alive = false;
+                continue;
+            }
+
+            ui.game.add_turn(1);
 
             ui.game.discover_room_at_player();
 
@@ -1480,6 +1495,12 @@ fn main() {
                 continue;
             }
 
+            // See if we were killed by something (exploding chest)
+            if ui.game.state() == GameState::Dead {
+                alive = false;
+                continue;
+            }
+
             if quiet {
                 print_location = false;
                 print_stats = false;
@@ -1537,12 +1558,6 @@ fn main() {
                 automove = true;
                 print_location = false;
                 print_stats = false;
-            }
-
-            // See if we were killed by something
-            if ui.game.state() == GameState::Dead {
-                alive = false;
-                continue;
             }
 
         } // while alive

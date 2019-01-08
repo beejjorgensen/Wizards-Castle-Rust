@@ -57,6 +57,13 @@ pub enum OrbEvent {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub enum ChestEvent {
+    Explode,
+    Gas,
+    Treasure(u32),
+}
+
+#[derive(Debug, Clone, Copy)]
 pub enum BookEvent {
     Blind,
     Poetry,
@@ -117,6 +124,8 @@ pub struct Game {
     vendors_angry: bool,
     vendor_treasure_price: u32,
     vendor_treasure: Option<TreasureType>,
+
+    turn: u32,
 }
 
 impl Game {
@@ -139,6 +148,7 @@ impl Game {
             vendors_angry: false,
             vendor_treasure_price: 0,
             vendor_treasure: None,
+            turn: 0,
         }
     }
 
@@ -194,6 +204,17 @@ impl Game {
             0
         } else {
             z as u32
+        }
+    }
+
+    /// Choose a random direction
+    fn rand_direction() -> Direction {
+        match Game::d(1,4) {
+            1 => Direction::North,
+            2 => Direction::South,
+            3 => Direction::West,
+            4 => Direction::East,
+            _ => panic!("SNH"),
         }
     }
     
@@ -956,6 +977,37 @@ impl Game {
         }
     }
 
+    /// Open a chest
+    pub fn open_chest(&mut self) -> Result<ChestEvent, Error> {
+        {
+            let room_type = self.room_at_player().room_type();
+
+            if *room_type != RoomType::Chest {
+                return Err(Error::CantGo);
+            }
+        }
+
+        // In the original game, gas would not destroy the chest.
+        // We mod that here to destroy the chest in all cases.
+        self.make_current_room_empty();
+
+        match Game::d(1,4) {
+            1 => {
+                if self.player.damage_st(Game::d(1,6)) {
+                    self.state = GameState::Dead;
+                }
+                Ok(ChestEvent::Explode)
+            }
+            2 => {
+                self.add_turn(20);
+                self.move_dir(Game::rand_direction());
+                Ok(ChestEvent::Gas)
+            }
+            3...4 => Ok(ChestEvent::Treasure(Game::d(1,1000))),
+            _ => panic!("SNR"),
+        }
+    }
+
     /// Cure blindness
     /// 
     /// True if blindness was cured
@@ -1146,5 +1198,15 @@ impl Game {
     /// Get character gender
     pub fn player_gender(&self) -> &Gender {
         self.player.gender()
+    }
+
+    /// Return number of turns
+    pub fn turn(&self) -> &u32 {
+        &self.turn
+    }
+
+    /// Add to turns
+    pub fn add_turn(&mut self, amount: u32) {
+        self.turn += amount;
     }
 }
