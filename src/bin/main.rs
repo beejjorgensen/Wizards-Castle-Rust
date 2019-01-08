@@ -1371,6 +1371,11 @@ fn main() {
         let mut alive = true;
         let mut automove = false;
 
+        let mut quiet = false;
+        let mut print_location = true;
+        let mut print_stats = true;
+        let mut resolve_room_effects = true;
+
         while alive {
             ui.turn_count += 1;
 
@@ -1392,13 +1397,10 @@ fn main() {
                 println!("\nTHE BLUE FLAME DISSOLVES THE BOOK");
             }
 
-            let mut print_location = true;
-            let mut print_stats = true;
-            let mut resolve_room_effects = true;
-            let mut quiet = false;
 
             if automove {
                 println!("\n");
+                automove = false;
             } else {
                 let mut valid_command = false;
 
@@ -1420,7 +1422,7 @@ fn main() {
 
                     match command.get(..1) {
                         Some("M") => {
-                            ui.map(false);
+                            ui.map(true);
                             print_stats = false;
                             resolve_room_effects = false;
                         },
@@ -1472,22 +1474,32 @@ fn main() {
                 }
             } // if !automove
 
+            // See if the player walked out
+            if ui.game.state() == GameState::Exit {
+                alive = false;
+                continue;
+            }
+
             if quiet {
                 print_location = false;
                 print_stats = false;
                 resolve_room_effects = false;
             }
 
-            automove = false;
+            quiet = false;
 
             if print_location {
                 ui.print_location();
             }
             
+            print_location = true;
+
             if print_stats {
                 ui.print_stats();
                 ui.print_room();
             }
+
+            print_stats = true;
 
             if resolve_room_effects {                
                 match ui.game.room_effect() {
@@ -1518,9 +1530,13 @@ fn main() {
                 }
             } // if resolve_room_effects
 
+            resolve_room_effects = true;
+
             // If we're chosen to fight the vendor, let's do that
             if ui.game.state() == GameState::VendorAttack {
                 automove = true;
+                print_location = false;
+                print_stats = false;
             }
 
             // See if we were killed by something
@@ -1529,11 +1545,6 @@ fn main() {
                 continue;
             }
 
-            // See if the player walked out
-            if ui.game.state() == GameState::Exit {
-                alive = false;
-                continue;
-            }
         } // while alive
 
         ui.game_summary();
