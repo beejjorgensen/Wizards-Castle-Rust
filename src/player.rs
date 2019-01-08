@@ -278,14 +278,24 @@ impl Player {
         &self.weapon
     }
 
-    /// Return player's weapon
+    /// Set player's weapon
     pub fn set_weapon(&mut self, weapon: Weapon) {
         self.weapon = weapon;
+    }
+
+    /// Set player's weapon by type
+    pub fn set_weapon_by_type(&mut self, weapon_type: WeaponType) {
+        self.weapon = Weapon::new(weapon_type);
     }
 
     /// Return player's armor
     pub fn armor(&self) -> &Armor {
         &self.armor
+    }
+
+    /// Set player's armor by type
+    pub fn set_armor_by_type(&mut self, armor_type: ArmorType) {
+        self.armor = Armor::new(armor_type);
     }
 
     /// Return player's armor mutably
@@ -296,6 +306,11 @@ impl Player {
     /// True if the player has a lamp
     pub fn has_lamp(&self) -> bool {
         self.lamp
+    }
+
+    /// Set if the player has a lamp
+    pub fn set_lamp(&mut self, has_lamp: bool) {
+        self.lamp = has_lamp;
     }
 
     /// Damage the player

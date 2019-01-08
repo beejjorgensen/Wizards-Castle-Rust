@@ -29,9 +29,20 @@ pub enum CombatEvent {
     NoWeapon,
     BookHands,
     Miss,
-    Hit(u32, bool, bool, u32, bool),
+    Hit(HitResult),
     MonsterMiss,
     MonsterHit(u32, bool, bool),
+}
+
+#[derive(Debug,Clone,Copy)]
+pub struct HitResult {
+    pub damage: u32,
+    pub broke_weapon: bool,
+    pub defeated: bool,
+    pub treasure: u32,
+    pub got_runestaff: bool,
+    pub killed_vendor: bool,
+    pub got_lamp: bool,
 }
 
 #[derive(Debug,Clone,Copy)]
@@ -344,48 +355,68 @@ impl Game {
         let hit = *self.player.stat(&Stat::Dexterity) >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
 
         if hit {
-            let damage = self.player.weapon().damage();
-            let mut broke_weapon = false;
+            let mut result = HitResult {
+                damage: self.player.weapon().damage(),
+                broke_weapon: false,
+                defeated: false,
+                treasure: 0,
+                got_runestaff: false,
+                killed_vendor: false,
+                got_lamp: false,
+            };
+
             let mut next_state = GameState::MonsterAttack;
-            let defeated;
-            let mut got_runestaff = false;
-            let treasure;
 
             if let Some(ref mut monster) = self.currently_fighting {
                 if monster.can_break_weapon() && Game::d(1,8) == 1 {
-                    broke_weapon = true;
+                    result.broke_weapon = true;
                     self.player.set_weapon(Weapon::new(WeaponType::None));
                 }
 
-                defeated = monster.take_damage(damage);
+                result.defeated = monster.take_damage(result.damage);
                 
-                if defeated {
+                if result.defeated {
                     next_state = GameState::Move;
 
-                    if monster.has_runestaff() {
-                        self.player.give_runestaff(true);
-                        got_runestaff = true;
-                    }
+                    // Take vendor's wares
+                    if monster.monster_type() == MonsterType::Vendor {
+                        result.killed_vendor = true;
 
-                    // TODO if defeated vendor, get his wares
+                        self.player.change_stat(&Stat::Strength, Game::d(1,6) as i32);
+                        self.player.change_stat(&Stat::Intelligence, Game::d(1,6) as i32);
+                        self.player.change_stat(&Stat::Dexterity, Game::d(1,6) as i32);
+
+                        self.player.set_armor_by_type(ArmorType::Plate);
+                        self.player.set_weapon_by_type(WeaponType::Sword);
+
+                        if !self.player.has_lamp() {
+                            self.player.set_lamp(true);
+                            result.got_lamp = true;
+                        }
+
+                    } else {
+                        // Non-vendor creature
+                        if monster.has_runestaff() {
+                            self.player.give_runestaff(true);
+                            result.got_runestaff = true;
+                        }
+
+                        result.treasure = Game::d(1,1000);
+                    }
                 }
             } else {
                 panic!("not fighting a monster");
             }
 
-            if defeated {
+            if result.defeated {
                 self.make_current_room_empty();
                 self.currently_fighting = None;
-
-                treasure = Game::d(1,1000);
-            } else {
-                treasure = 0;
             }
 
-            self.player.add_gp(treasure);
+            self.player.add_gp(result.treasure);
 
             self.state = next_state;
-            return Ok(CombatEvent::Hit(damage, broke_weapon, defeated, treasure, got_runestaff));
+            return Ok(CombatEvent::Hit(result));
         }
 
         self.state = GameState::MonsterAttack;

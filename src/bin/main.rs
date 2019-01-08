@@ -616,31 +616,43 @@ impl UI {
                 println!("\n** YOU CAN'T BEAT IT TO DEATH WITH A BOOK");
             },
 
-            Ok(CombatEvent::Hit(_, weapon_broke, defeated, treasure, got_runestaff)) =>  {
+            Ok(CombatEvent::Hit(result)) =>  {
                 println!("\n  YOU HIT THE LOUSY {}", m_name);
 
-                if weapon_broke {
+                if result.broke_weapon {
                     println!("\nOH NO! YOUR {} BROKE", UI::weapon_name(weapon_type));
                 }
 
-                if defeated {
+                if result.defeated {
                     println!("\n{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
 
                     // TODO random eating message
 
-                    if got_runestaff {
-                        println!("\nGREAT ZOT! YOU'VE FOUND THE RUNESTAFF");
-                    }
+                    if result.killed_vendor {
+                        println!("\nYOU GET ALL HIS WARES\n");
+                        println!("PLATE ARMOR");
+                        println!("A SWORD");
+                        println!("A STRENGTH POTION");
+                        println!("AN INTELLIGENCE POTION");
+                        println!("A DEXTERITY POTION");
 
-                    println!("\nYOU NOW GET HIS HOARD OF {} GP's", treasure);
+                        if result.got_lamp {
+                            println!("A LAMP");
+                        }
+
+                    } else {
+                        if result.got_runestaff {
+                            println!("\nGREAT ZOT! YOU'VE FOUND THE RUNESTAFF");
+                        }
+
+                        println!("\nYOU NOW GET HIS HOARD OF {} GP's", result.treasure);
+                    }
                 }
             },
             
             Ok(CombatEvent::Miss) => {
                 println!("\n  DRAT! MISSED");
             },
-
-            // TODO: check for book hands
 
             Ok(any) => panic!("unexpected combat event {:#?}", any),
 
