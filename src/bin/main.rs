@@ -1449,7 +1449,7 @@ fn main() {
 
                     match command.get(..1) {
                         Some("M") => {
-                            ui.map(true);
+                            ui.map(false);
                             print_stats = false;
                             resolve_room_effects = false;
                         },
