@@ -158,7 +158,11 @@ impl UI {
 
     /// Move a direction
     fn move_dir(&mut self, dir: Direction) {
-        self.game.move_dir(dir)
+        self.game.move_dir(dir);
+
+        // This is often redundant, but there's a case where we retreat from
+        // monsters and the discover room gets overlooked
+        self.game.discover_room_at_player();
     }
 
     /// Take some stairs
