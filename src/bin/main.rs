@@ -222,7 +222,7 @@ impl UI {
                 if found_orb_of_zot {
                     println!("\nGREAT UNMITIGATED ZOT!\n");
                     println!("YOU JUST FOUND THE ORB OF ZOT!\n");
-                    println!("THE RUNESTAFF IS GONE");
+                    println!("THE RUNESTAFF IS GONE\n");
                 }
             },
             Err(err) => panic!("{:#?}", err),
