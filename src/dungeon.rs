@@ -30,6 +30,7 @@ impl Dungeon {
         let stair_count = area / 32; // 2 in 8x8
         let item_count = area / 21; // 3 in 8x8
         let vendor_count = area / 21; // 3 in 8x8
+        let monster_count = area / 5; // 12 in 8x8
 
         let entrance_x = (xsize - 1) / 2;
 
@@ -90,14 +91,16 @@ impl Dungeon {
                 // Not counting Vendors
             ];
 
-            let monster_count = monsters_to_place.len();
+            let num_monsters = monsters_to_place.len();
 
-            let monster_with_runestaff = rng.gen_range(0, monster_count);
+            let monster_with_runestaff = rng.gen_range(0, monster_count) as usize;
 
-            for i in 0..monster_count {
+            for i in 0..monster_count as usize {
                 let has_runestaff = i == monster_with_runestaff && z == runestaff_level;
 
-                this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(monsters_to_place[i], has_runestaff)), ..Default::default() });
+                let m_num = i % num_monsters;
+
+                this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(monsters_to_place[m_num], has_runestaff)), ..Default::default() });
             }
 
             // Vendors
