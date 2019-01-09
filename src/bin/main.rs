@@ -866,7 +866,7 @@ impl UI {
             GameState::Dead => {
                 println!("\n\nA NOBLE EFFORT, OH FORMERLY LIVING {}\n", self.race_str());
 
-                print!("YOU DIED FROM LACK OF ");
+                print!("YOU DIED FROM A LACK OF ");
                 if self.game.player_stat(Stat::Strength) == 0 {
                     println!("STRENGTH");
                 }
