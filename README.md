@@ -22,16 +22,17 @@ Please don't hold it against me.
 ## TODO
 
 * Buy lamp from vendor
-* Make fewer fields `pub` and provide accessors
-  * Notably in `Room`
 * Random eating messages
 * Random messages between turns
-* Have `room_at` and `room_at_mut` return undiscovered status
 * Give monster initiative if blind
 * Check all other places blindness should have an effect
 * Spells
   * Check for monster stuck in web
   * Check for web breaking
+
+* Have `room_at` and `room_at_mut` return undiscovered status
+* Make fewer fields `pub` and provide accessors
+  * Notably in `Room`
 * Break up the `main.rs` and `game.rs` code into smaller pieces
 
 <beej@beej.us>
