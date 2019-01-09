@@ -8,7 +8,7 @@ pub enum TreasureType {
     OpalEye,
     GreenGem,
     BlueFlame,
-    Palintir,
+    Palantir,
     Silmaril,
 }
 
@@ -33,7 +33,7 @@ impl Treasure {
             3 => TreasureType::OpalEye,
             4 => TreasureType::GreenGem,
             5 => TreasureType::BlueFlame,
-            6 => TreasureType::Palintir,
+            6 => TreasureType::Palantir,
             7 => TreasureType::Silmaril,
             _ => panic!("get_treasure_by_id: unknown id")
         }
@@ -48,7 +48,7 @@ impl Treasure {
             TreasureType::OpalEye => 3,
             TreasureType::GreenGem => 4,
             TreasureType::BlueFlame => 5,
-            TreasureType::Palintir => 6,
+            TreasureType::Palantir => 6,
             TreasureType::Silmaril => 7,
         }
     }

@@ -104,7 +104,7 @@ impl UI {
             TreasureType::OpalEye => String::from("THE OPAL EYE"),
             TreasureType::GreenGem => String::from("THE GREEN GEM"),
             TreasureType::BlueFlame => String::from("THE BLUE FLAME"),
-            TreasureType::Palintir => String::from("THE PALINTIR"),
+            TreasureType::Palantir => String::from("THE PALANTIR"),
             TreasureType::Silmaril => String::from("THE SILMARIL"),
         }
     }
