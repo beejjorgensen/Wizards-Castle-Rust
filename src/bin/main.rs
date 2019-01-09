@@ -370,13 +370,15 @@ impl UI {
 
         println!("{:*^64}\n", "");
 
-        println!("MANY CYCLES AGO, IN THE KINGDOM OF N'DIC, THE GNOMIC");
-        println!("WIZARD ZOT FORGED HIS GREAT *ORB OF POWER*. HE SOON");
-        println!("VANISHED, LEAVING BEHIND HIS VAST SUBTERRANEAN CASTLE");
-        println!("FILLED WITH ESURIENT MONSTERS, FABULOUS TREASURES, AND");
-        println!("THE INCREDIBLE *ORB OF ZOT*. FROM THAT TIME HENCE, MANY");
-        println!("A BOLD YOUTH HAS VENTURED INTO THE WIZARD'S CASTLE. AS");
-        println!("OF NOW, *NONE* HAS EVER EMERGED VICTORIOUSLY! BEWARE!!\n");
+        println!("{:^64}", "MANY CYCLES AGO, IN THE KINGDOM OF N'DIC, THE GNOMIC");
+        println!("{:^64}", "WIZARD ZOT FORGED HIS GREAT *ORB OF POWER*. HE SOON");
+        println!("{:^64}", "VANISHED, LEAVING BEHIND HIS VAST SUBTERRANEAN CASTLE");
+        println!("{:^64}", "FILLED WITH ESURIENT MONSTERS, FABULOUS TREASURES, AND");
+        println!("{:^64}", "THE INCREDIBLE *ORB OF ZOT*. FROM THAT TIME HENCE, MANY");
+        println!("{:^64}", "A BOLD YOUTH HAS VENTURED INTO THE WIZARD'S CASTLE. AS");
+        println!("{:^64}", "OF NOW, *NONE* HAS EVER EMERGED VICTORIOUSLY! BEWARE!!");
+
+        println!("\n{:*^64}\n", "");
     }
 
     /// Select the player's race and sex
