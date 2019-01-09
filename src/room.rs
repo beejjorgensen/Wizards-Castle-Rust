@@ -53,6 +53,11 @@ impl Room {
         self.discovered = discovered;
     }
 
+    /// Sets curse in a room
+    pub fn set_curse(&mut self, curse_type: CurseType) {
+        self.curse = curse_type;
+    }
+
     /// Returns the room's curse status
     pub fn curse(&self) -> &CurseType {
         &self.curse

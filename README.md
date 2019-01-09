@@ -13,25 +13,24 @@ Please don't hold it against me.
 
 * Learn Rust
 
-* Have a Wizard's Castle library that other front-ends can use to play the game.
-  * Build an ncurses front end.
-  * Build to WASM with a web front end.
+* Have a Wizard's Castle library that other front-ends can use to play the game
+  * Build an ncurses front end
+  * Build to WASM with a web front end
 
-* Have a default binary that plays the game in the classic text format.
+* Have a default binary that plays the game in the classic text format
 
 ## TODO
 
 * Make fewer fields `pub` and provide accessors
   * Notably in `Room`
 * Random eating messages
-* Curse effects
 * Random messages between turns
 * Have `room_at` and `room_at_mut` return undiscovered status
-* Give monster initiative if blind or lethargic
+* Give monster initiative if blind
 * Check all other places blindness should have an effect
 * Spells
   * Check for monster stuck in web
-  * Checck for web breaking
+  * Check for web breaking
 * Break up the `main.rs` and `game.rs` code into smaller pieces
 
 <beej@beej.us>

@@ -498,8 +498,10 @@ impl Player {
 
     /// Curse the player
     pub fn add_curse(&mut self, curse: CurseType) {
-        if !self.curses.contains(&curse) {
-            self.curses.push(curse);
+        if curse != CurseType::None {
+            if !self.curses.contains(&curse) {
+                self.curses.push(curse);
+            }
         }
     }
 

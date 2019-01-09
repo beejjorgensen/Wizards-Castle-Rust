@@ -1082,35 +1082,34 @@ impl Game {
 
     /// Handle curses
     pub fn curse_effects(&mut self) {
-        for curse in [CurseType::Lethargy, CurseType::Forgetfulness, CurseType::TheLeech].iter() {
+        if self.player.has_curse(CurseType::Lethargy) {
+            if !self.player.has_treasure(TreasureType::RubyRed) {
+                self.lethargic = true;
+                self.turn += 1; // additional turn count per turn
+            } else {
+                self.lethargic = false;
+            }
+        }
 
-            match curse {
-                CurseType::Lethargy => {
-                    if !self.player.has_treasure(TreasureType::RubyRed) {
-                        self.lethargic = true;
-                        self.turn += 1; // additional turn count per turn
-                    } else {
-                        self.lethargic = false;
-                    }
-                }
+        if self.player.has_curse(CurseType::Forgetfulness) {
+            if !self.player.has_treasure(TreasureType::GreenGem) {
+                self.rand_mark_unexplored();
+            }
+        }
 
-                CurseType::Forgetfulness => {
-                    if !self.player.has_treasure(TreasureType::GreenGem) {
-                        self.rand_mark_unexplored();
-                    }
-                }
-
-                CurseType::TheLeech => {
-                    if !self.player.has_treasure(TreasureType::PalePearl) {
-                        self.player.add_gp(-(Game::d(1,5) as i32));
-                    }
-                }
-
-                _ => panic!("SNH"),
+        if self.player.has_curse(CurseType::TheLeech) {
+            if !self.player.has_treasure(TreasureType::PalePearl) {
+                self.player.add_gp(-(Game::d(1,5) as i32));
             }
         }
     }
 
+    /// Check for catching a curse
+    pub fn curse_check(&mut self) {
+        let curse = *self.room_at_player().curse();
+
+        self.player.add_curse(curse);
+    }
 
     /// Roll a die (1d6, 2d7, etc.)
     pub fn d(count: u32, sides: u32) -> u32 {

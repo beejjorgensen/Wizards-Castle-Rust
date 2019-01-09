@@ -1409,7 +1409,7 @@ fn main() {
 
             ui.game.curse_effects();
 
-            // TODO curse check
+            ui.game.curse_check();
 
             // TODO random message
 
