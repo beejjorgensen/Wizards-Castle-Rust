@@ -4,6 +4,7 @@ use error::Error;
 use armor::{Armor, ArmorType};
 use weapon::{Weapon, WeaponType};
 use treasure::TreasureType;
+use curse::CurseType;
 
 #[derive(Eq, Hash, PartialEq, Copy, Clone, Debug)]
 pub enum Stat {
@@ -54,6 +55,8 @@ pub struct Player {
 
     blind: bool,
     book_stuck: bool,
+
+    curses: Vec<CurseType>,
 }
 
 impl Player {
@@ -84,6 +87,8 @@ impl Player {
             runestaff: false,
 
             flares: 0,
+
+            curses: Vec::new(),
         }
     }
 
@@ -116,6 +121,7 @@ impl Player {
         self.flares = 0;
 
         self.treasures.clear();
+        self.curses.clear();
     }
 
     /// Get a race number by race type
@@ -269,8 +275,10 @@ impl Player {
     }
 
     /// Add gold pieces
-    pub fn add_gp(&mut self, amount: u32) {
-        self.gp += amount;
+    pub fn add_gp(&mut self, amount: i32) {
+        let new_gp = std::cmp::max(0, self.gp as i32 + amount);
+
+        self.gp = new_gp as u32;
     }
 
     /// Return player's weapon
@@ -486,5 +494,17 @@ impl Player {
     /// Set book stuck status
     pub fn set_book_stuck(&mut self, stuck: bool) {
         self.book_stuck = stuck;
+    }
+
+    /// Curse the player
+    pub fn add_curse(&mut self, curse: CurseType) {
+        if !self.curses.contains(&curse) {
+            self.curses.push(curse);
+        }
+    }
+
+    /// True if the player has a curse
+    pub fn has_curse(&self, curse: CurseType) -> bool {
+        self.curses.contains(&curse)
     }
 }

@@ -52,5 +52,10 @@ impl Room {
     pub fn set_discovered(&mut self, discovered: bool) {
         self.discovered = discovered;
     }
+
+    /// Returns the room's curse status
+    pub fn curse(&self) -> &CurseType {
+        &self.curse
+    }
 }
 

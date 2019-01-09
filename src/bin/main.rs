@@ -1362,7 +1362,6 @@ impl UI {
 
         true
     }
-
 }
 
 /// Main
@@ -1408,7 +1407,7 @@ fn main() {
 
             ui.game.discover_room_at_player();
 
-            // TODO curse effects (Does this happen before automove??)
+            ui.game.curse_effects();
 
             // TODO curse check
 

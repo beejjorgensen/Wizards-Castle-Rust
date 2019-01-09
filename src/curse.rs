@@ -1,6 +1,6 @@
 pub const CURSE_COUNT: u32 = 3;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum CurseType {
     None,
     Forgetfulness,

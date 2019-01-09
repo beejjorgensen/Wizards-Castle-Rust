@@ -8,6 +8,7 @@ use monster::{Monster, MonsterType};
 use weapon::{Weapon, WeaponType};
 use armor::ArmorType;
 use error::Error;
+use curse::CurseType;
 
 use self::rand::Rng;
 use self::rand::thread_rng;
@@ -137,6 +138,8 @@ pub struct Game {
     vendor_treasure: Option<TreasureType>,
 
     turn: u32,
+
+    lethargic: bool,
 }
 
 impl Game {
@@ -160,6 +163,7 @@ impl Game {
             vendor_treasure_price: 0,
             vendor_treasure: None,
             turn: 0,
+            lethargic: false,
         }
     }
 
@@ -228,6 +232,17 @@ impl Game {
             _ => panic!("SNH"),
         }
     }
+
+    /// Mark a random room unexplored
+    fn rand_mark_unexplored(&mut self) {
+        let mut rng = thread_rng();
+
+        let x = rng.gen_range(0, self.dungeon.xsize());
+        let y = rng.gen_range(0, self.dungeon.ysize());
+        let z = rng.gen_range(0, self.dungeon.zsize());
+
+        self.dungeon.room_at_mut(x, y, z).set_discovered(false);
+    }
     
     /// Mark the player's current room as empty
     fn make_current_room_empty(&mut self) {
@@ -250,7 +265,7 @@ impl Game {
     fn room_effect_gold(&mut self) -> Event {
         let gold_amount = Game::d(1,10);
 
-        self.player.add_gp(gold_amount);
+        self.player.add_gp(gold_amount as i32);
 
         self.make_current_room_empty();
 
@@ -315,11 +330,13 @@ impl Game {
 
         self.currently_fighting = Some(monster.clone());
 
-        // TODO check for blind or lethargy
-
-        self.state = GameState::PlayerAttack;
-
-        self.bribe_possible = true;
+        // TODO check for blind
+        if self.lethargic {
+            self.state = GameState::MonsterAttack;
+        } else {
+            self.state = GameState::PlayerAttack;
+            self.bribe_possible = true;
+        }
 
         self.retreating = false;
 
@@ -413,7 +430,7 @@ impl Game {
                 self.currently_fighting = None;
             }
 
-            self.player.add_gp(result.treasure);
+            self.player.add_gp(result.treasure as i32);
 
             self.state = next_state;
             return Ok(CombatEvent::Hit(result));
@@ -723,7 +740,7 @@ impl Game {
             panic!("player should have had this treasure");
         }
 
-        self.player.add_gp(self.vendor_treasure_price);
+        self.player.add_gp(self.vendor_treasure_price as i32);
 
         self.vendor_treasure = None;
 
@@ -1062,6 +1079,38 @@ impl Game {
             false
         }
     }
+
+    /// Handle curses
+    pub fn curse_effects(&mut self) {
+        for curse in [CurseType::Lethargy, CurseType::Forgetfulness, CurseType::TheLeech].iter() {
+
+            match curse {
+                CurseType::Lethargy => {
+                    if !self.player.has_treasure(TreasureType::RubyRed) {
+                        self.lethargic = true;
+                        self.turn += 1; // additional turn count per turn
+                    } else {
+                        self.lethargic = false;
+                    }
+                }
+
+                CurseType::Forgetfulness => {
+                    if !self.player.has_treasure(TreasureType::GreenGem) {
+                        self.rand_mark_unexplored();
+                    }
+                }
+
+                CurseType::TheLeech => {
+                    if !self.player.has_treasure(TreasureType::PalePearl) {
+                        self.player.add_gp(-(Game::d(1,5) as i32));
+                    }
+                }
+
+                _ => panic!("SNH"),
+            }
+        }
+    }
+
 
     /// Roll a die (1d6, 2d7, etc.)
     pub fn d(count: u32, sides: u32) -> u32 {
