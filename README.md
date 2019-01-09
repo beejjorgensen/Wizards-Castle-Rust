@@ -21,6 +21,7 @@ Please don't hold it against me.
 
 ## TODO
 
+* Buy lamp from vendor
 * Make fewer fields `pub` and provide accessors
   * Notably in `Room`
 * Random eating messages
