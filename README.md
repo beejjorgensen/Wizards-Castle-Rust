@@ -28,6 +28,7 @@ Please don't hold it against me.
 * Spells
   * Check for monster stuck in web
   * Check for web breaking
+* Quit
 
 ### Refactoring TODO
 
