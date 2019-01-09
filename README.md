@@ -21,7 +21,6 @@ Please don't hold it against me.
 
 ## TODO
 
-* Buy lamp from vendor
 * Random eating messages
 * Random messages between turns
 * Give monster initiative if blind

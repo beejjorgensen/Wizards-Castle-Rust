@@ -1144,6 +1144,33 @@ impl UI {
 
     }
 
+    /// Buy a lamp from the vendor
+    fn vendor_buy_lamp(&mut self) {
+        if self.game.player_has_lamp() || !self.game.vendor_can_afford_lamp() {
+            return;
+        }
+
+        loop {
+            let lamp = UI::get_input(Some("\nWANT A LAMP FOR OR 1000 GP's? "));
+
+            match lamp.get(..1) {
+                Some("Y") => {
+                    match self.game.vendor_buy_lamp() {
+                        Ok(()) => println!("\nIT'S GUARANTEED TO OUTLIVE YOU!"),
+                        Err(err) => panic!("{:#?}", err),
+                    }
+                    break;
+                },
+                Some("N") => {
+                    break;
+                },
+                _ => {
+                    println!("\n** ANSWER YES OR NO");
+                },
+            }
+        }
+    }
+
     /// Trade with a Vendor
     fn vendor_trade(&mut self) {
         self.vendor_trade_treasures();
@@ -1156,6 +1183,7 @@ impl UI {
         self.vendor_trade_armor();
         self.vendor_trade_weapons();
         self.vendor_buy_stats();
+        self.vendor_buy_lamp();
     }
 
     /// Interact with a Vendor

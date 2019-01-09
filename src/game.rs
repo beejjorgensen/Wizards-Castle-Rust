@@ -772,6 +772,21 @@ impl Game {
         Ok(self.player.change_stat(&stat, addition as i32))
     }
 
+
+    /// True if the player can buy a lamp from a vendor
+    pub fn vendor_can_afford_lamp(&self) -> bool {
+        *self.player.gp() >= 1000
+    }
+
+    /// Buy a lamp from a vendor
+    pub fn vendor_buy_lamp(&mut self) -> Result<(), Error> {
+        self.player.spend(1000)?;
+        
+        self.player.set_lamp(true);
+
+        Ok(())
+    }
+
     /// Begin negotiations to sell a treasure to a vendor
     pub fn vendor_treasure_offer(&mut self, treasure_type: TreasureType) -> Result<u32, Error> {
         if self.state != GameState::Vendor {
