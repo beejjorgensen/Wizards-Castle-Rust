@@ -29,9 +29,12 @@ Please don't hold it against me.
   * Check for monster stuck in web
   * Check for web breaking
 
+### Refactoring TODO
+
 * Have `room_at` and `room_at_mut` return undiscovered status
 * Make fewer fields `pub` and provide accessors
   * Notably in `Room`
 * Break up the `main.rs` and `game.rs` code into smaller pieces
+* Move player buying things code out of player into game?
 
 <beej@beej.us>
