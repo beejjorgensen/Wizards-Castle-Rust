@@ -342,8 +342,8 @@ impl Game {
 
         self.currently_fighting = Some(monster.clone());
 
-        // TODO check for blind
-        if self.lethargic {
+        // Monster gets first attack if player blind or lethargic
+        if self.lethargic || self.player.is_blind() {
             self.state = GameState::MonsterAttack;
         } else {
             self.state = GameState::PlayerAttack;
@@ -958,6 +958,10 @@ impl Game {
             if *room_type != RoomType::CrystalOrb {
                 return Err(Error::CantGo);
             }
+        }
+
+        if self.player.is_blind() {
+            return Err(Error::Blind);
         }
 
         let mut rng = thread_rng();

@@ -4,6 +4,7 @@ pub enum Error {
     NotEnoughGP,
     WrongState,
     CantGo,
+    Blind,
     OutOfBounds,
     BribeNotPossible,
     BribeMustProposition, // Need to proposition successfully before calling bribe()

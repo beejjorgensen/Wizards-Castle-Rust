@@ -21,9 +21,6 @@ Please don't hold it against me.
 
 ## TODO
 
-* Give monster initiative if blind
-* Check all other places blindness should have an effect
-
 * Random eating messages
 * Spells
   * Check for monster stuck in web
@@ -35,7 +32,6 @@ Please don't hold it against me.
 * Have `room_at` and `room_at_mut` return undiscovered status
 * Make fewer fields `pub` and provide accessors
   * Notably in `Room`
-* Break up the `main.rs` and `game.rs` code into smaller pieces
 * Move player buying things code out of player into game?
 
 <beej@beej.us>

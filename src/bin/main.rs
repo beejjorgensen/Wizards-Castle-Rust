@@ -290,6 +290,11 @@ impl UI {
 
     /// Print a map
     fn map(&mut self, show_all: bool) {
+        if self.game.player_is_blind() {
+            println!("** YOU CAN'T SEE ANYTHING, DUMB {}", self.race_str());
+            return;
+        }
+
         let z = self.game.player_z();
 
         for y in 0..self.game.dungeon_ysize() {
@@ -1234,6 +1239,11 @@ impl UI {
 
     /// Shine the lamp into another room
     pub fn lamp(&mut self) -> bool {
+        if self.game.player_is_blind() {
+            println!("** YOU CAN'T SEE ANYTHING, DUMB {}", self.race_str());
+            return false;
+        }
+
         if !self.game.player_has_lamp() {
             println!("** YOU DON'T HAVE A LAMP");
             return false;
@@ -1277,6 +1287,11 @@ impl UI {
 
     /// Set off a flare
     pub fn flare(&mut self) -> bool {
+        if self.game.player_is_blind() {
+            println!("** YOU CAN'T SEE ANYTHING, DUMB {}", self.race_str());
+            return false;
+        }
+
         if self.game.player_flares() == 0 {
             println!("** HEY BRIGHT ONE, YOU'RE OUT OF FLARES");
             return false;
@@ -1320,40 +1335,45 @@ impl UI {
 
     /// Gaze into an Orb
     pub fn gaze(&mut self) -> bool {
-        if let Ok(event) = self.game.gaze() {
-            print!("YOU SEE ");
+        let mut success = false;
 
-            match event {
-                OrbEvent::BloodyHeap => {
-                    println!("YOURSELF IN A BLOODY HEAP")
+        match self.game.gaze() {
+            Ok(event) => {
+                print!("YOU SEE ");
+
+                match event {
+                    OrbEvent::BloodyHeap => {
+                        println!("YOURSELF IN A BLOODY HEAP")
+                    }
+                    OrbEvent::Polymorph(m) => {
+                        let mon_str = UI::monster_name(m);
+                        println!("YOURSELF DRINKING FROM A POOL AND BECOMING {} {}", UI::get_article(&mon_str), mon_str);
+                    }
+                    OrbEvent::GazeBack(m) => {
+                        let mon_str = UI::monster_name(m);
+                        println!("{} {} GAZING BACK AT YOU", UI::get_article(&mon_str), mon_str);
+                    }
+                    OrbEvent::Item(room_type, x, y, z) => {
+                        println!("{} AT ({},{}) LEVEL {}", UI::room_name(&room_type), x, y, z);
+                    }
+                    OrbEvent::OrbOfZot(x, y, z) => {
+                        println!("THE ORB OF ZOT AT ({},{}) LEVEL {}", x, y, z);
+                    }
+                    OrbEvent::SoapOpera => {
+                        println!("A SOAP OPERA RERUN");
+                    }
                 }
-                OrbEvent::Polymorph(m) => {
-                    let mon_str = UI::monster_name(m);
-                    println!("YOURSELF DRINKING FROM A POOL AND BECOMING {} {}", UI::get_article(&mon_str), mon_str);
-                }
-                OrbEvent::GazeBack(m) => {
-                    let mon_str = UI::monster_name(m);
-                    println!("{} {} GAZING BACK AT YOU", UI::get_article(&mon_str), mon_str);
-                }
-                OrbEvent::Item(room_type, x, y, z) => {
-                    println!("{} AT ({},{}) LEVEL {}", UI::room_name(&room_type), x, y, z);
-                }
-                OrbEvent::OrbOfZot(x, y, z) => {
-                    println!("THE ORB OF ZOT AT ({},{}) LEVEL {}", x, y, z);
-                }
-                OrbEvent::SoapOpera => {
-                    println!("A SOAP OPERA RERUN");
-                }
+
+                println!();
+
+                success = true;
             }
-
-            println!();
-
-            true
-
-        } else {
-            println!("** NO ORB - NO GAZE");
-            false
+            Err(Error::Blind) => println!("** YOU CAN'T SEE ANYTHING, DUMB {}", self.race_str()),
+            Err(Error::CantGo) => println!("** NO ORB - NO GAZE"),
+            _ => panic!("SNH"),
         }
+
+        success
     }
 
     /// Open a chest
