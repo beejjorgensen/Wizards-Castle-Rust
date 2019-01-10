@@ -1506,7 +1506,7 @@ impl UI {
 
                 let i = self.rng.gen_range(0, sounds.len());
 
-                println!("YOU HEAR {}", sounds[i]);
+                println!("\nYOU HEAR {}", sounds[i]);
             }
             RandomMessage::Sneeze => println!("\nYOU SNEEZED"),
             RandomMessage::StepFrog => println!("\nYOU STEPPED ON A FROG"),
