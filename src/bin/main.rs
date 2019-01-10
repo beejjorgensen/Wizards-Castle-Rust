@@ -441,7 +441,7 @@ impl UI {
                     },
                 };
 
-                if let Ok(_) = self.game.player_allocate_points(&stats[i], points_to_add) {
+                if let Ok(_) = self.game.player_allocate_points(stats[i], points_to_add) {
                     ok = true;
                 } else {
                     print!("\n** ");

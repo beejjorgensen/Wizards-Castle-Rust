@@ -320,7 +320,7 @@ impl Game {
     }
 
     // Handle Monster room effects
-    fn room_effect_monster(&mut self, monster: Monster) -> Event {
+    fn room_effect_monster(&mut self, monster: &Monster) -> Event {
 
         // If Vendors are not angry, head into vendor trade state instead of combat
         if monster.monster_type() == MonsterType::Vendor && !self.vendors_angry {
@@ -399,9 +399,9 @@ impl Game {
                     if monster.monster_type() == MonsterType::Vendor {
                         result.killed_vendor = true;
 
-                        self.player.change_stat(&Stat::Strength, Game::d(1,6) as i32);
-                        self.player.change_stat(&Stat::Intelligence, Game::d(1,6) as i32);
-                        self.player.change_stat(&Stat::Dexterity, Game::d(1,6) as i32);
+                        self.player.change_stat(Stat::Strength, Game::d(1,6) as i32);
+                        self.player.change_stat(Stat::Intelligence, Game::d(1,6) as i32);
+                        self.player.change_stat(Stat::Dexterity, Game::d(1,6) as i32);
 
                         self.player.set_armor_by_type(ArmorType::Plate);
                         self.player.set_weapon_by_type(WeaponType::Sword);
@@ -595,9 +595,9 @@ impl Game {
 
         let i = rng.gen_range(0, count);
 
-        let t_type = treasures.get(i).unwrap();
+        let t_type = treasures[i];
 
-        self.bribe_treasure = Some(*t_type);
+        self.bribe_treasure = Some(t_type);
 
         Ok(self.bribe_treasure)
     }
@@ -625,7 +625,7 @@ impl Game {
             RoomType::Sinkhole => self.room_effect_sinkhole(),
             RoomType::Warp(orb_of_zot) => self.room_effect_warp(orb_of_zot),
             RoomType::Treasure(t) => self.room_effect_treasure(t),
-            RoomType::Monster(m) => self.room_effect_monster(m),
+            RoomType::Monster(m) => self.room_effect_monster(&m),
             _ => Event::None,
         }
     }
@@ -769,7 +769,7 @@ impl Game {
 
         let addition = Game::d(1,6);
 
-        Ok(self.player.change_stat(&stat, addition as i32))
+        Ok(self.player.change_stat(stat, addition as i32))
     }
 
 
@@ -821,27 +821,27 @@ impl Game {
 
         match Game::d(1,8) {
             1 => {
-                self.player.change_stat(&Stat::Strength, Game::d(1,3) as i32);
+                self.player.change_stat(Stat::Strength, Game::d(1,3) as i32);
                 Ok(DrinkEvent::Stronger)
             },
             2 => {
-                self.player.change_stat(&Stat::Strength, -(Game::d(1,3) as i32));
+                self.player.change_stat(Stat::Strength, -(Game::d(1,3) as i32));
                 Ok(DrinkEvent::Weaker)
             },
             3 => {
-                self.player.change_stat(&Stat::Intelligence, Game::d(1,3) as i32);
+                self.player.change_stat(Stat::Intelligence, Game::d(1,3) as i32);
                 Ok(DrinkEvent::Smarter)
             },
             4 => {
-                self.player.change_stat(&Stat::Intelligence, -(Game::d(1,3) as i32));
+                self.player.change_stat(Stat::Intelligence, -(Game::d(1,3) as i32));
                 Ok(DrinkEvent::Dumber)
             },
             5 => {
-                self.player.change_stat(&Stat::Dexterity, Game::d(1,3) as i32);
+                self.player.change_stat(Stat::Dexterity, Game::d(1,3) as i32);
                 Ok(DrinkEvent::Nimbler)
             },
             6 => {
-                self.player.change_stat(&Stat::Dexterity, -(Game::d(1,3) as i32));
+                self.player.change_stat(Stat::Dexterity, -(Game::d(1,3) as i32));
                 Ok(DrinkEvent::Clumsier)
             },
             7 => {
@@ -952,7 +952,7 @@ impl Game {
 
         match Game::d(1,6) {
             1 => {
-                self.player.change_stat(&Stat::Strength, -(Game::d(1,2) as i32));
+                self.player.change_stat(Stat::Strength, -(Game::d(1,2) as i32));
                 self.make_current_room_empty();
                 Ok(OrbEvent::BloodyHeap)
             },
@@ -1025,11 +1025,11 @@ impl Game {
             2 => Ok(BookEvent::Poetry),
             3 => Ok(BookEvent::PlayMonster(Game::rand_monster_type())),
             4 => {
-                self.player.set_stat(&Stat::Dexterity, 18);
+                self.player.set_stat(Stat::Dexterity, 18);
                 Ok(BookEvent::Dexterity)
             }
             5 => {
-                self.player.set_stat(&Stat::Strength, 18);
+                self.player.set_stat(Stat::Strength, 18);
                 Ok(BookEvent::Strength)
             }
             6 => {
@@ -1210,7 +1210,7 @@ impl Game {
     }
 
     /// Allocate player stat points
-    pub fn player_allocate_points(&mut self, stat:&Stat, points: u32) -> Result<u32, Error> {
+    pub fn player_allocate_points(&mut self, stat:Stat, points: u32) -> Result<u32, Error> {
         self.player.allocate_points(stat, points)
     }
 

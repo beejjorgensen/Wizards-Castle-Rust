@@ -59,6 +59,12 @@ pub struct Player {
     curses: Vec<CurseType>,
 }
 
+impl Default for self::Player {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Player {
     pub fn new() -> Player {
         Player {
@@ -102,7 +108,7 @@ impl Player {
     /// Set the race and all the corresponding points
     pub fn init(&mut self, race: Race) {
 
-        let race_id = Player::get_id_by_race(&race);
+        let race_id = Player::get_id_by_race(race);
 
         self.stat.insert(Stat::Strength, 2 + (race_id + 1) * 2);
         self.stat.insert(Stat::Dexterity, 14 - (race_id + 1) * 2);
@@ -125,7 +131,7 @@ impl Player {
     }
 
     /// Get a race number by race type
-    fn get_id_by_race(race: &Race) -> u32 {
+    fn get_id_by_race(race: Race) -> u32 {
         match race {
             Race::Hobbit => 0,
             Race::Elf => 1,
@@ -145,7 +151,7 @@ impl Player {
     }
 
     /// Allocate points to a stat
-    pub fn allocate_points(&mut self, stat: &Stat, points: u32) -> Result<u32, Error> {
+    pub fn allocate_points(&mut self, stat: Stat, points: u32) -> Result<u32, Error> {
         if points > self.additional_points {
             return Err(Error::NotEnoughPoints);
         }
@@ -158,8 +164,8 @@ impl Player {
     }
 
     /// Modify a stat
-    pub fn change_stat(&mut self, stat: &Stat, delta: i32) -> u32 {
-        let mut val = *self.stat.get(stat).unwrap() as i32;
+    pub fn change_stat(&mut self, stat: Stat, delta: i32) -> u32 {
+        let mut val = self.stat[&stat] as i32;
 
         val += delta;
 
@@ -168,16 +174,16 @@ impl Player {
 
         let result = val as u32;
 
-        self.stat.insert(*stat, result);
+        self.stat.insert(stat, result);
 
         result
     }
 
     /// Set a stat
-    pub fn set_stat(&mut self, stat: &Stat, mut val: u32) -> u32 {
+    pub fn set_stat(&mut self, stat: Stat, mut val: u32) -> u32 {
         val = std::cmp::min(18, val);
 
-        self.stat.insert(*stat, val);
+        self.stat.insert(stat, val);
 
         val
     }
@@ -327,7 +333,7 @@ impl Player {
     pub fn damage_st(&mut self, damage: u32) -> bool {
         let delta = -(damage as i32);
 
-        let new_st = self.change_stat(&Stat::Strength, delta);
+        let new_st = self.change_stat(Stat::Strength, delta);
 
         new_st < 1
     }

@@ -23,144 +23,54 @@ impl Dungeon {
     pub fn new(xsize: u32, ysize: u32, zsize: u32) -> Dungeon {
         let mut levels: Vec<Vec<Room>> = Vec::new();
 
-        let mut rng = thread_rng();
-
         let area = xsize * ysize;
 
-        let stair_count = area / 32; // 2 in 8x8
-        let item_count = area / 21; // 3 in 8x8
-        let vendor_count = area / 21; // 3 in 8x8
-        let monster_count = area / 5; // 12 in 8x8
-
-        let entrance_x = (xsize - 1) / 2;
+        let mut rng = thread_rng();
 
         let orb_of_zot_level = rng.gen_range(0, zsize);
-        let runestaff_level = rng.gen_range(0, zsize);
 
         // Add all necessary elements to the level
         for z in 0..zsize {
             let mut this_level = Vec::new();
 
-            // Entrance
-            if z == 0 {
-                this_level.push(Room{ roomtype: RoomType::Entrance, discovered: true, ..Default::default() });
-            }
-
-            // Stairs down
-            if z < zsize - 1 {
-                for _ in 0..stair_count {
-                    this_level.push(Room{ roomtype: RoomType::StairsDown, ..Default::default() });
-                }
-            }
-
-            // Stairs up
-            if z > 0 {
-                for _ in 0..stair_count {
-                    this_level.push(Room{ roomtype: RoomType::StairsUp, ..Default::default() });
-                }
-            }
-
-            // Items
-            for i in 0..item_count {
-                let orb_of_zot_warp = i == 0 && z == orb_of_zot_level;
-
-                this_level.push(Room{ roomtype: RoomType::Gold, ..Default::default() });
-                this_level.push(Room{ roomtype: RoomType::Pool, ..Default::default() });
-                this_level.push(Room{ roomtype: RoomType::Chest, ..Default::default() });
-                this_level.push(Room{ roomtype: RoomType::Flares, ..Default::default() });
-                this_level.push(Room{ roomtype: RoomType::Warp(orb_of_zot_warp), ..Default::default() });
-                this_level.push(Room{ roomtype: RoomType::Sinkhole, ..Default::default() });
-                this_level.push(Room{ roomtype: RoomType::CrystalOrb, ..Default::default() });
-                this_level.push(Room{ roomtype: RoomType::Book, ..Default::default() });
-            }
-
-            // Monsters
-            let monsters_to_place = [
-                MonsterType::Kobold,
-                MonsterType::Orc,
-                MonsterType::Wolf,
-                MonsterType::Goblin,
-                MonsterType::Ogre,
-                MonsterType::Troll,
-                MonsterType::Bear,
-                MonsterType::Minotaur,
-                MonsterType::Gargoyle,
-                MonsterType::Chimera,
-                MonsterType::Balrog,
-                MonsterType::Dragon,
-                // Not counting Vendors
-            ];
-
-            let num_monsters = monsters_to_place.len();
-
-            let monster_with_runestaff = rng.gen_range(0, monster_count) as usize;
-
-            for i in 0..monster_count as usize {
-                let has_runestaff = i == monster_with_runestaff && z == runestaff_level;
-
-                let m_num = i % num_monsters;
-
-                this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(monsters_to_place[m_num], has_runestaff)), ..Default::default() });
-            }
-
-            // Vendors
-            for _ in 0..vendor_count {
-                this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(MonsterType::Vendor, false)), ..Default::default() });
-            }
+            Dungeon::place_ent_stairs(&mut this_level, z, zsize, area);
+            Dungeon::place_items(&mut this_level, orb_of_zot_level, z, area);
+            Dungeon::place_monsters_vendors(&mut this_level, z, zsize, area);
 
             levels.push(this_level);
         }
 
-        // Add curse rooms
-        for i in 0..crate::curse::CURSE_COUNT {
-            let curse_level = rng.gen_range(0, zsize) as usize;
-
-            let curse = Curse::get_curse_by_id(i);
-
-            levels[curse_level].push(Room { curse, ..Default::default() })
-        }
-
-        for i in 0..crate::treasure::TREASURE_COUNT {
-            let treasure_level = rng.gen_range(0, zsize) as usize;
-
-            levels[treasure_level].push(Room { roomtype: RoomType::Treasure(Treasure::new(i)), ..Default::default() })
-        }
+        // Curses and treasures
+        Dungeon::place_curse_treasure(&mut levels, zsize);
 
         // Run through the levels, padding them with empty rooms, shuffling
         // them, and moving certain rooms to their proper positions.
 
-        let mut orb_of_zot = (0, 0, 0);
-
-        for z in 0..zsize as usize {
+        for l in &mut levels {
             // Fill the rest with empty
-            while levels[z].len() < area as usize {
-                levels[z].push(Room{ roomtype: RoomType::Empty, ..Default::default() });
+            while l.len() < area as usize {
+                l.push(Room{ roomtype: RoomType::Empty, ..Default::default() });
             }
 
             // Shuffle the level
-            levels[z].shuffle(&mut rng);
+            l.shuffle(&mut rng);
+        }
 
-            // Fix up the entrance
-            for y in 0..ysize as usize {
-                for x in 0..xsize as usize {
-                    let i = y * xsize as usize + x;
+        // Fix up the stairs and entrance
+        Dungeon::place_fixup(&mut levels, xsize, ysize, zsize, area);
 
-                    // Swap the entrance
-                    if levels[z][i].roomtype == RoomType::Entrance {
-                        let i2 = (0 * xsize + entrance_x) as usize;
+        // Find the orb of zot
+        let mut orb_of_zot = (0, 0, 0);
 
-                        levels[z].swap(i, i2);
-                    }
-                }
-            }
-
+        //for z in 0..zsize as usize {
+        for (z, l) in levels.iter().enumerate().take(zsize as usize) { // Clippy, you crazy
             // Find Orb of Zot (for gazing into orbs)
             if z as u32 == orb_of_zot_level {
                 for y in 0..ysize {
                     for x in 0..xsize {
                         let i = (y * xsize + x) as usize;
 
-                        if let RoomType::Warp(oz) = levels[z][i].roomtype {
+                        if let RoomType::Warp(oz) = l[i].roomtype {
                             if oz {
                                 orb_of_zot = (x, y, z as u32);
                             }
@@ -190,6 +100,137 @@ impl Dungeon {
                 println!("\n>>> ORB OF ZOT IS AT {},{},{} <<<\n", orb_of_zot.0, orb_of_zot.1, orb_of_zot.2);
             }
             */
+        }
+
+        Dungeon{levels, xsize, ysize, zsize, orb_of_zot}
+    }
+
+    /// Place the entryway and the stairs
+    fn place_ent_stairs(this_level: &mut Vec<Room>, z: u32, zsize: u32, area: u32) {
+        let stair_count = area / 32; // 2 in 8x8
+
+        // Entrance
+        if z == 0 {
+            this_level.push(Room{ roomtype: RoomType::Entrance, discovered: true, ..Default::default() });
+        }
+
+        // Stairs down
+        if z < zsize - 1 {
+            for _ in 0..stair_count {
+                this_level.push(Room{ roomtype: RoomType::StairsDown, ..Default::default() });
+            }
+        }
+
+        // Stairs up
+        if z > 0 {
+            for _ in 0..stair_count {
+                this_level.push(Room{ roomtype: RoomType::StairsUp, ..Default::default() });
+            }
+        }
+    }
+
+    /// Place the items in the dungeon
+    fn place_items(this_level: &mut Vec<Room>, orb_of_zot_level: u32, z: u32, area: u32) {
+        let item_count = area / 21; // 3 in 8x8
+
+        // Items
+        for i in 0..item_count {
+            let orb_of_zot_warp = i == 0 && z == orb_of_zot_level;
+
+            this_level.push(Room{ roomtype: RoomType::Gold, ..Default::default() });
+            this_level.push(Room{ roomtype: RoomType::Pool, ..Default::default() });
+            this_level.push(Room{ roomtype: RoomType::Chest, ..Default::default() });
+            this_level.push(Room{ roomtype: RoomType::Flares, ..Default::default() });
+            this_level.push(Room{ roomtype: RoomType::Warp(orb_of_zot_warp), ..Default::default() });
+            this_level.push(Room{ roomtype: RoomType::Sinkhole, ..Default::default() });
+            this_level.push(Room{ roomtype: RoomType::CrystalOrb, ..Default::default() });
+            this_level.push(Room{ roomtype: RoomType::Book, ..Default::default() });
+        }
+    }
+
+    /// Place monsters and vendors in the dungeon
+    fn place_monsters_vendors(this_level: &mut Vec<Room>, z: u32, zsize: u32, area: u32) {
+        let vendor_count = area / 21; // 3 in 8x8
+        let monster_count = area / 5; // 12 in 8x8
+
+        let mut rng = thread_rng();
+
+        let runestaff_level = rng.gen_range(0, zsize);
+
+        // Monsters
+        let monsters_to_place = [
+            MonsterType::Kobold,
+            MonsterType::Orc,
+            MonsterType::Wolf,
+            MonsterType::Goblin,
+            MonsterType::Ogre,
+            MonsterType::Troll,
+            MonsterType::Bear,
+            MonsterType::Minotaur,
+            MonsterType::Gargoyle,
+            MonsterType::Chimera,
+            MonsterType::Balrog,
+            MonsterType::Dragon,
+            // Not counting Vendors
+        ];
+
+        let num_monsters = monsters_to_place.len();
+
+        let monster_with_runestaff = rng.gen_range(0, monster_count) as usize;
+
+        for i in 0..monster_count as usize {
+            let has_runestaff = i == monster_with_runestaff && z == runestaff_level;
+
+            let m_num = i % num_monsters;
+
+            this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(monsters_to_place[m_num], has_runestaff)), ..Default::default() });
+        }
+
+        // Vendors
+        for _ in 0..vendor_count {
+            this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(MonsterType::Vendor, false)), ..Default::default() });
+        }
+    }
+
+    /// Place curses and treasures
+    fn place_curse_treasure(levels: &mut Vec<Vec<Room>>, zsize: u32) {
+        let mut rng = thread_rng();
+
+        // Add curse rooms
+        for i in 0..crate::curse::CURSE_COUNT {
+            let curse_level = rng.gen_range(0, zsize) as usize;
+
+            let curse = Curse::get_curse_by_id(i);
+
+            levels[curse_level].push(Room { curse, ..Default::default() })
+        }
+
+        // Add treasures
+        for i in 0..crate::treasure::TREASURE_COUNT {
+            let treasure_level = rng.gen_range(0, zsize) as usize;
+
+            levels[treasure_level].push(Room { roomtype: RoomType::Treasure(Treasure::new(i)), ..Default::default() })
+        }
+    }
+
+    /// Fix stairs and entrance on levels
+    fn place_fixup(levels: &mut Vec<Vec<Room>>, xsize: u32, ysize: u32, zsize: u32, area: u32) {
+        let entrance_x = (xsize - 1) / 2;
+
+        for z in 0..zsize as usize {
+            // Fix up the entrance
+            for y in 0..ysize as usize {
+                for x in 0..xsize as usize {
+                    let i = y * xsize as usize + x;
+
+                    // Swap the entrance
+                    if levels[z][i].roomtype == RoomType::Entrance {
+                        let i2 = (/*0 * xsize + */ entrance_x) as usize;
+
+                        levels[z].swap(i, i2);
+                    }
+                }
+            }
 
             // Fix up the stairs up
             if z > 0 {
@@ -208,7 +249,7 @@ impl Dungeon {
                     }
                 }
 
-                while ups.len() > 0 {
+                while !ups.is_empty() {
                     let up_i = ups.pop().unwrap();
                     let down_i = downs.pop().unwrap();
 
@@ -216,8 +257,6 @@ impl Dungeon {
                 }
             }
         }
-
-        Dungeon{levels, xsize, ysize, zsize, orb_of_zot}
     }
 
     /// Get the entrance x position
