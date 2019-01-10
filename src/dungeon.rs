@@ -65,8 +65,8 @@ impl Dungeon {
         let mut orb_of_zot = (0, 0, 0);
 
         //for z in 0..zsize as usize {
+        // Clippy, you crazy for wanting this line instead:
         for (z, l) in levels.iter().enumerate().take(zsize as usize) {
-            // Clippy, you crazy
             // Find Orb of Zot (for gazing into orbs)
             if z as u32 == orb_of_zot_level {
                 for y in 0..ysize {

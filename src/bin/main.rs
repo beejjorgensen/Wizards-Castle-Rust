@@ -783,42 +783,40 @@ impl UI {
         let mut bribed = false;
 
         match self.game.bribe_proposition() {
-            Ok(Some(t_type)) => {
-                loop {
-                    let tname = UI::treasure_name(t_type);
+            Ok(Some(t_type)) => loop {
+                let tname = UI::treasure_name(t_type);
 
-                    let yn = UI::get_input(Some(&format!(
-                        "\nI WANT {}, WILL YOU GIVE IT TO ME? ",
-                        tname
-                    )));
+                let yn = UI::get_input(Some(&format!(
+                    "\nI WANT {}, WILL YOU GIVE IT TO ME? ",
+                    tname
+                )));
 
-                    match yn.get(..1) {
-                        Some("Y") => {
-                            match self.game.bribe_accept() {
-                                Ok(_) => {
-                                    bribed = true;
-                                }
-                                Err(err) => {
-                                    panic!("agree to bribe: {:#?}", err);
-                                }
-                            };
-                            break;
-                        }
-                        Some("N") => {
-                            match self.game.bribe_decline() {
-                                Ok(_) => {
-                                    bribed = false;
-                                }
-                                Err(err) => {
-                                    panic!("disagree to bribe: {:#?}", err);
-                                }
-                            };
-                            break;
-                        }
-                        _ => println!("\n** ANSWER YES OR NO"),
+                match yn.get(..1) {
+                    Some("Y") => {
+                        match self.game.bribe_accept() {
+                            Ok(_) => {
+                                bribed = true;
+                            }
+                            Err(err) => {
+                                panic!("agree to bribe: {:#?}", err);
+                            }
+                        };
+                        break;
                     }
+                    Some("N") => {
+                        match self.game.bribe_decline() {
+                            Ok(_) => {
+                                bribed = false;
+                            }
+                            Err(err) => {
+                                panic!("disagree to bribe: {:#?}", err);
+                            }
+                        };
+                        break;
+                    }
+                    _ => println!("\n** ANSWER YES OR NO"),
                 }
-            }
+            },
             Ok(None) => {
                 println!("\n'ALL I WANT IS YOUR LIFE!'");
             }

@@ -15,16 +15,8 @@ impl Armor {
     /// Create a new armor
     pub fn new(a: ArmorType) -> Armor {
         let health = match a {
-            ArmorType::None =>
-            /*0 * */
-            {
-                7
-            }
-            ArmorType::Leather =>
-            /*1 * */
-            {
-                7
-            }
+            ArmorType::None => 0,    // 0 * 7
+            ArmorType::Leather => 7, // 1 * 7
             ArmorType::Chainmail => 2 * 7,
             ArmorType::Plate => 3 * 7,
         };
