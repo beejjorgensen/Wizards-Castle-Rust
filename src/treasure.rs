@@ -1,6 +1,6 @@
 pub const TREASURE_COUNT: u32 = 8;
 
-#[derive(Debug,PartialEq,Copy,Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum TreasureType {
     RubyRed,
     NornStone,
@@ -12,7 +12,7 @@ pub enum TreasureType {
     Silmaril,
 }
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Treasure {
     pub treasure_type: TreasureType,
 }
@@ -35,7 +35,7 @@ impl Treasure {
             5 => TreasureType::BlueFlame,
             6 => TreasureType::Palantir,
             7 => TreasureType::Silmaril,
-            _ => panic!("get_treasure_by_id: unknown id")
+            _ => panic!("get_treasure_by_id: unknown id"),
         }
     }
 

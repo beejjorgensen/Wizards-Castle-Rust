@@ -1,6 +1,6 @@
 pub const MONSTER_COUNT: u32 = 13;
 
-#[derive(Debug,PartialEq,Copy,Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum MonsterType {
     Kobold,
     Orc,
@@ -17,7 +17,7 @@ pub enum MonsterType {
     Vendor,
 }
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Monster {
     monster_type: MonsterType,
     hp: u32,
@@ -35,14 +35,15 @@ impl Monster {
         let hp = m1 + 2;
         let damage = 1 + m1 / 2;
 
-        let break_weapon = monster_type == MonsterType::Gargoyle || monster_type == MonsterType::Dragon;
+        let break_weapon =
+            monster_type == MonsterType::Gargoyle || monster_type == MonsterType::Dragon;
 
-        Monster{
+        Monster {
             monster_type,
             hp,
             damage,
             break_weapon,
-            has_runestaff
+            has_runestaff,
         }
     }
 

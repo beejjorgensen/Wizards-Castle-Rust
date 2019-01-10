@@ -1,19 +1,19 @@
 extern crate rand;
 
+use crate::armor::ArmorType;
+use crate::curse::CurseType;
 use crate::dungeon::Dungeon;
-use crate::player::{Player, Stat, Race, Gender};
+use crate::error::Error;
+use crate::monster::{Monster, MonsterType};
+use crate::player::{Gender, Player, Race, Stat};
 use crate::room::{Room, RoomType};
 use crate::treasure::{Treasure, TreasureType};
-use crate::monster::{Monster, MonsterType};
 use crate::weapon::{Weapon, WeaponType};
-use crate::armor::ArmorType;
-use crate::error::Error;
-use crate::curse::CurseType;
 
-use self::rand::Rng;
 use self::rand::thread_rng;
+use self::rand::Rng;
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub enum Event {
     None,
     FoundGold(u32),
@@ -25,7 +25,7 @@ pub enum Event {
     Vendor,
 }
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum CombatEvent {
     NoWeapon,
     BookHands,
@@ -35,7 +35,7 @@ pub enum CombatEvent {
     MonsterHit(u32, bool, bool),
 }
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct HitResult {
     pub damage: u32,
     pub broke_weapon: bool,
@@ -46,7 +46,7 @@ pub struct HitResult {
     pub got_lamp: bool,
 }
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum DrinkEvent {
     Stronger,
     Weaker,
@@ -85,7 +85,7 @@ pub enum BookEvent {
     Sticky,
 }
 
-#[derive(Debug,Clone,Copy,PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Direction {
     North,
     South,
@@ -93,7 +93,7 @@ pub enum Direction {
     East,
 }
 
-#[derive(Debug,Clone,Copy,PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Stairs {
     Up,
     Down,
@@ -111,7 +111,7 @@ pub enum RandomMessage {
     Playing,
 }
 
-#[derive(Debug,Clone,Copy,PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum GameState {
     Init,
 
@@ -156,7 +156,6 @@ pub struct Game {
 
 impl Game {
     pub fn new(xsize: u32, ysize: u32, zsize: u32) -> Game {
-
         let dungeon = Dungeon::new(xsize, ysize, zsize);
 
         let mut player = Player::new();
@@ -211,7 +210,7 @@ impl Game {
             x as u32
         }
     }
-    
+
     /// Wrap a y coordinate
     pub fn wrap_y(&self, y: i32) -> u32 {
         if y < 0 {
@@ -222,7 +221,7 @@ impl Game {
             y as u32
         }
     }
-    
+
     /// Wrap a z coordinate
     pub fn wrap_z(&self, z: i32) -> u32 {
         if z < 0 {
@@ -236,7 +235,7 @@ impl Game {
 
     /// Choose a random direction
     fn rand_direction() -> Direction {
-        match Game::d(1,4) {
+        match Game::d(1, 4) {
             1 => Direction::North,
             2 => Direction::South,
             3 => Direction::West,
@@ -255,27 +254,31 @@ impl Game {
 
         self.dungeon.room_at_mut(x, y, z).set_discovered(false);
     }
-    
+
     /// Mark the player's current room as empty
     fn make_current_room_empty(&mut self) {
-        let room = self.dungeon.room_at_mut(*self.player.x(), *self.player.y(), *self.player.z());
+        let room = self
+            .dungeon
+            .room_at_mut(*self.player.x(), *self.player.y(), *self.player.z());
 
         room.make_empty();
     }
 
     /// Return the room at the player position
     pub fn room_at_player(&self) -> &Room {
-        self.dungeon.room_at(*self.player.x(), *self.player.y(), *self.player.z())
+        self.dungeon
+            .room_at(*self.player.x(), *self.player.y(), *self.player.z())
     }
 
     /// Discover the room at the player position
     pub fn discover_room_at_player(&mut self) {
-        self.dungeon.discover(*self.player.x(), *self.player.y(), *self.player.z())
+        self.dungeon
+            .discover(*self.player.x(), *self.player.y(), *self.player.z())
     }
 
     /// Handle Gold room effects
     fn room_effect_gold(&mut self) -> Event {
-        let gold_amount = Game::d(1,10);
+        let gold_amount = Game::d(1, 10);
 
         self.player.add_gp(gold_amount as i32);
 
@@ -286,7 +289,7 @@ impl Game {
 
     /// Handle Flare room effects
     fn room_effect_flares(&mut self) -> Event {
-        let flare_amount = Game::d(1,5);
+        let flare_amount = Game::d(1, 5);
 
         self.player.change_flares(flare_amount as i32);
 
@@ -333,7 +336,6 @@ impl Game {
 
     // Handle Monster room effects
     fn room_effect_monster(&mut self, monster: &Monster) -> Event {
-
         // If Vendors are not angry, head into vendor trade state instead of combat
         if monster.monster_type() == MonsterType::Vendor && !self.vendors_angry {
             self.state = GameState::Vendor;
@@ -381,7 +383,8 @@ impl Game {
             return Ok(CombatEvent::BookHands);
         }
 
-        let hit = *self.player.stat(&Stat::Dexterity) >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
+        let hit = *self.player.stat(&Stat::Dexterity)
+            >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
 
         if hit {
             let mut result = HitResult {
@@ -397,13 +400,13 @@ impl Game {
             let mut next_state = GameState::MonsterAttack;
 
             if let Some(ref mut monster) = self.currently_fighting {
-                if monster.can_break_weapon() && Game::d(1,8) == 1 {
+                if monster.can_break_weapon() && Game::d(1, 8) == 1 {
                     result.broke_weapon = true;
                     self.player.set_weapon(Weapon::new(WeaponType::None));
                 }
 
                 result.defeated = monster.take_damage(result.damage);
-                
+
                 if result.defeated {
                     next_state = GameState::Move;
 
@@ -411,9 +414,12 @@ impl Game {
                     if monster.monster_type() == MonsterType::Vendor {
                         result.killed_vendor = true;
 
-                        self.player.change_stat(Stat::Strength, Game::d(1,6) as i32);
-                        self.player.change_stat(Stat::Intelligence, Game::d(1,6) as i32);
-                        self.player.change_stat(Stat::Dexterity, Game::d(1,6) as i32);
+                        self.player
+                            .change_stat(Stat::Strength, Game::d(1, 6) as i32);
+                        self.player
+                            .change_stat(Stat::Intelligence, Game::d(1, 6) as i32);
+                        self.player
+                            .change_stat(Stat::Dexterity, Game::d(1, 6) as i32);
 
                         self.player.set_armor_by_type(ArmorType::Plate);
                         self.player.set_weapon_by_type(WeaponType::Sword);
@@ -422,7 +428,6 @@ impl Game {
                             self.player.set_lamp(true);
                             result.got_lamp = true;
                         }
-
                     } else {
                         // Non-vendor creature
                         if monster.has_runestaff() {
@@ -430,7 +435,7 @@ impl Game {
                             result.got_runestaff = true;
                         }
 
-                        result.treasure = Game::d(1,1000);
+                        result.treasure = Game::d(1, 1000);
                     }
                 }
             } else {
@@ -473,7 +478,8 @@ impl Game {
 
         // TODO check for stuck in web
 
-        let hit = *self.player.stat(&Stat::Dexterity) < (Game::d(3,7) + (self.player.is_blind() as u32) * 3);
+        let hit = *self.player.stat(&Stat::Dexterity)
+            < (Game::d(3, 7) + (self.player.is_blind() as u32) * 3);
 
         let mut combat_event = None;
         let mut defeated = false;
@@ -490,8 +496,11 @@ impl Game {
                 let armor_damage = std::cmp::min(damage, armor_value);
                 let armor_destroyed = self.player.damage_armor(armor_damage);
 
-                combat_event = Some(CombatEvent::MonsterHit(st_damage, defeated, armor_destroyed));
-
+                combat_event = Some(CombatEvent::MonsterHit(
+                    st_damage,
+                    defeated,
+                    armor_destroyed,
+                ));
             } else {
                 panic!("being attacked, but not by any monster");
             }
@@ -546,7 +555,10 @@ impl Game {
                 self.state = GameState::Move;
 
                 // Check if we're bribing a vendor
-                let roomtype = &self.dungeon.room_at(*self.player.x(), *self.player.y(), *self.player.z()).roomtype;
+                let roomtype = &self
+                    .dungeon
+                    .room_at(*self.player.x(), *self.player.y(), *self.player.z())
+                    .roomtype;
 
                 if let RoomType::Monster(m) = roomtype {
                     if m.monster_type() == MonsterType::Vendor {
@@ -559,7 +571,6 @@ impl Game {
             }
 
             self.bribe_treasure = None;
-
         } else {
             // No current bribeable treasure
             return Err(Error::BribeMustProposition);
@@ -620,14 +631,15 @@ impl Game {
 
         self.move_dir(dir);
     }
-    
+
     /// Check for a room event
     pub fn room_effect(&mut self) -> Event {
-
         let roomtype;
 
         {
-            let room = self.dungeon.room_at(*self.player.x(), *self.player.y(), *self.player.z());
+            let room = self
+                .dungeon
+                .room_at(*self.player.x(), *self.player.y(), *self.player.z());
             roomtype = room.roomtype.clone();
         }
 
@@ -648,7 +660,7 @@ impl Game {
     }
 
     /// Teleport the player
-    /// 
+    ///
     /// Returns true if the player found the Orb of Zot
     pub fn teleport(&mut self, x: u32, y: u32, z: u32) -> Result<bool, Error> {
         let mut found_orb_of_zot = false;
@@ -694,13 +706,13 @@ impl Game {
                     return Err(Error::CantGo);
                 }
                 p.up();
-            },
+            }
             Stairs::Down => {
                 if room.roomtype != RoomType::StairsDown {
                     return Err(Error::CantGo);
                 }
                 p.down();
-            },
+            }
         }
 
         Ok(())
@@ -724,19 +736,19 @@ impl Game {
             Direction::North => {
                 let new_y = self.wrap_y(p_y - 1);
                 self.player.set_y(new_y);
-            },
+            }
             Direction::South => {
                 let new_y = self.wrap_y(p_y + 1);
                 self.player.set_y(new_y);
-            },
+            }
             Direction::West => {
                 let new_x = self.wrap_x(p_x - 1);
                 self.player.set_x(new_x);
-            },
+            }
             Direction::East => {
                 let new_x = self.wrap_x(p_x + 1);
                 self.player.set_x(new_x);
-            },
+            }
         }
     }
 
@@ -769,7 +781,7 @@ impl Game {
 
         Ok(())
     }
-    
+
     /// Check if you can afford stats
     pub fn vendor_can_afford_stat(&self) -> bool {
         self.player_gp() >= 1000
@@ -779,11 +791,10 @@ impl Game {
     pub fn vendor_buy_stat(&mut self, stat: Stat) -> Result<u32, Error> {
         self.player.spend(1000)?;
 
-        let addition = Game::d(1,6);
+        let addition = Game::d(1, 6);
 
         Ok(self.player.change_stat(stat, addition as i32))
     }
-
 
     /// True if the player can buy a lamp from a vendor
     pub fn vendor_can_afford_lamp(&self) -> bool {
@@ -793,7 +804,7 @@ impl Game {
     /// Buy a lamp from a vendor
     pub fn vendor_buy_lamp(&mut self) -> Result<(), Error> {
         self.player.spend(1000)?;
-        
+
         self.player.set_lamp(true);
 
         Ok(())
@@ -806,7 +817,7 @@ impl Game {
         }
 
         let max_value = Treasure::treasure_max_value(treasure_type);
-        self.vendor_treasure_price = Game::d(1,max_value);
+        self.vendor_treasure_price = Game::d(1, max_value);
         self.vendor_treasure = Some(treasure_type);
 
         Ok(self.vendor_treasure_price)
@@ -831,35 +842,41 @@ impl Game {
             return Err(Error::CantGo);
         }
 
-        match Game::d(1,8) {
+        match Game::d(1, 8) {
             1 => {
-                self.player.change_stat(Stat::Strength, Game::d(1,3) as i32);
+                self.player
+                    .change_stat(Stat::Strength, Game::d(1, 3) as i32);
                 Ok(DrinkEvent::Stronger)
-            },
+            }
             2 => {
-                self.player.change_stat(Stat::Strength, -(Game::d(1,3) as i32));
+                self.player
+                    .change_stat(Stat::Strength, -(Game::d(1, 3) as i32));
                 Ok(DrinkEvent::Weaker)
-            },
+            }
             3 => {
-                self.player.change_stat(Stat::Intelligence, Game::d(1,3) as i32);
+                self.player
+                    .change_stat(Stat::Intelligence, Game::d(1, 3) as i32);
                 Ok(DrinkEvent::Smarter)
-            },
+            }
             4 => {
-                self.player.change_stat(Stat::Intelligence, -(Game::d(1,3) as i32));
+                self.player
+                    .change_stat(Stat::Intelligence, -(Game::d(1, 3) as i32));
                 Ok(DrinkEvent::Dumber)
-            },
+            }
             5 => {
-                self.player.change_stat(Stat::Dexterity, Game::d(1,3) as i32);
+                self.player
+                    .change_stat(Stat::Dexterity, Game::d(1, 3) as i32);
                 Ok(DrinkEvent::Nimbler)
-            },
+            }
             6 => {
-                self.player.change_stat(Stat::Dexterity, -(Game::d(1,3) as i32));
+                self.player
+                    .change_stat(Stat::Dexterity, -(Game::d(1, 3) as i32));
                 Ok(DrinkEvent::Clumsier)
-            },
+            }
             7 => {
                 let races = [Race::Dwarf, Race::Elf, Race::Hobbit, Race::Human];
 
-                let n = Game::d(1,3) - 1;
+                let n = Game::d(1, 3) - 1;
                 let mut i = 0;
 
                 for _ in 0..n {
@@ -872,7 +889,7 @@ impl Game {
                 self.player.set_race(races[i]);
 
                 Ok(DrinkEvent::ChangeRace)
-            },
+            }
             8 => {
                 if *self.player.gender() == Gender::Male {
                     self.player.set_gender(Gender::Female);
@@ -882,7 +899,7 @@ impl Game {
 
                 Ok(DrinkEvent::ChangeGender)
             }
-            _ => panic!("should not happen")
+            _ => panic!("should not happen"),
         }
     }
 
@@ -893,24 +910,24 @@ impl Game {
         }
 
         let (x, y);
-        
+
         match dir {
             Direction::North => {
                 x = *self.player.x();
                 y = self.wrap_y(*self.player.y() as i32 - 1);
-            },
+            }
             Direction::South => {
                 x = *self.player.x();
                 y = self.wrap_y(*self.player.y() as i32 + 1);
-            },
+            }
             Direction::West => {
                 x = self.wrap_x(*self.player.x() as i32 - 1);
                 y = *self.player.y();
-            },
+            }
             Direction::East => {
                 x = self.wrap_x(*self.player.x() as i32 + 1);
                 y = *self.player.y();
-            },
+            }
         }
 
         let z = *self.player.z();
@@ -936,11 +953,9 @@ impl Game {
         let z = *self.player.z();
 
         for y in ym1..(ym1 + 3) {
-
             let yw = self.wrap_y(y);
 
             for x in xm1..(xm1 + 3) {
-
                 let xw = self.wrap_x(x);
 
                 self.dungeon.room_at_mut(xw, yw, z).set_discovered(true);
@@ -966,20 +981,17 @@ impl Game {
 
         let mut rng = thread_rng();
 
-        match Game::d(1,6) {
+        match Game::d(1, 6) {
             1 => {
-                self.player.change_stat(Stat::Strength, -(Game::d(1,2) as i32));
+                self.player
+                    .change_stat(Stat::Strength, -(Game::d(1, 2) as i32));
                 self.make_current_room_empty();
                 Ok(OrbEvent::BloodyHeap)
-            },
-
-            2 => {
-                Ok(OrbEvent::Polymorph(Game::rand_monster_type()))
             }
 
-            3 => {
-                Ok(OrbEvent::GazeBack(Game::rand_monster_type()))
-            }
+            2 => Ok(OrbEvent::Polymorph(Game::rand_monster_type())),
+
+            3 => Ok(OrbEvent::GazeBack(Game::rand_monster_type())),
 
             4 => {
                 let x = rng.gen_range(0, self.dungeon.xsize());
@@ -996,7 +1008,7 @@ impl Game {
             5 => {
                 let (x, y, z);
 
-                if Game::d(1,8) <= 3 {
+                if Game::d(1, 8) <= 3 {
                     // Actual location
                     let loc = self.dungeon.orb_of_zot_location();
                     x = loc.0;
@@ -1012,13 +1024,10 @@ impl Game {
                 Ok(OrbEvent::OrbOfZot(x, y, z))
             }
 
-            6 => {
-                Ok(OrbEvent::SoapOpera)
-            }
+            6 => Ok(OrbEvent::SoapOpera),
 
             _ => panic!("SNH"),
         }
-
     }
 
     /// Open a book
@@ -1033,7 +1042,7 @@ impl Game {
 
         self.make_current_room_empty();
 
-        match Game::d(1,6) {
+        match Game::d(1, 6) {
             1 => {
                 self.player.set_blind(true);
                 Ok(BookEvent::Blind)
@@ -1070,9 +1079,9 @@ impl Game {
         // We mod that here to destroy the chest in all cases.
         self.make_current_room_empty();
 
-        match Game::d(1,4) {
+        match Game::d(1, 4) {
             1 => {
-                if self.player.damage_st(Game::d(1,6)) {
+                if self.player.damage_st(Game::d(1, 6)) {
                     self.state = GameState::Dead;
                 }
                 Ok(ChestEvent::Explode)
@@ -1082,13 +1091,13 @@ impl Game {
                 self.move_dir(Game::rand_direction());
                 Ok(ChestEvent::Gas)
             }
-            3...4 => Ok(ChestEvent::Treasure(Game::d(1,1000))),
+            3...4 => Ok(ChestEvent::Treasure(Game::d(1, 1000))),
             _ => panic!("SNR"),
         }
     }
 
     /// Cure blindness
-    /// 
+    ///
     /// True if blindness was cured
     pub fn cure_blindness(&mut self) -> bool {
         if self.player.is_blind() && self.player.has_treasure(TreasureType::OpalEye) {
@@ -1100,7 +1109,7 @@ impl Game {
     }
 
     /// Cure book stuck to hands
-    /// 
+    ///
     /// True if the book was dissolved
     pub fn cure_book(&mut self) -> bool {
         if *self.player.book_stuck() && self.player.has_treasure(TreasureType::BlueFlame) {
@@ -1122,16 +1131,16 @@ impl Game {
             }
         }
 
-        if self.player.has_curse(CurseType::Forgetfulness) &&
-                        !self.player.has_treasure(TreasureType::GreenGem) {
-
+        if self.player.has_curse(CurseType::Forgetfulness)
+            && !self.player.has_treasure(TreasureType::GreenGem)
+        {
             self.rand_mark_unexplored();
         }
 
-        if self.player.has_curse(CurseType::TheLeech) &&
-                        !self.player.has_treasure(TreasureType::PalePearl) {
-
-            self.player.add_gp(-(Game::d(1,5) as i32));
+        if self.player.has_curse(CurseType::TheLeech)
+            && !self.player.has_treasure(TreasureType::PalePearl)
+        {
+            self.player.add_gp(-(Game::d(1, 5) as i32));
         }
     }
 
@@ -1144,18 +1153,18 @@ impl Game {
 
     /// Choose a random message
     pub fn rand_message(&self) -> RandomMessage {
-        if Game::d(1,5) != 1 {
+        if Game::d(1, 5) != 1 {
             return RandomMessage::None;
         }
 
-        let mut msgs = vec!(
+        let mut msgs = vec![
             RandomMessage::HearSound,
             RandomMessage::Sneeze,
             RandomMessage::StepFrog,
             RandomMessage::MonsterFrying,
             RandomMessage::Watched,
             RandomMessage::Playing,
-        );
+        ];
 
         // In the original game, "YOU SEE A BAT" was replaced by "YOU STEPPED ON
         // A FROG" if the player was blind. Instead, here we just don't show the
@@ -1256,7 +1265,7 @@ impl Game {
     }
 
     /// Allocate player stat points
-    pub fn player_allocate_points(&mut self, stat:Stat, points: u32) -> Result<u32, Error> {
+    pub fn player_allocate_points(&mut self, stat: Stat, points: u32) -> Result<u32, Error> {
         self.player.allocate_points(stat, points)
     }
 

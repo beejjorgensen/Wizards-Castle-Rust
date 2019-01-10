@@ -1,8 +1,8 @@
-use crate::treasure::Treasure;
-use crate::monster::Monster;
 use crate::curse::CurseType;
+use crate::monster::Monster;
+use crate::treasure::Treasure;
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum RoomType {
     Empty,
     Entrance,
@@ -63,4 +63,3 @@ impl Room {
         &self.curse
     }
 }
-

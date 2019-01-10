@@ -1,18 +1,18 @@
-use std::io::{stdin,stdout,Write};
+use std::io::{stdin, stdout, Write};
 
-use rand::Rng;
 use rand::rngs::ThreadRng;
 use rand::thread_rng;
+use rand::Rng;
 
-use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent};
-use wizardscastle::game::{DrinkEvent, OrbEvent, BookEvent, ChestEvent, GameState, RandomMessage};
-use wizardscastle::room::RoomType;
-use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
-use wizardscastle::weapon::{Weapon, WeaponType};
-use wizardscastle::treasure::TreasureType;
-use wizardscastle::monster::MonsterType;
 use wizardscastle::error::Error;
+use wizardscastle::game::{BookEvent, ChestEvent, DrinkEvent, GameState, OrbEvent, RandomMessage};
+use wizardscastle::game::{CombatEvent, Direction, Event, Game, Stairs};
+use wizardscastle::monster::MonsterType;
+use wizardscastle::player::{Gender, Race, Stat};
+use wizardscastle::room::RoomType;
+use wizardscastle::treasure::TreasureType;
+use wizardscastle::weapon::{Weapon, WeaponType};
 
 struct UI {
     game: Game,
@@ -121,12 +121,10 @@ impl UI {
             RoomType::CrystalOrb => String::from("A CRYSTAL ORB"),
             RoomType::Book => String::from("A BOOK"),
             RoomType::Monster(m) => {
-                    let mon_str = UI::monster_name(m.monster_type());
-                    format!("{} {}", UI::get_article(&mon_str), mon_str)
-                }
-            RoomType::Treasure(t) => {
-                UI::treasure_name(*t.treasure_type()).to_string()
+                let mon_str = UI::monster_name(m.monster_type());
+                format!("{} {}", UI::get_article(&mon_str), mon_str)
             }
+            RoomType::Treasure(t) => UI::treasure_name(*t.treasure_type()).to_string(),
         }
     }
 
@@ -163,9 +161,13 @@ impl UI {
     }
 
     /// Take some stairs
-    fn move_stairs(&mut self, stairs: Stairs) -> bool{
+    fn move_stairs(&mut self, stairs: Stairs) -> bool {
         if self.game.move_stairs(stairs).is_err() {
-            println!("** OH {}, NO STAIRS GOING {} IN HERE", self.race_str(), UI::stair_name(stairs));
+            println!(
+                "** OH {}, NO STAIRS GOING {} IN HERE",
+                self.race_str(),
+                UI::stair_name(stairs)
+            );
             return false;
         }
 
@@ -173,7 +175,7 @@ impl UI {
     }
 
     // Input a coordinate, 1-8
-    fn input_coord(prompt:&str) -> u32 {
+    fn input_coord(prompt: &str) -> u32 {
         let mut coord = 0;
         let mut got_num = false;
 
@@ -193,12 +195,10 @@ impl UI {
         }
 
         coord
-
     }
 
     /// Teleport
-    fn teleport(&mut self) -> bool{
-
+    fn teleport(&mut self) -> bool {
         if !self.game.can_teleport() {
             println!("** YOU CAN'T TELEPORT WITHOUT THE RUNESTAFF!");
             return false;
@@ -208,14 +208,15 @@ impl UI {
         let y = UI::input_coord("Y-COORD (1 = FAR NORTH 8 = FAR SOUTH)? ");
         let z = UI::input_coord("Z-COORD (1 = TOP       8 = BOTTOM   )? ");
 
-        match self.game.teleport(x - 1, y - 1, z - 1) { // back to 0-based
+        match self.game.teleport(x - 1, y - 1, z - 1) {
+            // back to 0-based
             Ok(found_orb_of_zot) => {
                 if found_orb_of_zot {
                     println!("\nGREAT UNMITIGATED ZOT!\n");
                     println!("YOU JUST FOUND THE ORB OF ZOT!\n");
                     println!("THE RUNESTAFF IS GONE\n");
                 }
-            },
+            }
             Err(err) => panic!("{:#?}", err),
         }
 
@@ -229,33 +230,36 @@ impl UI {
         match self.game.drink() {
             Ok(DrinkEvent::Stronger) => {
                 s = String::from("FEEL STRONGER");
-            },
+            }
             Ok(DrinkEvent::Weaker) => {
                 s = String::from("FEEL WEAKER");
-            },
+            }
             Ok(DrinkEvent::Smarter) => {
                 s = String::from("FEEL SMARTER");
-            },
+            }
             Ok(DrinkEvent::Dumber) => {
                 s = String::from("FEEL DUMBER");
-            },
+            }
             Ok(DrinkEvent::Nimbler) => {
                 s = String::from("FEEL NIMBLER");
-            },
+            }
             Ok(DrinkEvent::Clumsier) => {
                 s = String::from("FEEL CLUMSIER");
-            },
+            }
             Ok(DrinkEvent::ChangeRace) => {
                 s = format!("TURN INTO A {}", self.race_str());
-            },
+            }
             Ok(DrinkEvent::ChangeGender) => {
-                s = format!("TURN INTO A {} {}",
-                    UI::gender_name(*self.game.player_gender()), self.race_str());
-            },
+                s = format!(
+                    "TURN INTO A {} {}",
+                    UI::gender_name(*self.game.player_gender()),
+                    self.race_str()
+                );
+            }
             Err(Error::CantGo) => {
                 println!("** IF YOU WANT A DRINK, FIND A POOL");
                 return;
-            },
+            }
             Err(err) => panic!("{:#?}", err),
         }
 
@@ -283,7 +287,7 @@ impl UI {
                 } else {
                     'M'
                 }
-            },
+            }
             RoomType::Treasure(_) => 'T',
         }
     }
@@ -299,7 +303,6 @@ impl UI {
 
         for y in 0..self.game.dungeon_ysize() {
             for x in 0..self.game.dungeon_xsize() {
-
                 if x >= 1 {
                     print!("   ");
                 }
@@ -366,13 +369,34 @@ impl UI {
 
         println!("{:*^64}\n", "");
 
-        println!("{:^64}", "MANY CYCLES AGO, IN THE KINGDOM OF N'DIC, THE GNOMIC");
-        println!("{:^64}", "WIZARD ZOT FORGED HIS GREAT *ORB OF POWER*. HE SOON");
-        println!("{:^64}", "VANISHED, LEAVING BEHIND HIS VAST SUBTERRANEAN CASTLE");
-        println!("{:^64}", "FILLED WITH ESURIENT MONSTERS, FABULOUS TREASURES, AND");
-        println!("{:^64}", "THE INCREDIBLE *ORB OF ZOT*. FROM THAT TIME HENCE, MANY");
-        println!("{:^64}", "A BOLD YOUTH HAS VENTURED INTO THE WIZARD'S CASTLE. AS");
-        println!("{:^64}", "OF NOW, *NONE* HAS EVER EMERGED VICTORIOUSLY! BEWARE!!");
+        println!(
+            "{:^64}",
+            "MANY CYCLES AGO, IN THE KINGDOM OF N'DIC, THE GNOMIC"
+        );
+        println!(
+            "{:^64}",
+            "WIZARD ZOT FORGED HIS GREAT *ORB OF POWER*. HE SOON"
+        );
+        println!(
+            "{:^64}",
+            "VANISHED, LEAVING BEHIND HIS VAST SUBTERRANEAN CASTLE"
+        );
+        println!(
+            "{:^64}",
+            "FILLED WITH ESURIENT MONSTERS, FABULOUS TREASURES, AND"
+        );
+        println!(
+            "{:^64}",
+            "THE INCREDIBLE *ORB OF ZOT*. FROM THAT TIME HENCE, MANY"
+        );
+        println!(
+            "{:^64}",
+            "A BOLD YOUTH HAS VENTURED INTO THE WIZARD'S CASTLE. AS"
+        );
+        println!(
+            "{:^64}",
+            "OF NOW, *NONE* HAS EVER EMERGED VICTORIOUSLY! BEWARE!!"
+        );
 
         println!("\n{:*^64}\n", "");
     }
@@ -380,7 +404,6 @@ impl UI {
     /// Select the player's race and sex
     fn race_gender_select(&mut self) {
         let race = loop {
-
             println!("ALL RIGHT, BOLD ONE.");
             println!("YOU MAY BE AN ELF, DWARF, MAN, OR HOBBIT.\n");
 
@@ -414,33 +437,45 @@ impl UI {
     fn allocate_points(&mut self) {
         println!("\nOK {}, YOU HAVE THESE STATISTICS:\n", self.race_str());
 
-        println!("STRENGTH= {} INTELLIGENCE= {} DEXTERITY= {}\n",
+        println!(
+            "STRENGTH= {} INTELLIGENCE= {} DEXTERITY= {}\n",
             self.game.player_stat(Stat::Strength),
             self.game.player_stat(Stat::Intelligence),
-            self.game.player_stat(Stat::Dexterity));
+            self.game.player_stat(Stat::Dexterity)
+        );
 
-        println!("AND {} OTHER POINTS TO ALLOCATE AS YOU WISH.\n", self.game.player_additional_points());
+        println!(
+            "AND {} OTHER POINTS TO ALLOCATE AS YOU WISH.\n",
+            self.game.player_additional_points()
+        );
 
-        let stats = vec!(Stat::Intelligence, Stat::Strength, Stat::Dexterity);
-        let stat_names = vec!("INTELLIGENCE", "STRENGTH", "DEXTERITY");
+        let stats = vec![Stat::Intelligence, Stat::Strength, Stat::Dexterity];
+        let stat_names = vec!["INTELLIGENCE", "STRENGTH", "DEXTERITY"];
 
         for i in 0..3 {
             let mut ok = false;
 
             while !ok {
-                let s = UI::get_input(Some(&format!("HOW MANY POINTS DO YOU ADD TO {}? ", stat_names[i])));
+                let s = UI::get_input(Some(&format!(
+                    "HOW MANY POINTS DO YOU ADD TO {}? ",
+                    stat_names[i]
+                )));
 
                 let points_to_add;
-                
+
                 match s.parse::<u32>() {
                     Ok(p) => points_to_add = p,
                     Err(_) => {
                         print!("\n** ");
                         continue;
-                    },
+                    }
                 };
 
-                if self.game.player_allocate_points(stats[i], points_to_add).is_ok() {
+                if self
+                    .game
+                    .player_allocate_points(stats[i], points_to_add)
+                    .is_ok()
+                {
                     ok = true;
                 } else {
                     print!("\n** ");
@@ -456,7 +491,11 @@ impl UI {
 
     /// Buy armor
     fn buy_armor(&mut self) {
-        println!("\nOK, {}, YOU HAVE {} GOLD PIECES (GP's)\n", self.race_str(), self.game.player_gp());
+        println!(
+            "\nOK, {}, YOU HAVE {} GOLD PIECES (GP's)\n",
+            self.race_str(),
+            self.game.player_gp()
+        );
 
         println!("HERE IS A LIST OF ARMOR YOU CAN BUY (WITH COST IN <>)\n");
 
@@ -466,7 +505,6 @@ impl UI {
             let armor_str = UI::get_input(Some("\nYOUR CHOICE? "));
 
             match armor_str.get(..1) {
-
                 Some("P") => break self.game.player_purchase_armor(ArmorType::Plate, false),
                 Some("C") => break self.game.player_purchase_armor(ArmorType::Chainmail, false),
                 Some("L") => break self.game.player_purchase_armor(ArmorType::Leather, false),
@@ -475,16 +513,24 @@ impl UI {
                     let mon_str = self.rand_monster_str();
                     let article = UI::get_article(&mon_str);
 
-                    println!("\n** ARE YOU A {} OR {} {}? TYPE P,C,L OR N", self.race_str(), article, mon_str);
-                },
+                    println!(
+                        "\n** ARE YOU A {} OR {} {}? TYPE P,C,L OR N",
+                        self.race_str(),
+                        article,
+                        mon_str
+                    );
+                }
             }
         };
     }
 
     /// Buy weapon
     fn buy_weapon(&mut self) {
-
-        println!("\nOK, BOLD {}, YOU HAVE {} GP's LEFT\n", self.race_str(), self.game.player_gp());
+        println!(
+            "\nOK, BOLD {}, YOU HAVE {} GP's LEFT\n",
+            self.race_str(),
+            self.game.player_gp()
+        );
 
         println!("HERE IS A LIST OF WEAPONS YOU CAN BUY (WITH COST IN <>)\n");
 
@@ -494,13 +540,14 @@ impl UI {
             let armor_str = UI::get_input(Some("\nYOUR CHOICE? "));
 
             match armor_str.get(..1) {
-
                 Some("S") => break self.game.player_purchase_weapon(WeaponType::Sword, false),
                 Some("M") => break self.game.player_purchase_weapon(WeaponType::Mace, false),
                 Some("D") => break self.game.player_purchase_weapon(WeaponType::Dagger, false),
                 Some("N") => break self.game.player_purchase_weapon(WeaponType::None, false),
-                _ => println!("\n** IS YOUR IQ REALLY {}? TYPE S, M, D, OR N",
-                    self.game.player_stat(Stat::Intelligence)),
+                _ => println!(
+                    "\n** IS YOUR IQ REALLY {}? TYPE S, M, D, OR N",
+                    self.game.player_stat(Stat::Intelligence)
+                ),
             }
         };
     }
@@ -530,19 +577,23 @@ impl UI {
             return;
         }
 
-        println!("\nOK, {}, YOU HAVE {} GOLD PIECES LEFT\n", self.race_str(), self.game.player_gp());
+        println!(
+            "\nOK, {}, YOU HAVE {} GOLD PIECES LEFT\n",
+            self.race_str(),
+            self.game.player_gp()
+        );
 
         loop {
             let flare_str = UI::get_input(Some("FLARES COST 1 GP EACH, HOW MANY DO YOU WANT? "));
 
             let flare_count;
-            
+
             match flare_str.parse::<u32>() {
                 Ok(f) => flare_count = f,
                 Err(_) => {
                     print!("** IF YOU DON'T WANT ANY JUST TYPE 0 (ZERO)\n\n");
                     continue;
-                },
+                }
             };
 
             match self.game.player_purchase_flares(flare_count) {
@@ -552,7 +603,7 @@ impl UI {
                     continue;
                 }
             }
-        };
+        }
     }
 
     /// Print the player's location
@@ -565,23 +616,29 @@ impl UI {
             return;
         }
 
-        println!("YOU ARE AT ({},{}) LEVEL {}", self.game.player_x() + 1,
-            self.game.player_y() + 1, self.game.player_z() + 1);
+        println!(
+            "YOU ARE AT ({},{}) LEVEL {}",
+            self.game.player_x() + 1,
+            self.game.player_y() + 1,
+            self.game.player_z() + 1
+        );
     }
 
     /// Print player stats
     fn print_stats(&self) {
-        println!("ST={} IQ={} DX={} FLARES={} GP's={}",
+        println!(
+            "ST={} IQ={} DX={} FLARES={} GP's={}",
             self.game.player_stat(Stat::Strength),
             self.game.player_stat(Stat::Intelligence),
             self.game.player_stat(Stat::Dexterity),
             self.game.player_flares(),
-            self.game.player_gp());
+            self.game.player_gp()
+        );
 
         let w_name = UI::weapon_name(self.game.player_weapon_type());
         let a_name = UI::armor_name(self.game.player_armor_type());
 
-        print!( "{} / {}", w_name, a_name);
+        print!("{} / {}", w_name, a_name);
 
         if self.game.player_has_lamp() {
             print!(" / A LAMP");
@@ -600,21 +657,21 @@ impl UI {
     }
 
     // Attack a monster
-    fn combat_attack(&mut self, m_art:&str, m_name:&str) {
+    fn combat_attack(&mut self, m_art: &str, m_name: &str) {
         // Need to do this before the attack since the weapon might
         // break during it
         let weapon_type = self.game.player_weapon_type();
 
         match self.game.attack() {
-            Ok(CombatEvent::NoWeapon) =>  {
+            Ok(CombatEvent::NoWeapon) => {
                 println!("\n** POUNDING ON {} {} WON'T HURT IT", m_art, m_name);
-            },
+            }
 
-            Ok(CombatEvent::BookHands) =>  {
+            Ok(CombatEvent::BookHands) => {
                 println!("\n** YOU CAN'T BEAT IT TO DEATH WITH A BOOK");
-            },
+            }
 
-            Ok(CombatEvent::Hit(result)) =>  {
+            Ok(CombatEvent::Hit(result)) => {
                 println!("\n  YOU HIT THE LOUSY {}", m_name);
 
                 if result.broke_weapon {
@@ -637,7 +694,6 @@ impl UI {
                         if result.got_lamp {
                             println!("A LAMP");
                         }
-
                     } else {
                         if result.got_runestaff {
                             println!("\nGREAT ZOT! YOU'VE FOUND THE RUNESTAFF");
@@ -646,11 +702,11 @@ impl UI {
                         println!("\nYOU NOW GET HIS HOARD OF {} GP's", result.treasure);
                     }
                 }
-            },
-            
+            }
+
             Ok(CombatEvent::Miss) => {
                 println!("\n  DRAT! MISSED");
-            },
+            }
 
             Ok(any) => panic!("unexpected combat event {:#?}", any),
 
@@ -667,17 +723,16 @@ impl UI {
                 if armor_destroyed {
                     println!("\nYOUR ARMOR IS DESTROYED - GOOD LUCK\n");
                 }
-            },
+            }
 
             Ok(CombatEvent::MonsterMiss) => {
                 println!("\n  HAH! HE MISSED YOU");
-            },
+            }
 
             Ok(any) => panic!("unexpected event while being attacked {:#?}", any),
 
             Err(err) => panic!("error in combat being attacked {:#?}", err),
         }
-
     }
 
     /// Retreat
@@ -732,38 +787,41 @@ impl UI {
                 loop {
                     let tname = UI::treasure_name(t_type);
 
-                    let yn = UI::get_input(Some(&format!("\nI WANT {}, WILL YOU GIVE IT TO ME? ", tname)));
+                    let yn = UI::get_input(Some(&format!(
+                        "\nI WANT {}, WILL YOU GIVE IT TO ME? ",
+                        tname
+                    )));
 
                     match yn.get(..1) {
                         Some("Y") => {
                             match self.game.bribe_accept() {
                                 Ok(_) => {
                                     bribed = true;
-                                },
+                                }
                                 Err(err) => {
                                     panic!("agree to bribe: {:#?}", err);
                                 }
                             };
                             break;
-                        },
+                        }
                         Some("N") => {
                             match self.game.bribe_decline() {
                                 Ok(_) => {
                                     bribed = false;
-                                },
+                                }
                                 Err(err) => {
                                     panic!("disagree to bribe: {:#?}", err);
                                 }
                             };
                             break;
-                        },
+                        }
                         _ => println!("\n** ANSWER YES OR NO"),
                     }
-                };
-            },
+                }
+            }
             Ok(None) => {
                 println!("\n'ALL I WANT IS YOUR LIFE!'");
-            },
+            }
             Err(err) => {
                 panic!("bribe proposition: {:#?}", err);
             }
@@ -774,7 +832,6 @@ impl UI {
 
     /// Handle combat
     fn combat(&mut self, monster_type: MonsterType) -> bool {
-
         let m_name = UI::monster_name(monster_type);
         let m_art = UI::get_article(&m_name);
 
@@ -784,7 +841,6 @@ impl UI {
         let mut retreated = false;
 
         while in_combat {
-
             match self.game.state() {
                 GameState::PlayerAttack => {
                     print!("\nYOU MAY ATTACK OR RETREAT");
@@ -802,9 +858,11 @@ impl UI {
 
                     println!(".\n");
 
-                    println!("\nYOUR STRENGTH IS {} AND DEXTERITY IS {}.\n",
+                    println!(
+                        "\nYOUR STRENGTH IS {} AND DEXTERITY IS {}.\n",
                         self.game.player_stat(Stat::Strength),
-                        self.game.player_stat(Stat::Dexterity));
+                        self.game.player_stat(Stat::Dexterity)
+                    );
 
                     let err_str = "\n** CHOOSE ONE OF THE OPTIONS LISTED.";
 
@@ -829,30 +887,29 @@ impl UI {
                         }
                         _ => println!("{}", err_str),
                     }
-                },
+                }
 
                 GameState::MonsterAttack => {
                     println!("\nTHE {} ATTACKS", m_name);
 
                     self.combat_be_attacked();
-                },
+                }
 
                 GameState::Retreat => {
                     self.combat_retreat_dir();
                     retreated = true;
-                },
+                }
 
                 GameState::Move => {
                     in_combat = false;
-                },
+                }
 
                 GameState::Dead => {
                     in_combat = false;
-                },
+                }
 
                 any => panic!("unknown state during combat {:#?}", any),
             }
-
         } // while in_combat
 
         retreated
@@ -862,21 +919,22 @@ impl UI {
     pub fn game_summary(&self) {
         match self.game.state() {
             GameState::Dead => {
-                println!("\n\nA NOBLE EFFORT, OH FORMERLY LIVING {}\n", self.race_str());
+                println!(
+                    "\n\nA NOBLE EFFORT, OH FORMERLY LIVING {}\n",
+                    self.race_str()
+                );
 
                 print!("YOU DIED FROM A LACK OF ");
                 if self.game.player_stat(Stat::Strength) == 0 {
                     println!("STRENGTH");
-                }
-                else if self.game.player_stat(Stat::Intelligence) == 0 {
+                } else if self.game.player_stat(Stat::Intelligence) == 0 {
                     println!("INTELLIGENCE");
-                }
-                else if self.game.player_stat(Stat::Dexterity) == 0 {
+                } else if self.game.player_stat(Stat::Dexterity) == 0 {
                     println!("DEXTERITY");
                 }
 
                 println!("\nWHEN YOU DIED YOU HAD:\n");
-            },
+            }
 
             GameState::Exit => {
                 let win = self.game.player_has_orb_of_zot();
@@ -898,7 +956,7 @@ impl UI {
                 }
 
                 println!("YOUR MISERABLE LIFE");
-            },
+            }
 
             any => panic!("unexpected game state at end {:#?}", any),
         }
@@ -933,7 +991,7 @@ impl UI {
         // Show turns
         println!("\nAND IT TOOK YOU {} TURNS!\n", *self.game.turn());
     }
-    
+
     /// Ask the user if they want to play again
     fn play_again(&self) -> bool {
         loop {
@@ -942,11 +1000,11 @@ impl UI {
             match play_again.get(..1) {
                 Some("Y") => {
                     println!("\nSOME {}S NEVER LEARN\n\n", self.race_str());
-                    break true
-                },
+                    break true;
+                }
                 Some("N") => {
                     println!("\nMAYBE DUMB {} NOT SO DUMB AFTER ALL\n", self.race_str());
-                    break false
+                    break false;
                 }
                 _ => {
                     println!("\n** ANSWER YES OR NO");
@@ -972,7 +1030,11 @@ impl UI {
             };
 
             loop {
-                let yn = UI::get_input(Some(&format!("DO YOU WANT TO SELL {} FOR {} GP's? ", UI::treasure_name(t), price)));
+                let yn = UI::get_input(Some(&format!(
+                    "DO YOU WANT TO SELL {} FOR {} GP's? ",
+                    UI::treasure_name(t),
+                    price
+                )));
 
                 match yn.get(..1) {
                     Some("Y") => {
@@ -981,7 +1043,7 @@ impl UI {
                             Err(err) => panic!("vendor treasure accept: {:#?}", err),
                         }
                         break;
-                    },
+                    }
                     Some("N") => {
                         match self.game.vendor_treasure_reject() {
                             Ok(_) => (),
@@ -1008,9 +1070,12 @@ impl UI {
         let chainmail_cost = Armor::cost(ArmorType::Chainmail, true);
         let plate_cost = Armor::cost(ArmorType::Plate, true);
 
-        println!("\nOK, {}, YOU HAVE {} GOLD PIECES AND {}",
-            self.race_str(), self.game.player_gp(),
-            UI::armor_name(self.game.player_armor_type()));
+        println!(
+            "\nOK, {}, YOU HAVE {} GOLD PIECES AND {}",
+            self.race_str(),
+            self.game.player_gp(),
+            UI::armor_name(self.game.player_armor_type())
+        );
 
         println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
 
@@ -1030,30 +1095,25 @@ impl UI {
             let armor_str = UI::get_input(Some("\nYOUR CHOICE? "));
 
             match armor_str.get(..1) {
-
-                Some("P") => {
-                    match self.game.player_purchase_armor(ArmorType::Plate, true) {
-                        Ok(_) => break,
-                        Err(Error::NotEnoughGP) => println!("\n** YOU CAN'T AFFORD PLATE"),
-                        _ => (),
-                    }
+                Some("P") => match self.game.player_purchase_armor(ArmorType::Plate, true) {
+                    Ok(_) => break,
+                    Err(Error::NotEnoughGP) => println!("\n** YOU CAN'T AFFORD PLATE"),
+                    _ => (),
                 },
-                Some("C") => {
-                    match self.game.player_purchase_armor(ArmorType::Chainmail, true) {
-                        Ok(_) => break,
-                        Err(Error::NotEnoughGP) => println!("\n** YOU HAVEN'T GOT THAT MUCH CASH"),
-                        _ => (),
-                    }
+                Some("C") => match self.game.player_purchase_armor(ArmorType::Chainmail, true) {
+                    Ok(_) => break,
+                    Err(Error::NotEnoughGP) => println!("\n** YOU HAVEN'T GOT THAT MUCH CASH"),
+                    _ => (),
                 },
                 Some("L") => {
                     // If we get to this point we already had enough to buy leather
                     let _ = self.game.player_purchase_armor(ArmorType::Leather, true);
                     break;
-                },
+                }
                 Some("N") => break,
                 _ => {
                     println!("\n** DON'T BE SILLY. CHOOSE A SELECTION");
-                },
+                }
             }
         }
     }
@@ -1069,9 +1129,11 @@ impl UI {
         let mace_cost = Weapon::cost(WeaponType::Mace, true);
         let sword_cost = Weapon::cost(WeaponType::Sword, true);
 
-        println!("\nYOU HAVE {} GP's LEFT WITH {} IN HAND",
+        println!(
+            "\nYOU HAVE {} GP's LEFT WITH {} IN HAND",
             self.game.player_gp(),
-            UI::weapon_name(self.game.player_weapon_type()));
+            UI::weapon_name(self.game.player_weapon_type())
+        );
 
         println!("\nHERE IS A LIST OF ARMOR YOU CAN BUY");
 
@@ -1091,43 +1153,38 @@ impl UI {
             let armor_str = UI::get_input(Some("\nYOUR CHOICE? "));
 
             match armor_str.get(..1) {
-
-                Some("S") => {
-                    match self.game.player_purchase_weapon(WeaponType::Sword, true) {
-                        Ok(_) => break,
-                        Err(Error::NotEnoughGP) => println!("\n** DUNGEON EXPRESS CARD - YOU LEFT HOME WITHOUT IT!"),
-                        _ => (),
+                Some("S") => match self.game.player_purchase_weapon(WeaponType::Sword, true) {
+                    Ok(_) => break,
+                    Err(Error::NotEnoughGP) => {
+                        println!("\n** DUNGEON EXPRESS CARD - YOU LEFT HOME WITHOUT IT!")
                     }
+                    _ => (),
                 },
-                Some("M") => {
-                    match self.game.player_purchase_weapon(WeaponType::Mace, true) {
-                        Ok(_) => break,
-                        Err(Error::NotEnoughGP) => println!("\n** SORRY SIR, I DON'T GIVE CREDIT"),
-                        _ => (),
-                    }
+                Some("M") => match self.game.player_purchase_weapon(WeaponType::Mace, true) {
+                    Ok(_) => break,
+                    Err(Error::NotEnoughGP) => println!("\n** SORRY SIR, I DON'T GIVE CREDIT"),
+                    _ => (),
                 },
                 Some("D") => {
                     // If we get to this &point we already had enough to buy a dagger
                     let _ = self.game.player_purchase_weapon(WeaponType::Dagger, true);
                     break;
-                },
+                }
                 Some("N") => break,
                 _ => {
                     println!("\n** TRY CHOOSING A SELECTION");
-                },
+                }
             }
         }
     }
 
     /// Buy stats from a Vendor
     fn vendor_buy_stats(&mut self) {
-
         let stats = [Stat::Strength, Stat::Intelligence, Stat::Dexterity];
 
         let mut i = 0;
 
         while i < 3 {
-
             let s = &stats[i];
 
             if !self.game.vendor_can_afford_stat() {
@@ -1137,30 +1194,31 @@ impl UI {
             let stat_name = UI::stat_name(*s);
 
             loop {
-                let play_again = UI::get_input(Some(&format!("\nWANT TO BUY A POTION OF {} FOR 1000 GP's? ", stat_name)));
+                let play_again = UI::get_input(Some(&format!(
+                    "\nWANT TO BUY A POTION OF {} FOR 1000 GP's? ",
+                    stat_name
+                )));
 
                 match play_again.get(..1) {
                     Some("Y") => {
                         match self.game.vendor_buy_stat(*s) {
                             Ok(new_value) => {
                                 println!("\nYOUR {} IS NOW {}", stat_name, new_value);
-                            },
+                            }
                             Err(err) => panic!("{:#?}", err),
                         }
                         break;
-                    },
+                    }
                     Some("N") => {
                         i += 1;
                         break;
-                    },
+                    }
                     _ => {
                         println!("\n** ANSWER YES OR NO");
-                    },
+                    }
                 }
             }
-
         }
-
     }
 
     /// Buy a lamp from the vendor
@@ -1179,13 +1237,13 @@ impl UI {
                         Err(err) => panic!("{:#?}", err),
                     }
                     break;
-                },
+                }
                 Some("N") => {
                     break;
-                },
+                }
                 _ => {
                     println!("\n** ANSWER YES OR NO");
-                },
+                }
             }
         }
     }
@@ -1219,20 +1277,20 @@ impl UI {
                     self.vendor_trade();
                     self.game.vendor_complete();
                     break;
-                },
+                }
                 Some("A") => {
                     println!("\nYOU'LL BE SORRY YOU DID THAT");
                     self.game.vendor_attack();
                     fighting_vendor = true;
                     break;
-                },
+                }
                 Some("I") => {
                     self.game.vendor_complete();
                     break;
-                },
+                }
                 _ => println!("\n** NICE SHOT, {}.", self.race_str()),
             }
-        };
+        }
 
         fighting_vendor
     }
@@ -1261,7 +1319,7 @@ impl UI {
             _ => {
                 println!("\n** TURKEY! THAT'S NOT A DIRECTION");
                 return false;
-            },
+            }
         }
 
         let (x, y, z, room_type);
@@ -1272,11 +1330,16 @@ impl UI {
                 y = ty;
                 z = tz;
                 room_type = troom_type;
-            },
+            }
             Err(err) => panic!(err),
         }
 
-        println!("\nTHE LAMP SHINES INTO ({},{}) LEVEL {}\n", x+1, y+1, z+1);
+        println!(
+            "\nTHE LAMP SHINES INTO ({},{}) LEVEL {}\n",
+            x + 1,
+            y + 1,
+            z + 1
+        );
 
         let room_str = UI::room_name(&room_type);
 
@@ -1307,11 +1370,9 @@ impl UI {
         let z = self.game.player_z();
 
         for y in ym1..(ym1 + 3) {
-
             let yw = self.game.wrap_y(y);
 
             for x in xm1..(xm1 + 3) {
-
                 let xw = self.game.wrap_x(x);
 
                 let room_type = self.game.dungeon_room_at(xw, yw, z).room_type();
@@ -1342,16 +1403,22 @@ impl UI {
                 print!("YOU SEE ");
 
                 match event {
-                    OrbEvent::BloodyHeap => {
-                        println!("YOURSELF IN A BLOODY HEAP")
-                    }
+                    OrbEvent::BloodyHeap => println!("YOURSELF IN A BLOODY HEAP"),
                     OrbEvent::Polymorph(m) => {
                         let mon_str = UI::monster_name(m);
-                        println!("YOURSELF DRINKING FROM A POOL AND BECOMING {} {}", UI::get_article(&mon_str), mon_str);
+                        println!(
+                            "YOURSELF DRINKING FROM A POOL AND BECOMING {} {}",
+                            UI::get_article(&mon_str),
+                            mon_str
+                        );
                     }
                     OrbEvent::GazeBack(m) => {
                         let mon_str = UI::monster_name(m);
-                        println!("{} {} GAZING BACK AT YOU", UI::get_article(&mon_str), mon_str);
+                        println!(
+                            "{} {} GAZING BACK AT YOU",
+                            UI::get_article(&mon_str),
+                            mon_str
+                        );
                     }
                     OrbEvent::Item(room_type, x, y, z) => {
                         println!("{} AT ({},{}) LEVEL {}", UI::room_name(&room_type), x, y, z);
@@ -1383,7 +1450,7 @@ impl UI {
                 ChestEvent::Explode => println!("KABOOM! IT EXPLODES"),
                 ChestEvent::Gas => println!("GAS! YOU STAGGER FROM THE ROOM"),
                 ChestEvent::Treasure(amount) => println!("YOU FIND {} GOLD PIECES", amount),
-            }
+            },
 
             Err(err) => panic!(err),
         }
@@ -1395,13 +1462,19 @@ impl UI {
     fn open_book(&mut self) {
         match self.game.open_book() {
             Ok(event) => match event {
-                BookEvent::Blind => println!("FLASH! OH NO! YOU ARE NOW A BLIND {}", self.race_str()),
+                BookEvent::Blind => {
+                    println!("FLASH! OH NO! YOU ARE NOW A BLIND {}", self.race_str())
+                }
                 BookEvent::Poetry => println!("IT'S ANOTHER VOLUME OF ZOT'S POETRY! - YEECH!"),
-                BookEvent::PlayMonster(m) => println!("IT'S AN OLD COPY OF PLAY{}", UI::monster_name(m)),
+                BookEvent::PlayMonster(m) => {
+                    println!("IT'S AN OLD COPY OF PLAY{}", UI::monster_name(m))
+                }
                 BookEvent::Dexterity => println!("IT'S A MANUAL OF DEXTERITY!"),
                 BookEvent::Strength => println!("IT'S A MANUAL OF STRENGTH!"),
-                BookEvent::Sticky => println!("THE BOOK STICKS TO YOUR HANDS -\n\nNOW YOU CAN'T DRAW YOUR WEAPON!"),
-            }
+                BookEvent::Sticky => {
+                    println!("THE BOOK STICKS TO YOUR HANDS -\n\nNOW YOU CAN'T DRAW YOUR WEAPON!")
+                }
+            },
             Err(err) => panic!(err),
         }
 
@@ -1429,12 +1502,7 @@ impl UI {
         match self.game.rand_message() {
             RandomMessage::SeeBat => println!("\nYOU SEE A BAT FLY BY"),
             RandomMessage::HearSound => {
-                let sounds = [
-                    "A SCREAM",
-                    "FOOTSTEPS",
-                    "A WUMPUS",
-                    "THUNDER",
-                ];
+                let sounds = ["A SCREAM", "FOOTSTEPS", "A WUMPUS", "THUNDER"];
 
                 let i = self.rng.gen_range(0, sounds.len());
 
@@ -1442,7 +1510,9 @@ impl UI {
             }
             RandomMessage::Sneeze => println!("\nYOU SNEEZED"),
             RandomMessage::StepFrog => println!("\nYOU STEPPED ON A FROG"),
-            RandomMessage::MonsterFrying => println!("\nYOU SMELL {} FRYING", self.rand_monster_str()),
+            RandomMessage::MonsterFrying => {
+                println!("\nYOU SMELL {} FRYING", self.rand_monster_str())
+            }
             RandomMessage::Watched => println!("\nYOU FEEL LIKE YOU'RE BEING WATCHED"),
             RandomMessage::Playing => println!("\nYOU ARE PLAYING WIZARD'S CASTLE"),
             RandomMessage::None => (),
@@ -1481,7 +1551,6 @@ impl UI {
             println!("\nTHE BLUE FLAME DISSOLVES THE BOOK");
         }
     }
-
 }
 
 /// Main
@@ -1491,7 +1560,6 @@ fn main() {
     UI::intro();
 
     while playing {
-
         let game = Game::new(8, 8, 8);
 
         let mut ui = UI {
@@ -1544,7 +1612,7 @@ fn main() {
                             ui.map(false);
                             print_stats = false;
                             resolve_room_effects = false;
-                        },
+                        }
                         Some("N") => ui.move_dir(Direction::North),
                         Some("S") => ui.move_dir(Direction::South),
                         Some("W") => ui.move_dir(Direction::West),
@@ -1553,21 +1621,21 @@ fn main() {
                             if !ui.move_stairs(Stairs::Up) {
                                 quiet = true;
                             }
-                        },
+                        }
                         Some("D") => {
                             if !ui.move_stairs(Stairs::Down) {
                                 quiet = true;
                             }
-                        },
+                        }
                         Some("T") => {
                             if !ui.teleport() {
                                 quiet = true;
                             }
-                        },
+                        }
                         Some("L") => {
                             ui.lamp();
                             quiet = true;
-                        },
+                        }
                         Some("F") => {
                             if !ui.flare() {
                                 print_location = false;
@@ -1579,7 +1647,7 @@ fn main() {
                             if !ui.gaze() {
                                 quiet = true;
                             }
-                        },
+                        }
                         Some("O") => {
                             if !ui.open() {
                                 quiet = true;
@@ -1588,7 +1656,7 @@ fn main() {
                         _ => {
                             println!("** STUPID {} THAT WASN'T A VALID COMMAND", ui.race_str());
                             valid_command = false;
-                        },
+                        }
                     }
                 }
             } // if !automove
@@ -1616,7 +1684,7 @@ fn main() {
             if print_location {
                 ui.print_location();
             }
-            
+
             print_location = true;
 
             if print_stats {
@@ -1626,20 +1694,20 @@ fn main() {
 
             print_stats = true;
 
-            if resolve_room_effects {                
+            if resolve_room_effects {
                 match ui.game.room_effect() {
                     Event::FoundGold(_) => {
                         println!("\nYOU HAVE {}", ui.game.player_gp());
-                    },
+                    }
                     Event::FoundFlares(_) => {
                         println!("\nYOU HAVE {}", ui.game.player_flares());
-                    },
+                    }
                     Event::Sinkhole => {
                         automove = true;
-                    },
+                    }
                     Event::Warp => {
                         automove = true;
-                    },
+                    }
                     Event::Combat(monster_type) => {
                         let retreated = ui.combat(monster_type);
 
@@ -1663,7 +1731,6 @@ fn main() {
                 print_location = false;
                 print_stats = false;
             }
-
         } // while alive
 
         ui.game_summary();
@@ -1672,5 +1739,4 @@ fn main() {
             playing = false;
         }
     } // while playing
-
 }

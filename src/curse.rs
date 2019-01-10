@@ -8,8 +8,7 @@ pub enum CurseType {
     Lethargy,
 }
 
-pub struct Curse {
-}
+pub struct Curse {}
 
 impl Curse {
     pub fn get_curse_by_id(id: u32) -> CurseType {
@@ -17,7 +16,7 @@ impl Curse {
             0 => CurseType::Forgetfulness,
             1 => CurseType::TheLeech,
             2 => CurseType::Lethargy,
-            _ => panic!("get_curse_by_id: unknown id")
+            _ => panic!("get_curse_by_id: unknown id"),
         }
     }
 }

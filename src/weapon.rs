@@ -1,4 +1,4 @@
-#[derive(Debug,PartialEq,Copy,Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum WeaponType {
     None,
     Dagger,
@@ -12,9 +12,7 @@ pub struct Weapon {
 
 impl Weapon {
     pub fn new(w: WeaponType) -> Weapon {
-        Weapon {
-            weapon_type: w,
-        }
+        Weapon { weapon_type: w }
     }
 
     pub fn cost(w: WeaponType, is_vendor: bool) -> u32 {

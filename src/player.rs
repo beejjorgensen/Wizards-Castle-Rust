@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::error::Error;
 use crate::armor::{Armor, ArmorType};
-use crate::weapon::{Weapon, WeaponType};
-use crate::treasure::TreasureType;
 use crate::curse::CurseType;
+use crate::error::Error;
+use crate::treasure::TreasureType;
+use crate::weapon::{Weapon, WeaponType};
 
 #[derive(Eq, Hash, PartialEq, Copy, Clone, Debug)]
 pub enum Stat {
@@ -107,7 +107,6 @@ impl Player {
 
     /// Set the race and all the corresponding points
     pub fn init(&mut self, race: Race) {
-
         let race_id = Player::get_id_by_race(race);
 
         self.stat.insert(Stat::Strength, 2 + (race_id + 1) * 2);
@@ -266,7 +265,7 @@ impl Player {
     }
 
     /// Return a player stat
-    pub fn stat(&self, stat:&Stat) -> &u32 {
+    pub fn stat(&self, stat: &Stat) -> &u32 {
         &self.stat[stat]
     }
 
@@ -339,10 +338,11 @@ impl Player {
     }
 
     /// Damage armor
-    /// 
+    ///
     /// Return true if the armor is destroyed
     pub fn damage_armor(&mut self, damage: u32) -> bool {
-        let armor_destroyed = self.armor_mut().damage(damage) && self.armor().armor_type() != ArmorType::None;
+        let armor_destroyed =
+            self.armor_mut().damage(damage) && self.armor().armor_type() != ArmorType::None;
 
         if armor_destroyed {
             self.armor = Armor::new(ArmorType::None);
@@ -353,9 +353,9 @@ impl Player {
 
     /// Returns true if the player is dead
     pub fn is_dead(&self) -> bool {
-        *self.stat(&Stat::Strength) == 0 ||
-        *self.stat(&Stat::Intelligence) == 0 ||
-        *self.stat(&Stat::Dexterity) == 0
+        *self.stat(&Stat::Strength) == 0
+            || *self.stat(&Stat::Intelligence) == 0
+            || *self.stat(&Stat::Dexterity) == 0
     }
 
     /// True if the player has the Orb of Zot
@@ -384,17 +384,16 @@ impl Player {
     }
 
     /// Remove a specific treasure from the list
-    /// 
+    ///
     /// Returns true on success (if the player had the treasure)
     pub fn remove_treasure(&mut self, treasure_type: TreasureType) -> bool {
-
         // Find the element
         match self.treasures.iter().position(|&t| t == treasure_type) {
             Some(i) => {
                 self.treasures.remove(i);
                 true
-            },
-            None => false
+            }
+            None => false,
         }
     }
 

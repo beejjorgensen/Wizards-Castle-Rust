@@ -1,4 +1,4 @@
-#[derive(Debug,PartialEq,Copy,Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum ArmorType {
     None,
     Leather,
@@ -12,12 +12,19 @@ pub struct Armor {
 }
 
 impl Armor {
-
     /// Create a new armor
     pub fn new(a: ArmorType) -> Armor {
         let health = match a {
-            ArmorType::None => /*0 * */ 7,
-            ArmorType::Leather => /*1 * */ 7,
+            ArmorType::None =>
+            /*0 * */
+            {
+                7
+            }
+            ArmorType::Leather =>
+            /*1 * */
+            {
+                7
+            }
             ArmorType::Chainmail => 2 * 7,
             ArmorType::Plate => 3 * 7,
         };
@@ -39,10 +46,8 @@ impl Armor {
                 ArmorType::Chainmail => 1500,
                 ArmorType::Plate => 2000,
             }
-
         } else if a == ArmorType::None {
-                value = 0;
-
+            value = 0;
         } else {
             let id = Armor::get_id(a);
 
@@ -78,10 +83,9 @@ impl Armor {
     }
 
     /// Damage the armor
-    /// 
+    ///
     /// Return true if the armor is destroyed
     pub fn damage(&mut self, damage: u32) -> bool {
-
         if damage > self.health {
             self.health = 0;
             return true;

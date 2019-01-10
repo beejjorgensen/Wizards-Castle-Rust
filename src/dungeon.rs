@@ -1,12 +1,12 @@
 extern crate rand;
 
-use self::rand::Rng;
-use self::rand::thread_rng;
 use self::rand::seq::SliceRandom;
+use self::rand::thread_rng;
+use self::rand::Rng;
 
-use crate::room::{Room, RoomType};
-use crate::monster::{Monster, MonsterType};
 use crate::curse::Curse;
+use crate::monster::{Monster, MonsterType};
+use crate::room::{Room, RoomType};
 use crate::treasure::Treasure;
 
 #[derive(Debug)]
@@ -19,7 +19,6 @@ pub struct Dungeon {
 }
 
 impl Dungeon {
-
     pub fn new(xsize: u32, ysize: u32, zsize: u32) -> Dungeon {
         let mut levels: Vec<Vec<Room>> = Vec::new();
 
@@ -49,7 +48,10 @@ impl Dungeon {
         for l in &mut levels {
             // Fill the rest with empty
             while l.len() < area as usize {
-                l.push(Room{ roomtype: RoomType::Empty, ..Default::default() });
+                l.push(Room {
+                    roomtype: RoomType::Empty,
+                    ..Default::default()
+                });
             }
 
             // Shuffle the level
@@ -63,7 +65,8 @@ impl Dungeon {
         let mut orb_of_zot = (0, 0, 0);
 
         //for z in 0..zsize as usize {
-        for (z, l) in levels.iter().enumerate().take(zsize as usize) { // Clippy, you crazy
+        for (z, l) in levels.iter().enumerate().take(zsize as usize) {
+            // Clippy, you crazy
             // Find Orb of Zot (for gazing into orbs)
             if z as u32 == orb_of_zot_level {
                 for y in 0..ysize {
@@ -102,7 +105,13 @@ impl Dungeon {
             */
         }
 
-        Dungeon{levels, xsize, ysize, zsize, orb_of_zot}
+        Dungeon {
+            levels,
+            xsize,
+            ysize,
+            zsize,
+            orb_of_zot,
+        }
     }
 
     /// Place the entryway and the stairs
@@ -111,20 +120,30 @@ impl Dungeon {
 
         // Entrance
         if z == 0 {
-            this_level.push(Room{ roomtype: RoomType::Entrance, discovered: true, ..Default::default() });
+            this_level.push(Room {
+                roomtype: RoomType::Entrance,
+                discovered: true,
+                ..Default::default()
+            });
         }
 
         // Stairs down
         if z < zsize - 1 {
             for _ in 0..stair_count {
-                this_level.push(Room{ roomtype: RoomType::StairsDown, ..Default::default() });
+                this_level.push(Room {
+                    roomtype: RoomType::StairsDown,
+                    ..Default::default()
+                });
             }
         }
 
         // Stairs up
         if z > 0 {
             for _ in 0..stair_count {
-                this_level.push(Room{ roomtype: RoomType::StairsUp, ..Default::default() });
+                this_level.push(Room {
+                    roomtype: RoomType::StairsUp,
+                    ..Default::default()
+                });
             }
         }
     }
@@ -137,14 +156,38 @@ impl Dungeon {
         for i in 0..item_count {
             let orb_of_zot_warp = i == 0 && z == orb_of_zot_level;
 
-            this_level.push(Room{ roomtype: RoomType::Gold, ..Default::default() });
-            this_level.push(Room{ roomtype: RoomType::Pool, ..Default::default() });
-            this_level.push(Room{ roomtype: RoomType::Chest, ..Default::default() });
-            this_level.push(Room{ roomtype: RoomType::Flares, ..Default::default() });
-            this_level.push(Room{ roomtype: RoomType::Warp(orb_of_zot_warp), ..Default::default() });
-            this_level.push(Room{ roomtype: RoomType::Sinkhole, ..Default::default() });
-            this_level.push(Room{ roomtype: RoomType::CrystalOrb, ..Default::default() });
-            this_level.push(Room{ roomtype: RoomType::Book, ..Default::default() });
+            this_level.push(Room {
+                roomtype: RoomType::Gold,
+                ..Default::default()
+            });
+            this_level.push(Room {
+                roomtype: RoomType::Pool,
+                ..Default::default()
+            });
+            this_level.push(Room {
+                roomtype: RoomType::Chest,
+                ..Default::default()
+            });
+            this_level.push(Room {
+                roomtype: RoomType::Flares,
+                ..Default::default()
+            });
+            this_level.push(Room {
+                roomtype: RoomType::Warp(orb_of_zot_warp),
+                ..Default::default()
+            });
+            this_level.push(Room {
+                roomtype: RoomType::Sinkhole,
+                ..Default::default()
+            });
+            this_level.push(Room {
+                roomtype: RoomType::CrystalOrb,
+                ..Default::default()
+            });
+            this_level.push(Room {
+                roomtype: RoomType::Book,
+                ..Default::default()
+            });
         }
     }
 
@@ -183,12 +226,18 @@ impl Dungeon {
 
             let m_num = i % num_monsters;
 
-            this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(monsters_to_place[m_num], has_runestaff)), ..Default::default() });
+            this_level.push(Room {
+                roomtype: RoomType::Monster(Monster::new(monsters_to_place[m_num], has_runestaff)),
+                ..Default::default()
+            });
         }
 
         // Vendors
         for _ in 0..vendor_count {
-            this_level.push(Room{ roomtype: RoomType::Monster(Monster::new(MonsterType::Vendor, false)), ..Default::default() });
+            this_level.push(Room {
+                roomtype: RoomType::Monster(Monster::new(MonsterType::Vendor, false)),
+                ..Default::default()
+            });
         }
     }
 
@@ -202,14 +251,20 @@ impl Dungeon {
 
             let curse = Curse::get_curse_by_id(i);
 
-            levels[curse_level].push(Room { curse, ..Default::default() })
+            levels[curse_level].push(Room {
+                curse,
+                ..Default::default()
+            })
         }
 
         // Add treasures
         for i in 0..crate::treasure::TREASURE_COUNT {
             let treasure_level = rng.gen_range(0, zsize) as usize;
 
-            levels[treasure_level].push(Room { roomtype: RoomType::Treasure(Treasure::new(i)), ..Default::default() })
+            levels[treasure_level].push(Room {
+                roomtype: RoomType::Treasure(Treasure::new(i)),
+                ..Default::default()
+            })
         }
     }
 
@@ -225,7 +280,7 @@ impl Dungeon {
 
                     // Swap the entrance
                     if levels[z][i].roomtype == RoomType::Entrance {
-                        let i2 = (/*0 * xsize + */ entrance_x) as usize;
+                        let i2 = (/*0 * xsize + */entrance_x) as usize;
 
                         levels[z].swap(i, i2);
                     }
@@ -238,7 +293,7 @@ impl Dungeon {
                 let mut ups = Vec::new();
 
                 for i in 0..area as usize {
-                    if levels[z-1][i].roomtype == RoomType::StairsDown {
+                    if levels[z - 1][i].roomtype == RoomType::StairsDown {
                         downs.push(i);
                     }
                 }
@@ -265,7 +320,8 @@ impl Dungeon {
     }
 
     /// Return a reference to the room at a location
-    pub fn room_at(&self, x: u32, y: u32, z: u32) -> &Room { // TODO: Result
+    pub fn room_at(&self, x: u32, y: u32, z: u32) -> &Room {
+        // TODO: Result
         // TODO modify this so that it returns unknown for undiscovered rooms
         let i = y * self.xsize + x;
 
@@ -273,7 +329,8 @@ impl Dungeon {
     }
 
     /// Return a reference to the room at a location
-    pub fn room_at_mut(&mut self, x: u32, y: u32, z: u32) -> &mut Room { // TODO: Result
+    pub fn room_at_mut(&mut self, x: u32, y: u32, z: u32) -> &mut Room {
+        // TODO: Result
         let i = y * self.xsize + x;
 
         &mut self.levels[z as usize][i as usize]
