@@ -267,7 +267,7 @@ impl Player {
 
     /// Return a player stat
     pub fn stat(&self, stat:&Stat) -> &u32 {
-        self.stat.get(stat).unwrap()
+        &self.stat[stat]
     }
 
     /// Return flare count

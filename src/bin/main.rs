@@ -93,7 +93,7 @@ impl UI {
         }
     }
 
-    fn treasure_name(t: &TreasureType) -> String {
+    fn treasure_name(t: TreasureType) -> String {
         match t {
             TreasureType::RubyRed => String::from("THE RUBY RED"),
             TreasureType::NornStone => String::from("THE NORN STONE"),
@@ -125,7 +125,7 @@ impl UI {
                     format!("{} {}", UI::get_article(&mon_str), mon_str)
                 }
             RoomType::Treasure(t) => {
-                format!("{}", UI::treasure_name(t.treasure_type()))
+                UI::treasure_name(*t.treasure_type()).to_string()
             }
         }
     }
@@ -142,7 +142,7 @@ impl UI {
             return c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
         }
 
-        return false;
+        false
     }
 
     fn get_article(s: &str) -> String {
@@ -164,13 +164,10 @@ impl UI {
 
     /// Take some stairs
     fn move_stairs(&mut self, stairs: Stairs) -> bool{
-        match self.game.move_stairs(stairs) {
-            Err(_) => {
-                println!("** OH {}, NO STAIRS GOING {} IN HERE", self.race_str(), UI::stair_name(stairs));
-                return false;
-            },
-            Ok(_) => (),
-        };
+        if self.game.move_stairs(stairs).is_err() {
+            println!("** OH {}, NO STAIRS GOING {} IN HERE", self.race_str(), UI::stair_name(stairs));
+            return false;
+        }
 
         true
     }
@@ -183,14 +180,11 @@ impl UI {
         while !got_num {
             let str = UI::get_input(Some(prompt));
 
-            match str.parse::<u32>() {
-                Ok(v) => {
-                    if v >= 1 && v <= 8 {
-                        got_num = true;
-                        coord = v;
-                    }
-                },
-                Err(_) => (),
+            if let Ok(v) = str.parse::<u32>() {
+                if v >= 1 && v <= 8 {
+                    got_num = true;
+                    coord = v;
+                }
             }
 
             if !got_num {
@@ -265,7 +259,7 @@ impl UI {
             Err(err) => panic!("{:#?}", err),
         }
 
-        print!("YOU TAKE A DRINK AND {}\n", s);
+        println!("YOU TAKE A DRINK AND {}", s);
     }
 
     /// Get the printable character for a room
@@ -441,7 +435,7 @@ impl UI {
                     },
                 };
 
-                if let Ok(_) = self.game.player_allocate_points(stats[i], points_to_add) {
+                if self.game.player_allocate_points(stats[i], points_to_add).is_ok() {
                     ok = true;
                 } else {
                     print!("\n** ");
@@ -731,7 +725,7 @@ impl UI {
         match self.game.bribe_proposition() {
             Ok(Some(t_type)) => {
                 loop {
-                    let tname = UI::treasure_name(&t_type);
+                    let tname = UI::treasure_name(t_type);
 
                     let yn = UI::get_input(Some(&format!("\nI WANT {}, WILL YOU GIVE IT TO ME? ", tname)));
 
@@ -906,7 +900,7 @@ impl UI {
 
         // List treasures
         for t in self.game.player_get_treasures() {
-            println!("{}", UI::treasure_name(t));
+            println!("{}", UI::treasure_name(*t));
         }
 
         // Show weapon
@@ -935,11 +929,32 @@ impl UI {
         println!("\nAND IT TOOK YOU {} TURNS!\n", *self.game.turn());
     }
     
+    /// Ask the user if they want to play again
+    fn play_again(&self) -> bool {
+        loop {
+            let play_again = UI::get_input(Some("\nPLAY AGAIN? "));
+
+            match play_again.get(..1) {
+                Some("Y") => {
+                    println!("\nSOME {}S NEVER LEARN\n\n", self.race_str());
+                    break true
+                },
+                Some("N") => {
+                    println!("\nMAYBE DUMB {} NOT SO DUMB AFTER ALL\n", self.race_str());
+                    break false
+                }
+                _ => {
+                    println!("\n** ANSWER YES OR NO");
+                }
+            }
+        }
+    }
+
     /// Sell treasures to a vendor
     fn vendor_trade_treasures(&mut self) {
         let treasures = self.game.player_get_treasures().clone();
 
-        if treasures.len() == 0 {
+        if treasures.is_empty() {
             return;
         }
 
@@ -952,7 +967,7 @@ impl UI {
             };
 
             loop {
-                let yn = UI::get_input(Some(&format!("DO YOU WANT TO SELL {} FOR {} GP's? ", UI::treasure_name(&t), price)));
+                let yn = UI::get_input(Some(&format!("DO YOU WANT TO SELL {} FOR {} GP's? ", UI::treasure_name(t), price)));
 
                 match yn.get(..1) {
                     Some("Y") => {
@@ -1267,10 +1282,9 @@ impl UI {
             return false;
         }
 
-        match self.game.flare() {
-            Err(err) => panic!(err),
-            _ => (),
-        };
+        if let Err(err) = self.game.flare() {
+            panic!(err);
+        }
 
         let xm1 = self.game.player_x() as i32 - 1;
         let ym1 = self.game.player_y() as i32 - 1;
@@ -1389,6 +1403,40 @@ impl UI {
 
         true
     }
+
+    /// Equip player phase
+    pub fn equip(&mut self) {
+        self.race_gender_select();
+        self.allocate_points();
+        self.buy_armor();
+        self.buy_weapon();
+        self.buy_lamp();
+        self.buy_flares();
+    }
+
+    /// Things to do at the start of the turn
+    pub fn at_turn_start(&mut self) {
+        self.game.add_turn(1);
+
+        self.game.discover_room_at_player();
+
+        self.game.curse_effects();
+
+        self.game.curse_check();
+
+        // TODO random message
+
+        // Cure blindness
+        if self.game.cure_blindness() {
+            println!("\nTHE OPAL EYE CURES YOUR BLINDNESS");
+        }
+
+        // Cure book stuck to hands
+        if self.game.cure_book() {
+            println!("\nTHE BLUE FLAME DISSOLVES THE BOOK");
+        }
+    }
+
 }
 
 /// Main
@@ -1402,16 +1450,11 @@ fn main() {
         let game = Game::new(8, 8, 8);
 
         let mut ui = UI {
-            game: game,
+            game,
             rng: thread_rng(),
         };
 
-        ui.race_gender_select();
-        ui.allocate_points();
-        ui.buy_armor();
-        ui.buy_weapon();
-        ui.buy_lamp();
-        ui.buy_flares();
+        ui.equip();
 
         println!("\n\nOK {}, YOU ENTER THE CASTLE AND BEGIN.", ui.race_str());
 
@@ -1430,26 +1473,7 @@ fn main() {
                 continue;
             }
 
-            ui.game.add_turn(1);
-
-            ui.game.discover_room_at_player();
-
-            ui.game.curse_effects();
-
-            ui.game.curse_check();
-
-            // TODO random message
-
-            // Cure blindness
-            if ui.game.cure_blindness() {
-                println!("\nTHE OPAL EYE CURES YOUR BLINDNESS");
-            }
-
-            // Cure book stuck to hands
-            if ui.game.cure_book() {
-                println!("\nTHE BLUE FLAME DISSOLVES THE BOOK");
-            }
-
+            ui.at_turn_start();
 
             if automove {
                 println!("\n");
@@ -1464,13 +1488,10 @@ fn main() {
 
                     println!();
 
-                    match command.get(..2) {
-                        Some("DR") => {
-                            ui.drink();
-                            quiet = true;
-                            break;
-                        }
-                        _ => ()
+                    if let Some("DR") = command.get(..2) {
+                        ui.drink();
+                        quiet = true;
+                        break;
                     }
 
                     match command.get(..1) {
@@ -1602,27 +1623,9 @@ fn main() {
 
         ui.game_summary();
 
-        let mut valid_command = false;
-
-        while !valid_command {
-            let play_again = UI::get_input(Some("\nPLAY AGAIN? "));
-
-            match play_again.get(..1) {
-                Some("Y") => {
-                    println!("\nSOME {}S NEVER LEARN\n\n", ui.race_str());
-                    valid_command = true;
-                },
-                Some("N") => {
-                    println!("\nMAYBE DUMB {} NOT SO DUMB AFTER ALL\n", ui.race_str());
-                    playing = false;
-                    valid_command = true;
-                }
-                _ => {
-                    println!("\n** ANSWER YES OR NO");
-                }
-            }
+        if !ui.play_again() {
+            playing = false;
         }
-
     } // while playing
 
 }
