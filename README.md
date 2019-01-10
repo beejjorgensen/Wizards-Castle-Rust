@@ -21,10 +21,10 @@ Please don't hold it against me.
 
 ## TODO
 
-* Random eating messages
-* Random messages between turns
 * Give monster initiative if blind
 * Check all other places blindness should have an effect
+
+* Random eating messages
 * Spells
   * Check for monster stuck in web
   * Check for web breaking
@@ -32,9 +32,6 @@ Please don't hold it against me.
 
 ### Refactoring TODO
 
-* Switch to 2018
-  * https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html
-* Run the `clippy` linter on everything
 * Have `room_at` and `room_at_mut` return undiscovered status
 * Make fewer fields `pub` and provide accessors
   * Notably in `Room`

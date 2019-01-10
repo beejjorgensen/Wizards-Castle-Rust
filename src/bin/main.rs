@@ -5,7 +5,7 @@ use rand::rngs::ThreadRng;
 use rand::thread_rng;
 
 use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent};
-use wizardscastle::game::{DrinkEvent, OrbEvent, BookEvent, ChestEvent, GameState};
+use wizardscastle::game::{DrinkEvent, OrbEvent, BookEvent, ChestEvent, GameState, RandomMessage};
 use wizardscastle::room::RoomType;
 use wizardscastle::player::{Race, Gender, Stat};
 use wizardscastle::armor::{Armor, ArmorType};
@@ -1404,6 +1404,31 @@ impl UI {
         true
     }
 
+    /// Display a random message
+    fn rand_message(&mut self) {
+        match self.game.rand_message() {
+            RandomMessage::SeeBat => println!("\nYOU SEE A BAT FLY BY"),
+            RandomMessage::HearSound => {
+                let sounds = [
+                    "A SCREAM",
+                    "FOOTSTEPS",
+                    "A WUMPUS",
+                    "THUNDER",
+                ];
+
+                let i = self.rng.gen_range(0, sounds.len());
+
+                println!("YOU HEAR {}", sounds[i]);
+            }
+            RandomMessage::Sneeze => println!("\nYOU SNEEZED"),
+            RandomMessage::StepFrog => println!("\nYOU STEPPED ON A FROG"),
+            RandomMessage::MonsterFrying => println!("\nYOU SMELL {} FRYING", self.rand_monster_str()),
+            RandomMessage::Watched => println!("\nYOU FEEL LIKE YOU'RE BEING WATCHED"),
+            RandomMessage::Playing => println!("\nYOU ARE PLAYING WIZARD'S CASTLE"),
+            RandomMessage::None => (),
+        }
+    }
+
     /// Equip player phase
     pub fn equip(&mut self) {
         self.race_gender_select();
@@ -1424,7 +1449,7 @@ impl UI {
 
         self.game.curse_check();
 
-        // TODO random message
+        self.rand_message();
 
         // Cure blindness
         if self.game.cure_blindness() {

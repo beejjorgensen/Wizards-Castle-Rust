@@ -99,6 +99,18 @@ pub enum Stairs {
     Down,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum RandomMessage {
+    None,
+    SeeBat,
+    HearSound,
+    Sneeze,
+    StepFrog,
+    MonsterFrying,
+    Watched,
+    Playing,
+}
+
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum GameState {
     Init,
@@ -1124,6 +1136,36 @@ impl Game {
         let curse = *self.room_at_player().curse();
 
         self.player.add_curse(curse);
+    }
+
+    /// Choose a random message
+    pub fn rand_message(&self) -> RandomMessage {
+        if Game::d(1,5) != 1 {
+            return RandomMessage::None;
+        }
+
+        let mut msgs = vec!(
+            RandomMessage::HearSound,
+            RandomMessage::Sneeze,
+            RandomMessage::StepFrog,
+            RandomMessage::MonsterFrying,
+            RandomMessage::Watched,
+            RandomMessage::Playing,
+        );
+
+        // In the original game, "YOU SEE A BAT" was replaced by "YOU STEPPED ON
+        // A FROG" if the player was blind. Instead, here we just don't show the
+        // "SEE" messages if the player is blind.
+
+        if !self.player.is_blind() {
+            msgs.push(RandomMessage::SeeBat);
+        }
+
+        let mut rng = thread_rng();
+
+        let i = rng.gen_range(0, msgs.len());
+
+        msgs[i]
     }
 
     /// Roll a die (1d6, 2d7, etc.)
