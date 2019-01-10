@@ -1,11 +1,8 @@
-extern crate wizardscastle;
-extern crate rand; 
-
 use std::io::{stdin,stdout,Write};
 
-use self::rand::Rng;
-use self::rand::rngs::ThreadRng;
-use self::rand::thread_rng;
+use rand::Rng;
+use rand::rngs::ThreadRng;
+use rand::thread_rng;
 
 use wizardscastle::game::{Game, Direction, Stairs, Event, CombatEvent};
 use wizardscastle::game::{DrinkEvent, OrbEvent, BookEvent, ChestEvent, GameState};

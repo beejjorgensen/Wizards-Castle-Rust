@@ -4,10 +4,10 @@ use self::rand::Rng;
 use self::rand::thread_rng;
 use self::rand::seq::SliceRandom;
 
-use room::{Room, RoomType};
-use monster::{Monster, MonsterType};
-use curse::Curse;
-use treasure::Treasure;
+use crate::room::{Room, RoomType};
+use crate::monster::{Monster, MonsterType};
+use crate::curse::Curse;
+use crate::treasure::Treasure;
 
 #[derive(Debug)]
 pub struct Dungeon {
@@ -112,7 +112,7 @@ impl Dungeon {
         }
 
         // Add curse rooms
-        for i in 0..::curse::CURSE_COUNT {
+        for i in 0..crate::curse::CURSE_COUNT {
             let curse_level = rng.gen_range(0, zsize) as usize;
 
             let curse = Curse::get_curse_by_id(i);
@@ -120,7 +120,7 @@ impl Dungeon {
             levels[curse_level].push(Room { curse, ..Default::default() })
         }
 
-        for i in 0..::treasure::TREASURE_COUNT {
+        for i in 0..crate::treasure::TREASURE_COUNT {
             let treasure_level = rng.gen_range(0, zsize) as usize;
 
             levels[treasure_level].push(Room { roomtype: RoomType::Treasure(Treasure::new(i)), ..Default::default() })
@@ -222,7 +222,7 @@ impl Dungeon {
 
     /// Get the entrance x position
     pub fn entrance_x(&self) -> u32 {
-        return (self.xsize - 1) / 2;
+        (self.xsize - 1) / 2
     }
 
     /// Return a reference to the room at a location

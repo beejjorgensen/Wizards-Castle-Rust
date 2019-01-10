@@ -1,6 +1,6 @@
-use treasure::Treasure;
-use monster::Monster;
-use curse::CurseType;
+use crate::treasure::Treasure;
+use crate::monster::Monster;
+use crate::curse::CurseType;
 
 #[derive(Debug,PartialEq,Clone)]
 pub enum RoomType {

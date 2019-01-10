@@ -16,8 +16,8 @@ impl Armor {
     /// Create a new armor
     pub fn new(a: ArmorType) -> Armor {
         let health = match a {
-            ArmorType::None => 0 * 7,
-            ArmorType::Leather => 1 * 7,
+            ArmorType::None => /*0 * */ 7,
+            ArmorType::Leather => /*1 * */ 7,
             ArmorType::Chainmail => 2 * 7,
             ArmorType::Plate => 3 * 7,
         };
@@ -40,22 +40,20 @@ impl Armor {
                 ArmorType::Plate => 2000,
             }
 
-        } else {
-            if a == ArmorType::None {
+        } else if a == ArmorType::None {
                 value = 0;
 
-            } else {
-                let id = Armor::to_id(a);
+        } else {
+            let id = Armor::get_id(a);
 
-                value = (id + 1) * 10;
-            }
+            value = (id + 1) * 10;
         }
 
         value
     }
 
     /// Convert an armor type to its internal ID
-    fn to_id(a: ArmorType) -> u32 {
+    fn get_id(a: ArmorType) -> u32 {
         match a {
             ArmorType::None => 9999,
             ArmorType::Leather => 0,

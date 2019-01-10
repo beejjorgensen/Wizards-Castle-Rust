@@ -1,14 +1,14 @@
 extern crate rand;
 
-use dungeon::Dungeon;
-use player::{Player, Stat, Race, Gender};
-use room::{Room, RoomType};
-use treasure::{Treasure, TreasureType};
-use monster::{Monster, MonsterType};
-use weapon::{Weapon, WeaponType};
-use armor::ArmorType;
-use error::Error;
-use curse::CurseType;
+use crate::dungeon::Dungeon;
+use crate::player::{Player, Stat, Race, Gender};
+use crate::room::{Room, RoomType};
+use crate::treasure::{Treasure, TreasureType};
+use crate::monster::{Monster, MonsterType};
+use crate::weapon::{Weapon, WeaponType};
+use crate::armor::ArmorType;
+use crate::error::Error;
+use crate::curse::CurseType;
 
 use self::rand::Rng;
 use self::rand::thread_rng;
@@ -269,7 +269,7 @@ impl Game {
 
         self.make_current_room_empty();
 
-        return Event::FoundGold(gold_amount);
+        Event::FoundGold(gold_amount)
     }
 
     /// Handle Flare room effects
@@ -280,7 +280,7 @@ impl Game {
 
         self.make_current_room_empty();
 
-        return Event::FoundFlares(flare_amount);
+        Event::FoundFlares(flare_amount)
     }
 
     /// Handle Sinkhole room effects
@@ -291,7 +291,7 @@ impl Game {
 
         self.player.set_z(new_z);
 
-        return Event::Sinkhole;
+        Event::Sinkhole
     }
 
     /// Handle Warp room effects
@@ -307,7 +307,7 @@ impl Game {
             self.player.set_z(rng.gen_range(0, *self.dungeon.zsize()));
         }
 
-        return Event::Warp;
+        Event::Warp
     }
 
     /// Handle Treasure room effects
@@ -797,7 +797,7 @@ impl Game {
         self.vendor_treasure_price = Game::d(1,max_value);
         self.vendor_treasure = Some(treasure_type);
 
-        return Ok(self.vendor_treasure_price);
+        Ok(self.vendor_treasure_price)
     }
 
     /// Attack a vendor
@@ -1106,16 +1106,16 @@ impl Game {
             }
         }
 
-        if self.player.has_curse(CurseType::Forgetfulness) {
-            if !self.player.has_treasure(TreasureType::GreenGem) {
-                self.rand_mark_unexplored();
-            }
+        if self.player.has_curse(CurseType::Forgetfulness) &&
+                        !self.player.has_treasure(TreasureType::GreenGem) {
+
+            self.rand_mark_unexplored();
         }
 
-        if self.player.has_curse(CurseType::TheLeech) {
-            if !self.player.has_treasure(TreasureType::PalePearl) {
-                self.player.add_gp(-(Game::d(1,5) as i32));
-            }
+        if self.player.has_curse(CurseType::TheLeech) &&
+                        !self.player.has_treasure(TreasureType::PalePearl) {
+
+            self.player.add_gp(-(Game::d(1,5) as i32));
         }
     }
 

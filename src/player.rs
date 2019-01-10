@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use error::Error;
-use armor::{Armor, ArmorType};
-use weapon::{Weapon, WeaponType};
-use treasure::TreasureType;
-use curse::CurseType;
+use crate::error::Error;
+use crate::armor::{Armor, ArmorType};
+use crate::weapon::{Weapon, WeaponType};
+use crate::treasure::TreasureType;
+use crate::curse::CurseType;
 
 #[derive(Eq, Hash, PartialEq, Copy, Clone, Debug)]
 pub enum Stat {
@@ -498,10 +498,8 @@ impl Player {
 
     /// Curse the player
     pub fn add_curse(&mut self, curse: CurseType) {
-        if curse != CurseType::None {
-            if !self.curses.contains(&curse) {
-                self.curses.push(curse);
-            }
+        if curse != CurseType::None && !self.curses.contains(&curse) {
+            self.curses.push(curse);
         }
     }
 
