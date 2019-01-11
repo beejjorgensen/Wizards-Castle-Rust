@@ -848,7 +848,20 @@ impl UI {
                 Ok(any) => panic!("Unexpected: {:#?}", any),
                 Err(err) => panic!("{:#?}", err),
             },
-            Some("D") => println!("\n[STUB: spell: deathspell]\n"),
+            Some("D") => {
+                print!("\nDEATH - - - ");
+                match self.game.spell_deathspell() {
+                    Ok(CombatEvent::Hit(hr)) => {
+                        println!("HIS\n");
+                        self.monster_defeated_message(hr, m_art, m_name);
+                    }
+                    Ok(CombatEvent::Died) => {
+                        println!("YOURS\n");
+                    }
+                    Ok(any) => panic!("Unexpected: {:#?}", any),
+                    Err(err) => panic!("{:#?}", err),
+                }
+            }
             _ => println!("\n** TRY ONE OF THE OPTIONS GIVEN"),
         }
     }
