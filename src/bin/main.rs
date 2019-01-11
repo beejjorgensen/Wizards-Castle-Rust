@@ -1634,6 +1634,19 @@ impl UI {
             }
         }
     }
+
+    /// Give help
+    ///
+    /// This wasn't in the original game
+    pub fn help(&self) {
+        println!("YOU CAN USE THE FOLLOWING COMMANDS:\n");
+
+        println!("(N)ORTH      (D)OWN        (G)AZE");
+        println!("(S)OUTH      (T)ELEPORT    (DR)INK");
+        println!("(W)EST       (M)AP         (O)PEN");
+        println!("(E)AST       (L)AMP        (H)ELP");
+        println!("(U)P         (F)LARE       (Q)UIT");
+    }
 }
 
 /// Main
@@ -1656,6 +1669,7 @@ fn main() {
 
         let mut alive = true;
         let mut automove = false;
+        let mut free_move = false;
 
         let mut quiet = false;
         let mut print_location = true;
@@ -1669,7 +1683,11 @@ fn main() {
                 continue;
             }
 
-            ui.at_turn_start();
+            if !free_move {
+                ui.at_turn_start();
+            } else {
+                free_move = false;
+            }
 
             if automove {
                 println!("\n");
@@ -1741,6 +1759,11 @@ fn main() {
                                 quiet = true;
                                 alive = false;
                             }
+                        }
+                        Some("H") | Some("?") => {
+                            ui.help();
+                            free_move = true;
+                            quiet = true;
                         }
                         _ => {
                             println!("** STUPID {} THAT WASN'T A VALID COMMAND", ui.race_str());

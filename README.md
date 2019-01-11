@@ -13,6 +13,26 @@ Please don't hold it against me.
 
 Clone the repo and `cargo run`.
 
+### Commands
+
+| Command |                      |
+|:-------:|----------------------|
+|   `N`   | North                |
+|   `S`   | South                |
+|   `W`   | West                 |
+|   `E`   | East                 |
+|   `U`   | Up                   |
+|   `D`   | Down                 |
+|   `T`   | Teleport             |
+|   `M`   | Map                  |
+|   `L`   | Lamp                 |
+|   `F`   | Flare                |
+|   `G`   | Gaze into an orb     |
+|   `DR`  | Drink from a pool    |
+|   `O`   | Open a chest or book |
+|   `H`   | Help                 |
+|   `Q`   | Quit                 |
+
 ## Goals
 
 * Learn Rust
