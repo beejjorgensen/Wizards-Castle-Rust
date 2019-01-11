@@ -22,9 +22,6 @@ Please don't hold it against me.
 ## TODO
 
 * Random eating messages
-* Spells
-  * Check for monster stuck in web
-  * Check for web breaking
 * Quit
 
 ### Refactoring TODO

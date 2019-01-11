@@ -24,6 +24,7 @@ pub struct Monster {
     damage: u32,
     break_weapon: bool,
     has_runestaff: bool,
+    webbed: u32, // How many turns left stuck in a web
 }
 
 impl Monster {
@@ -44,6 +45,7 @@ impl Monster {
             damage,
             break_weapon,
             has_runestaff,
+            webbed: 0,
         }
     }
 
@@ -97,5 +99,27 @@ impl Monster {
     /// True if the monster has the runestaff
     pub fn has_runestaff(&self) -> bool {
         self.has_runestaff
+    }
+
+    /// Return monster webbed status
+    pub fn webbed(&self) -> &u32 {
+        &self.webbed
+    }
+
+    /// Set webbed status
+    pub fn set_webbed(&mut self, count: u32) {
+        self.webbed = count;
+    }
+
+    /// Weaken a web, true if broke
+    pub fn weaken_web(&mut self) -> bool {
+        if self.webbed > 0 {
+            self.webbed -= 1;
+            if self.webbed == 0 {
+                return true;
+            }
+        }
+
+        false
     }
 }

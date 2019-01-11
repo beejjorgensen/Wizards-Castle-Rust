@@ -32,8 +32,9 @@ pub enum CombatEvent {
     Miss,
     Hit(HitResult),
     Died,
+    MonsterWebbed,
     MonsterMiss,
-    MonsterHit(u32, bool, bool),
+    MonsterHit(u32, bool, bool, bool),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -527,9 +528,21 @@ impl Game {
         self.bribe_possible = false;
         self.spell_possible = false;
 
-        // TODO check for web breaking
+        let mut web_broke = false;
 
-        // TODO check for stuck in web
+        // Check for web breaking / stuck
+        if let Some(ref mut monster) = self.currently_fighting {
+            if *monster.webbed() > 0 {
+                if monster.weaken_web() {
+                    web_broke = true;
+                } else {
+                    self.state = GameState::PlayerAttack;
+                    return Ok(CombatEvent::MonsterWebbed);
+                }
+            }
+        } else {
+            panic!("being attacked, but not by any monster");
+        }
 
         let hit = *self.player.stat(&Stat::Dexterity)
             < (Game::d(3, 7) + (self.player.is_blind() as u32) * 3);
@@ -553,6 +566,7 @@ impl Game {
                     st_damage,
                     defeated,
                     armor_destroyed,
+                    web_broke,
                 ));
             } else {
                 panic!("being attacked, but not by any monster");
@@ -693,6 +707,38 @@ impl Game {
     /// Deathspell spell
     pub fn spell_deathspell(&mut self) -> Result<CombatEvent, Error> {
         self.attack_with(AttackType::Deathspell)
+    }
+
+    /// Web spell
+    pub fn spell_web(&mut self) -> Result<CombatEvent, Error> {
+        if self.state != GameState::PlayerAttack {
+            return Err(Error::WrongState);
+        }
+
+        if self.player.change_stat(Stat::Strength, -1) == 0 {
+            self.state = GameState::Dead;
+            return Ok(CombatEvent::Died);
+        }
+
+        self.state = GameState::MonsterAttack;
+
+        let result = HitResult {
+            damage: 0,
+            broke_weapon: false,
+            defeated: false,
+            treasure: 0,
+            got_runestaff: false,
+            killed_vendor: false,
+            got_lamp: false,
+        };
+
+        if let Some(ref mut monster) = self.currently_fighting {
+            monster.set_webbed(Game::d(1, 6) + 1);
+        } else {
+            panic!("not fighting a monster");
+        }
+
+        Ok(CombatEvent::Hit(result))
     }
 
     /// Check for a room event

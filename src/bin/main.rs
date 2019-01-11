@@ -722,9 +722,19 @@ impl UI {
     }
 
     /// Be attacked by a monster
-    fn combat_be_attacked(&mut self) {
+    fn combat_be_attacked(&mut self, m_name: &str) {
         match self.game.be_attacked() {
-            Ok(CombatEvent::MonsterHit(_damage, _defeated, armor_destroyed)) => {
+            Ok(CombatEvent::MonsterWebbed) => {
+                println!("\nTHE {} IS STUCK AND CAN'T ATTACK", m_name);
+            }
+
+            Ok(CombatEvent::MonsterHit(_damage, _defeated, armor_destroyed, web_broke)) => {
+                if web_broke {
+                    println!("\nTHE WEB JUST BROKE!");
+                }
+
+                println!("\nTHE {} ATTACKS", m_name);
+
                 println!("\n  OUCH! HE HIT YOU");
 
                 if armor_destroyed {
@@ -733,6 +743,8 @@ impl UI {
             }
 
             Ok(CombatEvent::MonsterMiss) => {
+                println!("\nTHE {} ATTACKS", m_name);
+
                 println!("\n  HAH! HE MISSED YOU");
             }
 
@@ -838,7 +850,12 @@ impl UI {
     /// Handle combat spells
     fn combat_spell(&mut self, m_art: &str, m_name: &str) {
         match UI::get_input(Some("\nWHICH SPELL (WEB, FIREBALL, OR DEATHSPELL)? ")).get(..1) {
-            Some("W") => println!("\n[STUB: spell: web]\n"),
+            Some("W") => match self.game.spell_web() {
+                Ok(CombatEvent::Hit(_)) => (),
+                Ok(CombatEvent::Died) => (),
+                Ok(any) => panic!("Unexpected: {:#?}", any),
+                Err(err) => panic!("{:#?}", err),
+            },
             Some("F") => match self.game.spell_fireball() {
                 Ok(CombatEvent::Hit(hr)) => {
                     println!("\n  IT DOES {} POINTS OF DAMAGE.\n", hr.damage);
@@ -926,9 +943,7 @@ impl UI {
                 }
 
                 GameState::MonsterAttack => {
-                    println!("\nTHE {} ATTACKS", m_name);
-
-                    self.combat_be_attacked();
+                    self.combat_be_attacked(&m_name);
                 }
 
                 GameState::Retreat => {
