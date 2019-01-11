@@ -139,6 +139,7 @@ pub enum GameState {
 
     Dead,
     Exit,
+    Quit,
 }
 
 pub struct Game {
@@ -1300,6 +1301,11 @@ impl Game {
         } else {
             false
         }
+    }
+
+    /// Quit the game
+    pub fn quit(&mut self) {
+        self.state = GameState::Quit;
     }
 
     /// Roll a die (1d6, 2d7, etc.)

@@ -21,10 +21,6 @@ Please don't hold it against me.
 
 ## TODO
 
-* Quit
-
-### Refactoring TODO
-
 * Have `room_at` and `room_at_mut` return undiscovered status
 * Make fewer fields `pub` and provide accessors
   * Notably in `Room`

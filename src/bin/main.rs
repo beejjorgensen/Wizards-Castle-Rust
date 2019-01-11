@@ -1017,6 +1017,14 @@ impl UI {
                 println!("YOUR MISERABLE LIFE");
             }
 
+            GameState::Quit => {
+                println!();
+                println!("A LESS THAN AWE-INSPIRING DEFEAT.\n");
+                println!("WHEN YOU LEFT THE CASTLE YOU HAD:\n");
+
+                println!("YOUR MISERABLE LIFE");
+            }
+
             any => panic!("unexpected game state at end {:#?}", any),
         }
 
@@ -1610,6 +1618,23 @@ impl UI {
             println!("\nTHE BLUE FLAME DISSOLVES THE BOOK");
         }
     }
+
+    /// Quit the game
+    pub fn quit(&mut self) -> bool {
+        loop {
+            match UI::get_input(Some("DO YOU REALLY WANT TO QUIT? ")).get(..1) {
+                Some("Y") => {
+                    self.game.quit();
+                    break true;
+                }
+                Some("N") => {
+                    println!("\n** THEN DON'T SAY YOU DO\n");
+                    break false;
+                }
+                _ => println!("\n** ANSWER YES OR NO\n"),
+            }
+        }
+    }
 }
 
 /// Main
@@ -1710,6 +1735,12 @@ fn main() {
                         Some("O") => {
                             if !ui.open() {
                                 quiet = true;
+                            }
+                        }
+                        Some("Q") => {
+                            if ui.quit() {
+                                quiet = true;
+                                alive = false;
                             }
                         }
                         _ => {
