@@ -21,7 +21,6 @@ Please don't hold it against me.
 
 ## TODO
 
-* Random eating messages
 * Quit
 
 ### Refactoring TODO

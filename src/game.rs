@@ -161,6 +161,7 @@ pub struct Game {
     vendor_treasure: Option<TreasureType>,
 
     turn: u32,
+    last_recipe_turn: u32,
 
     lethargic: bool,
 }
@@ -186,6 +187,7 @@ impl Game {
             vendor_treasure_price: 0,
             vendor_treasure: None,
             turn: 0,
+            last_recipe_turn: 0,
             lethargic: false,
         }
     }
@@ -1288,6 +1290,16 @@ impl Game {
         let i = rng.gen_range(0, msgs.len());
 
         msgs[i]
+    }
+
+    /// Tell the caller if it's time for a random recipe
+    pub fn rand_recipe(&mut self) -> bool {
+        if self.last_recipe_turn == 0 || self.turn - self.last_recipe_turn > 6 {
+            self.last_recipe_turn = self.turn;
+            true
+        } else {
+            false
+        }
     }
 
     /// Roll a die (1d6, 2d7, etc.)

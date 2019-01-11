@@ -659,11 +659,19 @@ impl UI {
     }
 
     /// Print messaging when monster defeated by melee or magic
-    fn monster_defeated_message(&self, result: HitResult, m_art: &str, m_name: &str) {
+    fn monster_defeated_message(&mut self, result: HitResult, m_art: &str, m_name: &str) {
         if result.defeated {
             println!("\n{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
 
-            // TODO random eating message
+            if self.game.rand_recipe() {
+                let suffix = [
+                    "WICH", " STEW", " SOUP", " BURGER", " ROAST", " MUNCHY", " TACO", " PIE",
+                ];
+
+                let i = self.rng.gen_range(0, suffix.len());
+
+                println!("\nYOU SPEND AN HOUR EATING {}{}", m_name, suffix[i]);
+            }
 
             if result.killed_vendor {
                 println!("\nYOU GET ALL HIS WARES\n");
