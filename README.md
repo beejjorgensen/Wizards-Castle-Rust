@@ -9,6 +9,10 @@ non-idiomatic, and subject to frequent refactoring.
 
 Please don't hold it against me.
 
+## How to Play
+
+Clone the repo and `cargo run`.
+
 ## Goals
 
 * Learn Rust
@@ -16,8 +20,6 @@ Please don't hold it against me.
 * Have a Wizard's Castle library that other front-ends can use to play the game
   * Build an ncurses front end
   * Build to WASM with a web front end
-
-* Have a default binary that plays the game in the classic text format
 
 ## TODO
 
