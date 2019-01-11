@@ -978,10 +978,9 @@ impl UI {
     pub fn game_summary(&self) {
         match self.game.state() {
             GameState::Dead => {
-                println!(
-                    "\n\nA NOBLE EFFORT, OH FORMERLY LIVING {}\n",
-                    self.race_str()
-                );
+                println!("\n{:*^64}\n", "");
+
+                println!("A NOBLE EFFORT, OH FORMERLY LIVING {}\n", self.race_str());
 
                 print!("YOU DIED FROM A LACK OF ");
                 if self.game.player_stat(Stat::Strength) == 0 {
