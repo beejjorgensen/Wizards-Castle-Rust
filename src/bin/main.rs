@@ -6,7 +6,9 @@ use rand::Rng;
 
 use wizardscastle::armor::{Armor, ArmorType};
 use wizardscastle::error::Error;
-use wizardscastle::game::{BookEvent, ChestEvent, DrinkEvent, GameState, OrbEvent, RandomMessage};
+use wizardscastle::game::{
+    BookEvent, ChestEvent, DrinkEvent, GameState, HitResult, OrbEvent, RandomMessage,
+};
 use wizardscastle::game::{CombatEvent, Direction, Event, Game, Stairs};
 use wizardscastle::monster::MonsterType;
 use wizardscastle::player::{Gender, Race, Stat};
@@ -656,6 +658,34 @@ impl UI {
         println!("HERE YOU FIND {}", room_str);
     }
 
+    /// Print messaging when monster defeated by melee or magic
+    fn monster_defeated_message(&self, result: HitResult, m_art: &str, m_name: &str) {
+        if result.defeated {
+            println!("\n{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
+
+            // TODO random eating message
+
+            if result.killed_vendor {
+                println!("\nYOU GET ALL HIS WARES\n");
+                println!("PLATE ARMOR");
+                println!("A SWORD");
+                println!("A STRENGTH POTION");
+                println!("AN INTELLIGENCE POTION");
+                println!("A DEXTERITY POTION");
+
+                if result.got_lamp {
+                    println!("A LAMP");
+                }
+            } else {
+                if result.got_runestaff {
+                    println!("\nGREAT ZOT! YOU'VE FOUND THE RUNESTAFF");
+                }
+
+                println!("\nYOU NOW GET HIS HOARD OF {} GP's", result.treasure);
+            }
+        }
+    }
+
     // Attack a monster
     fn combat_attack(&mut self, m_art: &str, m_name: &str) {
         // Need to do this before the attack since the weapon might
@@ -678,30 +708,7 @@ impl UI {
                     println!("\nOH NO! YOUR {} BROKE", UI::weapon_name(weapon_type));
                 }
 
-                if result.defeated {
-                    println!("\n{} {} LIES DEAD AT YOUR FEET", m_art, m_name);
-
-                    // TODO random eating message
-
-                    if result.killed_vendor {
-                        println!("\nYOU GET ALL HIS WARES\n");
-                        println!("PLATE ARMOR");
-                        println!("A SWORD");
-                        println!("A STRENGTH POTION");
-                        println!("AN INTELLIGENCE POTION");
-                        println!("A DEXTERITY POTION");
-
-                        if result.got_lamp {
-                            println!("A LAMP");
-                        }
-                    } else {
-                        if result.got_runestaff {
-                            println!("\nGREAT ZOT! YOU'VE FOUND THE RUNESTAFF");
-                        }
-
-                        println!("\nYOU NOW GET HIS HOARD OF {} GP's", result.treasure);
-                    }
-                }
+                self.monster_defeated_message(result, m_art, m_name);
             }
 
             Ok(CombatEvent::Miss) => {
@@ -828,12 +835,28 @@ impl UI {
         bribed
     }
 
+    /// Handle combat spells
+    fn combat_spell(&mut self, m_art: &str, m_name: &str) {
+        match UI::get_input(Some("\nWHICH SPELL (WEB, FIREBALL, OR DEATHSPELL)? ")).get(..1) {
+            Some("W") => println!("\n[STUB: spell: web]\n"),
+            Some("F") => match self.game.spell_fireball() {
+                Ok(CombatEvent::Hit(hr)) => {
+                    println!("\n  IT DOES {} POINTS OF DAMAGE.\n", hr.damage);
+                    self.monster_defeated_message(hr, m_art, m_name);
+                }
+                Ok(CombatEvent::Died) => (),
+                Ok(any) => panic!("Unexpected: {:#?}", any),
+                Err(err) => panic!("{:#?}", err),
+            },
+            Some("D") => println!("\n[STUB: spell: deathspell]\n"),
+            _ => println!("\n** TRY ONE OF THE OPTIONS GIVEN"),
+        }
+    }
+
     /// Handle combat
     fn combat(&mut self, monster_type: MonsterType) -> bool {
         let m_name = UI::monster_name(monster_type);
         let m_art = UI::get_article(&m_name);
-
-        println!("YOU'RE FACING {} {}!", m_art, m_name);
 
         let mut in_combat = true;
         let mut retreated = false;
@@ -841,6 +864,8 @@ impl UI {
         while in_combat {
             match self.game.state() {
                 GameState::PlayerAttack => {
+                    println!("\nYOU'RE FACING {} {}!", m_art, m_name);
+
                     print!("\nYOU MAY ATTACK OR RETREAT");
 
                     let can_bribe = self.game.bribe_possible();
@@ -878,12 +903,12 @@ impl UI {
                         }
                         Some("C") => {
                             if can_cast_spell {
-                                // TODO
+                                self.combat_spell(&m_art, &m_name);
                             } else {
-                                println!("{}", err_str)
+                                println!("\n** YOU CAN'T CAST A SPELL NOW");
                             }
                         }
-                        _ => println!("{}", err_str),
+                        _ => println!("\n** CHOOSE ONE OF THE OPTIONS LISTED."),
                     }
                 }
 

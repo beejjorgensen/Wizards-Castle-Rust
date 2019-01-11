@@ -31,6 +31,7 @@ pub enum CombatEvent {
     BookHands,
     Miss,
     Hit(HitResult),
+    Died,
     MonsterMiss,
     MonsterHit(u32, bool, bool),
 }
@@ -83,6 +84,13 @@ pub enum BookEvent {
     Dexterity,
     Strength,
     Sticky,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum AttackType {
+    Melee,
+    Fireball,
+    //Deathspell,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -145,6 +153,8 @@ pub struct Game {
     bribe_treasure: Option<TreasureType>,
     retreating: bool,
 
+    spell_possible: bool,
+
     vendors_angry: bool,
     vendor_treasure_price: u32,
     vendor_treasure: Option<TreasureType>,
@@ -170,6 +180,7 @@ impl Game {
             bribe_possible: true,
             bribe_treasure: None,
             retreating: false,
+            spell_possible: false,
             vendors_angry: false,
             vendor_treasure_price: 0,
             vendor_treasure: None,
@@ -350,6 +361,7 @@ impl Game {
         } else {
             self.state = GameState::PlayerAttack;
             self.bribe_possible = true;
+            self.spell_possible = true;
         }
 
         self.retreating = false;
@@ -364,31 +376,57 @@ impl Game {
 
     /// True if the player can cast a spell
     pub fn spell_possible(&self) -> bool {
-        *self.player.stat(&Stat::Intelligence) > 14
+        self.spell_possible && *self.player.stat(&Stat::Intelligence) > 14
     }
 
     /// Handle player attacking monster
     pub fn attack(&mut self) -> Result<CombatEvent, Error> {
+        self.attack_with(AttackType::Melee)
+    }
+
+    /// Attack a creature with a given attack type (melee, various magic)
+    fn attack_with(&mut self, attack_type: AttackType) -> Result<CombatEvent, Error> {
         if self.state != GameState::PlayerAttack {
             return Err(Error::WrongState);
         }
 
-        if self.player.weapon().weapon_type() == WeaponType::None {
-            self.state = GameState::MonsterAttack;
-            return Ok(CombatEvent::NoWeapon);
-        }
+        let mut hit = false;
+        let mut damage = 0;
 
-        if *self.player.book_stuck() {
-            self.state = GameState::MonsterAttack;
-            return Ok(CombatEvent::BookHands);
-        }
+        if attack_type == AttackType::Melee {
+            if self.player.weapon().weapon_type() == WeaponType::None {
+                self.state = GameState::MonsterAttack;
+                return Ok(CombatEvent::NoWeapon);
+            }
 
-        let hit = *self.player.stat(&Stat::Dexterity)
-            >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
+            if *self.player.book_stuck() {
+                self.state = GameState::MonsterAttack;
+                return Ok(CombatEvent::BookHands);
+            }
+
+            hit = *self.player.stat(&Stat::Dexterity)
+                >= (Game::d(1, 20) + (self.player.is_blind() as u32) * 3);
+
+            if hit {
+                damage = self.player.weapon().damage();
+            }
+        } else if attack_type == AttackType::Fireball {
+            // -1 ST and IQ
+            if self.player.change_stat(Stat::Strength, -1) == 0
+                || self.player.change_stat(Stat::Intelligence, -1) == 0
+            {
+                self.state = GameState::Dead;
+                return Ok(CombatEvent::Died);
+            }
+
+            hit = true;
+
+            damage = Game::d(2, 7);
+        }
 
         if hit {
             let mut result = HitResult {
-                damage: self.player.weapon().damage(),
+                damage,
                 broke_weapon: false,
                 defeated: false,
                 treasure: 0,
@@ -400,7 +438,10 @@ impl Game {
             let mut next_state = GameState::MonsterAttack;
 
             if let Some(ref mut monster) = self.currently_fighting {
-                if monster.can_break_weapon() && Game::d(1, 8) == 1 {
+                if attack_type == AttackType::Melee
+                    && monster.can_break_weapon()
+                    && Game::d(1, 8) == 1
+                {
                     result.broke_weapon = true;
                     self.player.set_weapon(Weapon::new(WeaponType::None));
                 }
@@ -473,6 +514,7 @@ impl Game {
         }
 
         self.bribe_possible = false;
+        self.spell_possible = false;
 
         // TODO check for web breaking
 
@@ -630,6 +672,11 @@ impl Game {
         self.state = GameState::Move;
 
         self.move_dir(dir);
+    }
+
+    /// Fireball spell
+    pub fn spell_fireball(&mut self) -> Result<CombatEvent, Error> {
+        self.attack_with(AttackType::Fireball)
     }
 
     /// Check for a room event
