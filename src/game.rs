@@ -1295,7 +1295,7 @@ impl Game {
 
     /// Tell the caller if it's time for a random recipe
     pub fn rand_recipe(&mut self) -> bool {
-        if self.last_recipe_turn == 0 || self.turn - self.last_recipe_turn > 6 {
+        if self.last_recipe_turn == 0 || self.turn - self.last_recipe_turn > 60 {
             self.last_recipe_turn = self.turn;
             true
         } else {
