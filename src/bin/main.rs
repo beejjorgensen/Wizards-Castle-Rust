@@ -1487,7 +1487,13 @@ impl UI {
                         );
                     }
                     OrbEvent::Item(room_type, x, y, z) => {
-                        println!("{} AT ({},{}) LEVEL {}", UI::room_name(&room_type), x + 1, y + 1, z + 1);
+                        println!(
+                            "{} AT ({},{}) LEVEL {}",
+                            UI::room_name(&room_type),
+                            x + 1,
+                            y + 1,
+                            z + 1
+                        );
                     }
                     OrbEvent::OrbOfZot(x, y, z) => {
                         println!("THE ORB OF ZOT AT ({},{}) LEVEL {}", x + 1, y + 1, z + 1);
