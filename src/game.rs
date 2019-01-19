@@ -1215,7 +1215,11 @@ impl Game {
                 self.move_dir(Game::rand_direction());
                 Ok(ChestEvent::Gas)
             }
-            3...4 => Ok(ChestEvent::Treasure(Game::d(1, 1000))),
+            3...4 => {
+                let gold = Game::d(1, 1000);
+                self.player.add_gp(gold as i32);
+                Ok(ChestEvent::Treasure(gold))
+            }
             _ => panic!("SNR"),
         }
     }
