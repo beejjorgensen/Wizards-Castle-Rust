@@ -1057,6 +1057,10 @@ impl Game {
             return Err(Error::CantGo);
         }
 
+        if self.player.is_blind() {
+            return Err(Error::Blind);
+        }
+
         self.player.change_flares(-1);
 
         let xm1 = *self.player.x() as i32 - 1;
