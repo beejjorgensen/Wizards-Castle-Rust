@@ -832,7 +832,6 @@ impl Game {
         }
 
         self.discover_room_at_player();
-        println!("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHEY");
 
         Ok(())
     }
