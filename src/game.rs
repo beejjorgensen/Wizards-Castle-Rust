@@ -321,6 +321,8 @@ impl Game {
 
         self.player.set_z(new_z);
 
+        self.discover_room_at_player();
+
         Event::Sinkhole
     }
 
@@ -336,6 +338,8 @@ impl Game {
             self.player.set_y(rng.gen_range(0, *self.dungeon.ysize()));
             self.player.set_z(rng.gen_range(0, *self.dungeon.zsize()));
         }
+
+        self.discover_room_at_player();
 
         Event::Warp
     }
@@ -827,6 +831,8 @@ impl Game {
             }
         }
 
+        self.discover_room_at_player();
+
         Ok(())
     }
 
@@ -862,6 +868,8 @@ impl Game {
                 self.player.set_x(new_x);
             }
         }
+
+        self.discover_room_at_player();
     }
 
     /// Accept selling a treasure
