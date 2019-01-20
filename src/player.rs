@@ -379,8 +379,8 @@ impl Player {
     }
 
     /// Return a list of players treasures
-    pub fn get_treasures(&self) -> &Vec<TreasureType> {
-        &self.treasures
+    pub fn get_treasures(&self) -> Vec<TreasureType> {
+        self.treasures.clone()
     }
 
     /// Remove a specific treasure from the list

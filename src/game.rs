@@ -1458,7 +1458,7 @@ impl Game {
     }
 
     /// Return a list of players treasures
-    pub fn player_get_treasures(&self) -> &Vec<TreasureType> {
+    pub fn player_get_treasures(&self) -> Vec<TreasureType> {
         self.player.get_treasures()
     }
 

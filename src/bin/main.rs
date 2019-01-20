@@ -1029,7 +1029,7 @@ impl UI {
 
         // List treasures
         for t in self.game.player_get_treasures() {
-            println!("{}", UI::treasure_name(*t));
+            println!("{}", UI::treasure_name(t));
         }
 
         // Show weapon
