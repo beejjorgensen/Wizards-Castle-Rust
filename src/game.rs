@@ -1506,4 +1506,9 @@ impl Game {
     pub fn add_turn(&mut self, amount: u32) {
         self.turn += amount;
     }
+
+    /// True if the vendors are angry
+    pub fn vendors_angry(&self) -> bool {
+        self.vendors_angry
+    }
 }
