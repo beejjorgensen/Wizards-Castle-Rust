@@ -1276,9 +1276,12 @@ impl Game {
     pub fn curse_check(&mut self) -> bool {
         let curse = *self.room_at_player().curse();
 
-        self.player.add_curse(curse);
-
-        curse != CurseType::None
+        if curse != CurseType::None && !self.player.has_curse(curse) {
+            self.player.add_curse(curse);
+            true
+        } else {
+            false
+        }
     }
 
     /// Choose a random message
