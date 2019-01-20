@@ -1273,10 +1273,12 @@ impl Game {
     }
 
     /// Check for catching a curse
-    pub fn curse_check(&mut self) {
+    pub fn curse_check(&mut self) -> bool {
         let curse = *self.room_at_player().curse();
 
         self.player.add_curse(curse);
+
+        curse != CurseType::None
     }
 
     /// Choose a random message
