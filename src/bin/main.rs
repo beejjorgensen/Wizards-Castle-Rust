@@ -1089,11 +1089,21 @@ impl UI {
 
         println!();
 
+        let price_hash;
+
+        match self.game.vendor_treasure_offer() {
+            Ok(hash) => price_hash = hash,
+            Err(err) => panic!(err),
+        }
+
         for t in treasures {
-            let price = match self.game.vendor_treasure_offer(t) {
-                Ok(p) => p,
-                Err(err) => panic!("vendor treasure offer: {:#?}", err),
-            };
+            let price;
+
+            if let Some(p) = price_hash.get(&t) {
+                price = p;
+            } else {
+                panic!("price missing from hash");
+            }
 
             loop {
                 let yn = UI::get_input(Some(&format!(
@@ -1104,17 +1114,13 @@ impl UI {
 
                 match yn.get(..1) {
                     Some("Y") => {
-                        match self.game.vendor_treasure_accept() {
+                        match self.game.vendor_treasure_accept(t) {
                             Ok(_) => (),
                             Err(err) => panic!("vendor treasure accept: {:#?}", err),
                         }
                         break;
                     }
                     Some("N") => {
-                        match self.game.vendor_treasure_reject() {
-                            Ok(_) => (),
-                            Err(err) => panic!("vendor treasure accept: {:#?}", err),
-                        }
                         break;
                     }
                     _ => {
@@ -1716,7 +1722,7 @@ fn main() {
 
                     match command.get(..1) {
                         Some("M") => {
-                            ui.map(false);
+                            ui.map(true);
                             print_stats = false;
                             resolve_room_effects = false;
                         }

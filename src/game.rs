@@ -10,6 +10,8 @@ use crate::room::{Room, RoomType};
 use crate::treasure::{Treasure, TreasureType};
 use crate::weapon::{Weapon, WeaponType};
 
+use std::collections::HashMap;
+
 use self::rand::thread_rng;
 use self::rand::Rng;
 
@@ -158,8 +160,7 @@ pub struct Game {
     spell_possible: bool,
 
     vendors_angry: bool,
-    vendor_treasure_price: u32,
-    vendor_treasure: Option<TreasureType>,
+    vendor_treasure_price: Option<HashMap<TreasureType, u32>>,
 
     turn: u32,
     last_recipe_turn: u32,
@@ -185,8 +186,7 @@ impl Game {
             retreating: false,
             spell_possible: false,
             vendors_angry: false,
-            vendor_treasure_price: 0,
-            vendor_treasure: None,
+            vendor_treasure_price: None,
             turn: 0,
             last_recipe_turn: 0,
             lethargic: false,
@@ -872,32 +872,51 @@ impl Game {
         self.discover_room_at_player();
     }
 
-    /// Accept selling a treasure
-    pub fn vendor_treasure_accept(&mut self) -> Result<(), Error> {
-        if self.vendor_treasure == None {
-            return Err(Error::VendorMustOfferTreasure);
+    /// Begin negotiations to sell a treasure to a vendor
+    pub fn vendor_treasure_offer(&mut self) -> Result<HashMap<TreasureType, u32>, Error> {
+        if self.state != GameState::Vendor {
+            return Err(Error::WrongState);
         }
 
-        let treasure_type = self.vendor_treasure.unwrap();
+        let treasures = self.player_get_treasures();
 
-        if !self.player.remove_treasure(treasure_type) {
-            panic!("player should have had this treasure");
+        if treasures.is_empty() {
+            return Err(Error::VendorNoTreasure);
         }
 
-        self.player.add_gp(self.vendor_treasure_price as i32);
+        let mut hash = HashMap::new();
 
-        self.vendor_treasure = None;
+        for t in self.player_get_treasures() {
+            let max_value = Treasure::treasure_max_value(t);
 
-        Ok(())
+            let value = Game::d(1, max_value);
+
+            hash.insert(t, value);
+        }
+
+        self.vendor_treasure_price = Some(hash.clone());
+
+        Ok(hash)
     }
 
-    /// Reject selling a treasure
-    pub fn vendor_treasure_reject(&mut self) -> Result<(), Error> {
-        if self.vendor_treasure == None {
+    /// Accept selling a treasure
+    pub fn vendor_treasure_accept(&mut self, treasure_type: TreasureType) -> Result<(), Error> {
+        if self.vendor_treasure_price == None {
             return Err(Error::VendorMustOfferTreasure);
         }
 
-        self.vendor_treasure = None;
+        if !self.player.remove_treasure(treasure_type) {
+            return Err(Error::VendorNoTreasure);
+        }
+
+        if let Some(ref mut hash) = self.vendor_treasure_price {
+            if let Some(value) = hash.get(&treasure_type) {
+                self.player.add_gp(*value as i32);
+                hash.insert(treasure_type, 0);
+            } else {
+                return Err(Error::VendorNoTreasure);
+            }
+        }
 
         Ok(())
     }
@@ -930,19 +949,6 @@ impl Game {
         Ok(())
     }
 
-    /// Begin negotiations to sell a treasure to a vendor
-    pub fn vendor_treasure_offer(&mut self, treasure_type: TreasureType) -> Result<u32, Error> {
-        if self.state != GameState::Vendor {
-            return Err(Error::WrongState);
-        }
-
-        let max_value = Treasure::treasure_max_value(treasure_type);
-        self.vendor_treasure_price = Game::d(1, max_value);
-        self.vendor_treasure = Some(treasure_type);
-
-        Ok(self.vendor_treasure_price)
-    }
-
     /// Attack a vendor
     pub fn vendor_attack(&mut self) {
         self.vendors_angry = true;
@@ -952,6 +958,7 @@ impl Game {
     /// Complete vendor interactions
     pub fn vendor_complete(&mut self) {
         self.state = GameState::Move;
+        self.vendor_treasure_price = None;
     }
 
     /// Drink

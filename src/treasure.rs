@@ -1,6 +1,6 @@
 pub const TREASURE_COUNT: u32 = 8;
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone, Hash, Eq)]
 pub enum TreasureType {
     RubyRed,
     NornStone,
