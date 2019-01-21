@@ -127,10 +127,6 @@ impl Player {
 
         self.treasures.clear();
         self.curses.clear();
-
-        self.treasures.push(TreasureType::Palantir);
-        self.treasures.push(TreasureType::Silmaril);
-        self.treasures.push(TreasureType::PalePearl);
     }
 
     /// Get a race number by race type
