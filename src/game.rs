@@ -946,6 +946,12 @@ impl Game {
         self.player_gp() >= 1000
     }
 
+    /// Check to see if the player can afford anything from the vendor
+    pub fn vendor_can_afford_anything(&self) -> bool {
+        // Stats are the cheapest
+        self.vendor_can_afford_stat()
+    }
+
     /// Buy stats from a vendor
     pub fn vendor_buy_stat(&mut self, stat: Stat) -> Result<u32, Error> {
         self.player.spend(1000)?;
