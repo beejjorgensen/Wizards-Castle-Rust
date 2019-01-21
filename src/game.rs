@@ -1,6 +1,6 @@
 extern crate rand;
 
-use crate::armor::ArmorType;
+use crate::armor::{Armor, ArmorType};
 use crate::curse::CurseType;
 use crate::dungeon::Dungeon;
 use crate::error::Error;
@@ -919,6 +919,26 @@ impl Game {
         }
 
         Ok(())
+    }
+
+    /// Check if you can afford armor
+    pub fn vendor_can_afford_armor(&self) -> bool {
+        self.vendor_can_afford_armor_type(ArmorType::Leather)
+    }
+
+    /// Check if you can afford a specific armor
+    pub fn vendor_can_afford_armor_type(&self, armor_type: ArmorType) -> bool {
+        self.player_gp() >= Armor::cost(armor_type, true)
+    }
+
+    /// Check if you can afford weapons
+    pub fn vendor_can_afford_weapon(&self) -> bool {
+        self.vendor_can_afford_weapon_type(WeaponType::Dagger)
+    }
+
+    /// Check if you can afford a specific weapon
+    pub fn vendor_can_afford_weapon_type(&self, weapon_type: WeaponType) -> bool {
+        self.player_gp() >= Weapon::cost(weapon_type, true)
     }
 
     /// Check if you can afford stats
