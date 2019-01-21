@@ -946,11 +946,6 @@ impl Game {
         self.player_gp() >= 1000
     }
 
-    /// Check if you can afford a lamp
-    pub fn vendor_can_afford_lamp(&self) -> bool {
-        self.player_gp() >= 1000
-    }
-
     /// Check to see if the player can afford anything from the vendor
     pub fn vendor_can_afford_anything(&self) -> bool {
         // Stats are the cheapest
