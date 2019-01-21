@@ -963,7 +963,12 @@ impl Game {
 
     /// True if the player can buy a lamp from a vendor
     pub fn vendor_can_afford_lamp(&self) -> bool {
-        *self.player.gp() >= 1000
+        *self.player.gp() >= Game::vendor_lamp_cost()
+    }
+
+    /// True if the player can buy a lamp from a vendor
+    pub fn vendor_lamp_cost() -> u32 {
+        1000
     }
 
     /// Buy a lamp from a vendor
