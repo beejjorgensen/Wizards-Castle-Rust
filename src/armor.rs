@@ -43,7 +43,7 @@ impl Armor {
         } else {
             let id = Armor::get_id(a);
 
-            value = (id + 1) * 10;
+            value = id * 10;
         }
 
         value
@@ -52,11 +52,16 @@ impl Armor {
     /// Convert an armor type to its internal ID
     fn get_id(a: ArmorType) -> u32 {
         match a {
-            ArmorType::None => 9999,
-            ArmorType::Leather => 0,
-            ArmorType::Chainmail => 1,
-            ArmorType::Plate => 2,
+            ArmorType::None => 0,
+            ArmorType::Leather => 1,
+            ArmorType::Chainmail => 2,
+            ArmorType::Plate => 3,
         }
+    }
+
+    /// Return a value for numeric comparison
+    pub fn get_enum_value(a: ArmorType) -> u32 {
+        Armor::get_id(a)
     }
 
     /// Return protection value of this armor

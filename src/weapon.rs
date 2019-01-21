@@ -46,6 +46,16 @@ impl Weapon {
         }
     }
 
+    /// Get a value for comparison
+    pub fn get_enum_value(w: WeaponType) -> u32 {
+        match w {
+            WeaponType::None => 0,
+            WeaponType::Dagger => 1,
+            WeaponType::Mace => 2,
+            WeaponType::Sword => 3,
+        }
+    }
+
     pub fn damage(&self) -> u32 {
         Weapon::damage_by_type(self.weapon_type)
     }

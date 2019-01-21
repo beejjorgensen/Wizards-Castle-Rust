@@ -987,6 +987,20 @@ impl Game {
         self.vendor_treasure_price = None;
     }
 
+    /// Check if the player has at least an armor
+    pub fn player_has_at_least_armor(&self, armor_type: ArmorType) -> bool {
+        let player_armor_type = self.player.armor().armor_type();
+
+        Armor::get_enum_value(player_armor_type) >= Armor::get_enum_value(armor_type)
+    }
+
+    /// Check if the player has at least a weapon
+    pub fn player_has_at_least_weapon(&self, weapon_type: WeaponType) -> bool {
+        let player_weapon_type = self.player.weapon().weapon_type();
+
+        Weapon::get_enum_value(player_weapon_type) >= Weapon::get_enum_value(weapon_type)
+    }
+
     /// Drink
     pub fn drink(&mut self) -> Result<DrinkEvent, Error> {
         let roomtype = self.room_at_player().room_type().clone();
