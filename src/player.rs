@@ -187,6 +187,11 @@ impl Player {
         val
     }
 
+    /// Return true if a player's stat is maxed
+    pub fn stat_maxed(&self, stat: Stat) -> bool {
+        *self.stat(&stat) == 18
+    }
+
     /// Give the player some armor
     pub fn purchase_armor(&mut self, a: ArmorType, is_vendor: bool) -> Result<(), Error> {
         let armor_cost = Armor::cost(a, is_vendor);

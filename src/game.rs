@@ -1439,6 +1439,18 @@ impl Game {
         *self.player.stat(&stat)
     }
 
+    // Return true if a player stat is maxed
+    pub fn player_stat_maxed(&self, stat: Stat) -> bool {
+        self.player.stat_maxed(stat)
+    }
+
+    // Return true if all player stats are maxed
+    pub fn player_all_stats_maxed(&self) -> bool {
+        self.player.stat_maxed(Stat::Strength)
+            && self.player.stat_maxed(Stat::Intelligence)
+            && self.player.stat_maxed(Stat::Dexterity)
+    }
+
     /// Accessor for player armor type
     pub fn player_armor_type(&self) -> ArmorType {
         self.player.armor().armor_type()
