@@ -1499,11 +1499,6 @@ impl Game {
         self.player.purchase_flares(flares)
     }
 
-    /// True if the player can afford a potion
-    pub fn player_can_purchase_potion(&self) -> bool {
-        *self.player.gp() >= 1000
-    }
-
     /// Return true if the player is blind
     pub fn player_is_blind(&self) -> bool {
         self.player.is_blind()
