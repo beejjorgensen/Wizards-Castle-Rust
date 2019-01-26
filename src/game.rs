@@ -966,8 +966,13 @@ impl Game {
         *self.player.gp() >= Game::vendor_lamp_cost()
     }
 
-    /// True if the player can buy a lamp from a vendor
+    /// Return the cost of a lamp from a vendor
     pub fn vendor_lamp_cost() -> u32 {
+        1000
+    }
+
+    /// Return the cost of a stat from a vendor
+    pub fn vendor_stat_cost() -> u32 {
         1000
     }
 
