@@ -122,4 +122,9 @@ impl Monster {
 
         false
     }
+
+    /// Return hitpoints
+    pub fn hp(&self) -> u32 {
+        self.hp
+    }
 }
