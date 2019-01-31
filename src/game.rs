@@ -166,6 +166,8 @@ pub struct Game {
     last_recipe_turn: u32,
 
     lethargic: bool,
+
+    player_moved_since_bribe: bool,
 }
 
 impl Game {
@@ -190,6 +192,7 @@ impl Game {
             turn: 0,
             last_recipe_turn: 0,
             lethargic: false,
+            player_moved_since_bribe: true,
         }
     }
 
@@ -355,6 +358,13 @@ impl Game {
 
     // Handle Monster room effects
     fn room_effect_monster(&mut self, monster: &Monster) -> Event {
+
+        // If the player bribed this monster, don't do combat again until after
+        // the player has moved
+        if !self.player_moved_since_bribe {
+            return Event::None;
+        }
+
         // If Vendors are not angry, head into vendor trade state instead of combat
         if monster.monster_type() == MonsterType::Vendor && !self.vendors_angry {
             self.state = GameState::Vendor;
@@ -650,6 +660,8 @@ impl Game {
             return Err(Error::BribeMustProposition);
         }
 
+        self.player_moved_since_bribe = false;
+
         Ok(())
     }
 
@@ -807,6 +819,8 @@ impl Game {
             self.make_current_room_empty();
         }
 
+        self.player_moved_since_bribe = true;
+
         Ok(found_orb_of_zot)
     }
 
@@ -868,6 +882,8 @@ impl Game {
                 self.player.set_x(new_x);
             }
         }
+
+        self.player_moved_since_bribe = true;
 
         self.discover_room_at_player();
     }
