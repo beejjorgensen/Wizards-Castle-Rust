@@ -517,4 +517,9 @@ impl Player {
     pub fn has_curse(&self, curse: CurseType) -> bool {
         self.curses.contains(&curse)
     }
+
+    /// True if the player has any treasure
+    pub fn has_any_treasure(&self) -> bool {
+        !self.treasures.is_empty()
+    }
 }

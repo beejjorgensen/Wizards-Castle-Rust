@@ -1531,6 +1531,11 @@ impl Game {
         self.player.get_treasures()
     }
 
+    /// Return true if the player has any treasure
+    pub fn player_has_any_treasure(&self) -> bool {
+        self.player.has_any_treasure()
+    }
+
     /// True if the player has the Runestaff
     pub fn player_has_runestaff(&self) -> bool {
         self.player.has_runestaff()
