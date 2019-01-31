@@ -358,7 +358,6 @@ impl Game {
 
     // Handle Monster room effects
     fn room_effect_monster(&mut self, monster: &Monster) -> Event {
-
         // If the player bribed this monster, don't do combat again until after
         // the player has moved
         if !self.player_moved_since_bribe {
@@ -1600,5 +1599,10 @@ impl Game {
     /// True if the vendors are angry
     pub fn vendors_angry(&self) -> bool {
         self.vendors_angry
+    }
+
+    /// True if the player just bribed the monster in this room
+    pub fn player_bribed_this_monster(&self) -> bool {
+        !self.player_moved_since_bribe
     }
 }
