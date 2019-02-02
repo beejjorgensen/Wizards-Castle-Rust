@@ -820,6 +820,8 @@ impl Game {
 
         self.player_moved_since_bribe = true;
 
+        self.discover_room_at_player();
+
         Ok(found_orb_of_zot)
     }
 
