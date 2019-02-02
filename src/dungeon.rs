@@ -28,6 +28,7 @@ impl Dungeon {
         let mut rng = thread_rng();
 
         let orb_of_zot_level = rng.gen_range(0, zsize);
+        let runestaff_level = rng.gen_range(0, zsize);
 
         // Add all necessary elements to the level
         for z in 0..zsize {
@@ -35,7 +36,7 @@ impl Dungeon {
 
             Dungeon::place_ent_stairs(&mut this_level, z, zsize, area);
             Dungeon::place_items(&mut this_level, orb_of_zot_level, z, area);
-            Dungeon::place_monsters_vendors(&mut this_level, z, zsize, area);
+            Dungeon::place_monsters_vendors(&mut this_level, z, area, runestaff_level);
 
             levels.push(this_level);
         }
@@ -65,6 +66,9 @@ impl Dungeon {
         let mut orb_of_zot = (0, 0, 0);
         let mut runestaff = (0, 0, 0);
 
+        let mut found_orb_of_zot = false;
+        let mut found_runestaff = false;
+
         // Find the orb of zot
         //for z in 0..zsize as usize {
         // Clippy, you crazy for wanting this line instead:
@@ -78,6 +82,7 @@ impl Dungeon {
                         if let RoomType::Warp(oz) = l[i].roomtype {
                             if oz {
                                 orb_of_zot = (x, y, z as u32);
+                                found_orb_of_zot = true;
                             }
                         }
                     }
@@ -92,10 +97,19 @@ impl Dungeon {
                     if let RoomType::Monster(ref m) = levels[z][i].roomtype {
                         if m.has_runestaff() {
                             runestaff = (x as u32, y as u32, z as u32);
+                            found_runestaff = true;
                         }
                     }
                 }
             }
+        }
+
+        if !found_orb_of_zot {
+            panic!("Couldn't find the orb of zot");
+        }
+
+        if !found_runestaff {
+            panic!("Couldn't find the runestaff");
         }
 
         Dungeon {
@@ -186,13 +200,11 @@ impl Dungeon {
     }
 
     /// Place monsters and vendors in the dungeon
-    fn place_monsters_vendors(this_level: &mut Vec<Room>, z: u32, zsize: u32, area: u32) {
+    fn place_monsters_vendors(this_level: &mut Vec<Room>, z: u32, area: u32, runestaff_level: u32) {
         let vendor_count = area / 21; // 3 in 8x8
         let monster_count = area / 5; // 12 in 8x8
 
         let mut rng = thread_rng();
-
-        let runestaff_level = rng.gen_range(0, zsize);
 
         // Monsters
         let monsters_to_place = [
