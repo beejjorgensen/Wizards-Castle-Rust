@@ -16,6 +16,7 @@ pub struct Dungeon {
     ysize: u32,
     zsize: u32,
     orb_of_zot: (u32, u32, u32),
+    runestaff: (u32, u32, u32),
 }
 
 impl Dungeon {
@@ -61,9 +62,10 @@ impl Dungeon {
         // Fix up the stairs and entrance
         Dungeon::place_fixup(&mut levels, xsize, ysize, zsize, area);
 
-        // Find the orb of zot
         let mut orb_of_zot = (0, 0, 0);
+        let mut runestaff = (0, 0, 0);
 
+        // Find the orb of zot
         //for z in 0..zsize as usize {
         // Clippy, you crazy for wanting this line instead:
         for (z, l) in levels.iter().enumerate().take(zsize as usize) {
@@ -82,27 +84,18 @@ impl Dungeon {
                 }
             }
 
-            /*
-            // cheater code to reveal Runestaff location
-            if z == runestaff_level {
-                for y in 0..ysize as usize {
-                    for x in 0..xsize as usize {
-                        let i = y as usize * xsize + x as usize;
+            // Find runestaff
+            for y in 0..ysize as usize {
+                for x in 0..xsize as usize {
+                    let i = y * xsize as usize + x;
 
-                        if let RoomType::Monster(ref m) = levels[z][i].roomtype {
-                            if m.has_runestaff() {
-                                println!("\n>>> RUNESTAFF IS AT {},{},{} <<<\n", x+1, y+1, z+1);
-                            }
+                    if let RoomType::Monster(ref m) = levels[z][i].roomtype {
+                        if m.has_runestaff() {
+                            runestaff = (x as u32, y as u32, z as u32);
                         }
                     }
                 }
             }
-
-            // cheater code to reveal Orb of Zot location
-            if z == orb_of_zot_level as usize {
-                println!("\n>>> ORB OF ZOT IS AT {},{},{} <<<\n", orb_of_zot.0, orb_of_zot.1, orb_of_zot.2);
-            }
-            */
         }
 
         Dungeon {
@@ -111,6 +104,7 @@ impl Dungeon {
             ysize,
             zsize,
             orb_of_zot,
+            runestaff,
         }
     }
 
@@ -361,5 +355,10 @@ impl Dungeon {
     /// Return Orb of Zot location
     pub fn orb_of_zot_location(&self) -> (u32, u32, u32) {
         self.orb_of_zot
+    }
+
+    /// Return Runestaff location
+    pub fn runestaff_location(&self) -> (u32, u32, u32) {
+        self.runestaff
     }
 }

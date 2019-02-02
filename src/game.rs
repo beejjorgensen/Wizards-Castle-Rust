@@ -1623,4 +1623,22 @@ impl Game {
     pub fn debug_give_runestaff(&mut self) {
         self.player.give_runestaff(true);
     }
+
+    /// Get the runestaff location
+    ///
+    /// This is for debugging use only.
+    pub fn debug_runestaff_location(&self) -> String {
+        let loc = self.dungeon.runestaff_location();
+
+        format!("({},{},{})", loc.0 + 1, loc.1 + 1, loc.2 + 1)
+    }
+
+    /// Get the Orb of Zot location
+    ///
+    /// This is for debugging use only.
+    pub fn debug_orb_of_zot_location(&self) -> String {
+        let loc = self.dungeon.orb_of_zot_location();
+
+        format!("({},{},{})", loc.0 + 1, loc.1 + 1, loc.2 + 1)
+    }
 }
