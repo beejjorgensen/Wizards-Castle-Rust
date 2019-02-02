@@ -1607,4 +1607,20 @@ impl Game {
     pub fn player_bribed_this_monster(&self) -> bool {
         !self.player_moved_since_bribe
     }
+
+    /// Give the player the orb of zot
+    ///
+    /// This is for debugging use only. The game automatically gives the orb of
+    /// zot to the player at the appropriate time.
+    pub fn debug_give_orb_of_zot(&mut self) {
+        self.player.give_orb_of_zot(true);
+    }
+
+    /// Give the player the runestaff
+    ///
+    /// This is for debugging use only. The game automatically gives the
+    /// runestaff to the player at the appropriate time.
+    pub fn debug_give_runestaff(&mut self) {
+        self.player.give_runestaff(true);
+    }
 }
