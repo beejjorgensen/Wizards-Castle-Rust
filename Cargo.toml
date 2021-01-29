@@ -1,8 +1,8 @@
 [package]
 name = "wizardscastle"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Brian \"Beej Jorgensen\" Hall <beej@beej.us>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-rand = "0.6"
+rand = "0.8.3"

@@ -27,8 +27,8 @@ impl Dungeon {
 
         let mut rng = thread_rng();
 
-        let orb_of_zot_level = rng.gen_range(0, zsize);
-        let runestaff_level = rng.gen_range(0, zsize);
+        let orb_of_zot_level = rng.gen_range(0..zsize);
+        let runestaff_level = rng.gen_range(0..zsize);
 
         // Add all necessary elements to the level
         for z in 0..zsize {
@@ -225,7 +225,7 @@ impl Dungeon {
 
         let num_monsters = monsters_to_place.len();
 
-        let monster_with_runestaff = rng.gen_range(0, monster_count) as usize;
+        let monster_with_runestaff = rng.gen_range(0..monster_count) as usize;
 
         for i in 0..monster_count as usize {
             let has_runestaff = i == monster_with_runestaff && z == runestaff_level;
@@ -253,7 +253,7 @@ impl Dungeon {
 
         // Add curse rooms
         for i in 0..crate::curse::CURSE_COUNT {
-            let curse_level = rng.gen_range(0, zsize) as usize;
+            let curse_level = rng.gen_range(0..zsize) as usize;
 
             let curse = Curse::get_curse_by_id(i);
 
@@ -265,7 +265,7 @@ impl Dungeon {
 
         // Add treasures
         for i in 0..crate::treasure::TREASURE_COUNT {
-            let treasure_level = rng.gen_range(0, zsize) as usize;
+            let treasure_level = rng.gen_range(0..zsize) as usize;
 
             levels[treasure_level].push(Room {
                 roomtype: RoomType::Treasure(Treasure::new(i)),
