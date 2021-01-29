@@ -2,7 +2,7 @@
 name = "wizardscastle"
 version = "0.9.1"
 authors = ["Brian \"Beej Jorgensen\" Hall <beej@beej.us>"]
-edition = "2021"
+edition = "2018"
 
 [dependencies]
 rand = "0.8.3"
