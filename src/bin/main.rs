@@ -126,7 +126,7 @@ impl UI {
                 let mon_str = UI::monster_name(m.monster_type());
                 format!("{} {}", UI::get_article(&mon_str), mon_str)
             }
-            RoomType::Treasure(t) => UI::treasure_name(*t.treasure_type()).to_string(),
+            RoomType::Treasure(t) => UI::treasure_name(*t.treasure_type()),
         }
     }
 
@@ -185,7 +185,7 @@ impl UI {
             let str = UI::get_input(Some(prompt));
 
             if let Ok(v) = str.parse::<u32>() {
-                if v >= 1 && v <= 8 {
+                if (1..=8).contains(&v) {
                     got_num = true;
                     coord = v;
                 }
@@ -1081,7 +1081,7 @@ impl UI {
 
     /// Sell treasures to a vendor
     fn vendor_trade_treasures(&mut self) {
-        let treasures = self.game.player_get_treasures().clone();
+        let treasures = self.game.player_get_treasures();
 
         if treasures.is_empty() {
             return;
