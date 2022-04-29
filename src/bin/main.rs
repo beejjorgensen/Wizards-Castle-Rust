@@ -1093,7 +1093,7 @@ impl UI {
 
         match self.game.vendor_treasure_offer() {
             Ok(hash) => price_hash = hash,
-            Err(err) => panic!(err),
+            Err(err) => panic!("{:?}", err),
         }
 
         for t in treasures {
@@ -1403,7 +1403,7 @@ impl UI {
                 z = tz;
                 room_type = troom_type;
             }
-            Err(err) => panic!(err),
+            Err(err) => panic!("{:?}", err),
         }
 
         println!(
@@ -1433,7 +1433,7 @@ impl UI {
         }
 
         if let Err(err) = self.game.flare() {
-            panic!(err);
+            panic!("{:?}", err);
         }
 
         let xm1 = self.game.player_x() as i32 - 1;
@@ -1530,7 +1530,7 @@ impl UI {
                 ChestEvent::Treasure(amount) => println!("YOU FIND {} GOLD PIECES", amount),
             },
 
-            Err(err) => panic!(err),
+            Err(err) => panic!("{:?}", err),
         }
 
         println!();
@@ -1553,7 +1553,7 @@ impl UI {
                     println!("THE BOOK STICKS TO YOUR HANDS -\n\nNOW YOU CAN'T DRAW YOUR WEAPON!")
                 }
             },
-            Err(err) => panic!(err),
+            Err(err) => panic!("{:?}", err),
         }
 
         println!();
