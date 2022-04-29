@@ -1093,7 +1093,9 @@ impl UI {
         for t in treasures {
             let price = match price_hash.get(&t) {
                 Some(p) => p,
-                None => { panic!("price missing from hash"); }
+                None => {
+                    panic!("price missing from hash");
+                }
             };
 
             loop {
