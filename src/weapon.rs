@@ -16,25 +16,21 @@ impl Weapon {
     }
 
     pub fn cost(w: WeaponType, is_vendor: bool) -> u32 {
-        let value;
-
         if is_vendor {
-            value = match w {
+            match w {
                 WeaponType::None => 0,
                 WeaponType::Dagger => 1250,
                 WeaponType::Mace => 1500,
                 WeaponType::Sword => 2000,
             }
         } else {
-            value = match w {
+            match w {
                 WeaponType::None => 0,
                 WeaponType::Dagger => 10,
                 WeaponType::Mace => 20,
                 WeaponType::Sword => 30,
             }
         }
-
-        value
     }
 
     pub fn damage_by_type(w: WeaponType) -> u32 {

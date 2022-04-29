@@ -463,10 +463,8 @@ impl UI {
                     stat_names[i]
                 )));
 
-                let points_to_add;
-
-                match s.parse::<u32>() {
-                    Ok(p) => points_to_add = p,
+                let points_to_add = match s.parse::<u32>() {
+                    Ok(p) => p,
                     Err(_) => {
                         print!("\n** ");
                         continue;
@@ -588,10 +586,8 @@ impl UI {
         loop {
             let flare_str = UI::get_input(Some("FLARES COST 1 GP EACH, HOW MANY DO YOU WANT? "));
 
-            let flare_count;
-
-            match flare_str.parse::<u32>() {
-                Ok(f) => flare_count = f,
+            let flare_count = match flare_str.parse::<u32>() {
+                Ok(f) => f,
                 Err(_) => {
                     print!("** IF YOU DON'T WANT ANY JUST TYPE 0 (ZERO)\n\n");
                     continue;
@@ -1089,21 +1085,16 @@ impl UI {
 
         println!();
 
-        let price_hash;
-
-        match self.game.vendor_treasure_offer() {
-            Ok(hash) => price_hash = hash,
+        let price_hash = match self.game.vendor_treasure_offer() {
+            Ok(hash) => hash,
             Err(err) => panic!("{:?}", err),
-        }
+        };
 
         for t in treasures {
-            let price;
-
-            if let Some(p) = price_hash.get(&t) {
-                price = p;
-            } else {
-                panic!("price missing from hash");
-            }
+            let price = match price_hash.get(&t) {
+                Some(p) => p,
+                None => { panic!("price missing from hash"); }
+            };
 
             loop {
                 let yn = UI::get_input(Some(&format!(
@@ -1379,20 +1370,18 @@ impl UI {
             return false;
         }
 
-        let dir;
-
         let dir_str = UI::get_input(Some("WHERE DO YOU WANT TO SHINE THE LAMP (N,S,E, OR W)? "));
 
-        match dir_str.get(..1) {
-            Some("N") => dir = Direction::North,
-            Some("S") => dir = Direction::South,
-            Some("W") => dir = Direction::West,
-            Some("E") => dir = Direction::East,
+        let dir = match dir_str.get(..1) {
+            Some("N") => Direction::North,
+            Some("S") => Direction::South,
+            Some("W") => Direction::West,
+            Some("E") => Direction::East,
             _ => {
                 println!("\n** TURKEY! THAT'S NOT A DIRECTION");
                 return false;
             }
-        }
+        };
 
         let (x, y, z, room_type);
 
@@ -1453,7 +1442,7 @@ impl UI {
                     print!(" ");
                 }
 
-                print!("{}", UI::room_char(&room_type));
+                print!("{}", UI::room_char(room_type));
 
                 if x == xm1 || x == xm1 + 1 {
                     print!("     ");

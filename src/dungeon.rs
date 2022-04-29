@@ -248,7 +248,7 @@ impl Dungeon {
     }
 
     /// Place curses and treasures
-    fn place_curse_treasure(levels: &mut Vec<Vec<Room>>, zsize: u32) {
+    fn place_curse_treasure(levels: &mut [Vec<Room>], zsize: u32) {
         let mut rng = thread_rng();
 
         // Add curse rooms
@@ -275,7 +275,7 @@ impl Dungeon {
     }
 
     /// Fix stairs and entrance on levels
-    fn place_fixup(levels: &mut Vec<Vec<Room>>, xsize: u32, ysize: u32, zsize: u32, area: u32) {
+    fn place_fixup(levels: &mut [Vec<Room>], xsize: u32, ysize: u32, zsize: u32, area: u32) {
         let entrance_x = (xsize - 1) / 2;
 
         for z in 0..zsize as usize {
