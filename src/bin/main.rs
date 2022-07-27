@@ -227,43 +227,41 @@ impl UI {
 
     /// Drink
     fn drink(&mut self) {
-        let s;
-
-        match self.game.drink() {
+        let s = match self.game.drink() {
             Ok(DrinkEvent::Stronger) => {
-                s = String::from("FEEL STRONGER");
+                String::from("FEEL STRONGER")
             }
             Ok(DrinkEvent::Weaker) => {
-                s = String::from("FEEL WEAKER");
+                String::from("FEEL WEAKER")
             }
             Ok(DrinkEvent::Smarter) => {
-                s = String::from("FEEL SMARTER");
+                String::from("FEEL SMARTER")
             }
             Ok(DrinkEvent::Dumber) => {
-                s = String::from("FEEL DUMBER");
+                String::from("FEEL DUMBER")
             }
             Ok(DrinkEvent::Nimbler) => {
-                s = String::from("FEEL NIMBLER");
+                String::from("FEEL NIMBLER")
             }
             Ok(DrinkEvent::Clumsier) => {
-                s = String::from("FEEL CLUMSIER");
+                String::from("FEEL CLUMSIER")
             }
             Ok(DrinkEvent::ChangeRace) => {
-                s = format!("TURN INTO A {}", self.race_str());
+                format!("TURN INTO A {}", self.race_str())
             }
             Ok(DrinkEvent::ChangeGender) => {
-                s = format!(
+                format!(
                     "TURN INTO A {} {}",
                     UI::gender_name(*self.game.player_gender()),
                     self.race_str()
-                );
+                )
             }
             Err(Error::CantGo) => {
                 println!("** IF YOU WANT A DRINK, FIND A POOL");
                 return;
             }
             Err(err) => panic!("{:#?}", err),
-        }
+        };
 
         println!("YOU TAKE A DRINK AND {}", s);
     }
