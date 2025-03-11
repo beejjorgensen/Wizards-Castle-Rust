@@ -281,7 +281,7 @@ impl UI {
             RoomType::Sinkhole => 'S',
             RoomType::CrystalOrb => 'O',
             RoomType::Book => 'B',
-            RoomType::Monster(ref m) => {
+            RoomType::Monster(m) => {
                 if m.monster_type() == MonsterType::Vendor {
                     'V'
                 } else {
