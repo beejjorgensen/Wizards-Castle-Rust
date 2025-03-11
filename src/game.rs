@@ -918,7 +918,7 @@ impl Game {
 
     /// Accept selling a treasure
     pub fn vendor_treasure_accept(&mut self, treasure_type: TreasureType) -> Result<(), Error> {
-        if self.vendor_treasure_price == None {
+        if self.vendor_treasure_price.is_none() {
             return Err(Error::VendorMustOfferTreasure);
         }
 

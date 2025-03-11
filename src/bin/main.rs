@@ -449,8 +449,8 @@ impl UI {
             self.game.player_additional_points()
         );
 
-        let stats = vec![Stat::Intelligence, Stat::Strength, Stat::Dexterity];
-        let stat_names = vec!["INTELLIGENCE", "STRENGTH", "DEXTERITY"];
+        let stats = [Stat::Intelligence, Stat::Strength, Stat::Dexterity];
+        let stat_names = ["INTELLIGENCE", "STRENGTH", "DEXTERITY"];
 
         for i in 0..3 {
             let mut ok = false;

@@ -310,8 +310,7 @@ impl Dungeon {
                     }
                 }
 
-                while !ups.is_empty() {
-                    let up_i = ups.pop().unwrap();
+                while let Some(up_i) = ups.pop() {
                     let down_i = downs.pop().unwrap();
 
                     levels[z].swap(up_i, down_i);
