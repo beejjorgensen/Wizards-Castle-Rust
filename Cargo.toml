@@ -1,6 +1,6 @@
 [package]
 name = "wizardscastle"
-version = "0.9.4"
+version = "0.9.7"
 authors = ["Brian \"Beej Jorgensen\" Hall <beej@beej.us>"]
 edition = "2021"
 
