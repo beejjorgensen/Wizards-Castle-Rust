@@ -12,7 +12,7 @@ use crate::weapon::{Weapon, WeaponType};
 
 use std::collections::HashMap;
 
-use self::rand::thread_rng;
+use self::rand::rng;
 use self::rand::Rng;
 
 #[derive(Debug, Clone)]
@@ -213,9 +213,9 @@ impl Game {
             MonsterType::Dragon,
         ];
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
-        monster_list[rng.gen_range(0..monster_list.len())]
+        monster_list[rng.random_range(0..monster_list.len())]
     }
 
     /// Wrap an x coordinate
@@ -264,11 +264,11 @@ impl Game {
 
     /// Mark a random room unexplored
     fn rand_mark_unexplored(&mut self) {
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
-        let x = rng.gen_range(0..*self.dungeon.xsize());
-        let y = rng.gen_range(0..*self.dungeon.ysize());
-        let z = rng.gen_range(0..*self.dungeon.zsize());
+        let x = rng.random_range(0..*self.dungeon.xsize());
+        let y = rng.random_range(0..*self.dungeon.ysize());
+        let z = rng.random_range(0..*self.dungeon.zsize());
 
         self.dungeon.room_at_mut(x, y, z).set_discovered(false);
     }
@@ -335,11 +335,11 @@ impl Game {
             let prev_dir = self.prev_dir;
             self.move_dir(prev_dir);
         } else {
-            let mut rng = thread_rng();
+            let mut rng = rng();
 
-            self.player.set_x(rng.gen_range(0..*self.dungeon.xsize()));
-            self.player.set_y(rng.gen_range(0..*self.dungeon.ysize()));
-            self.player.set_z(rng.gen_range(0..*self.dungeon.zsize()));
+            self.player.set_x(rng.random_range(0..*self.dungeon.xsize()));
+            self.player.set_y(rng.random_range(0..*self.dungeon.ysize()));
+            self.player.set_z(rng.random_range(0..*self.dungeon.zsize()));
         }
 
         self.discover_room_at_player();
@@ -699,9 +699,9 @@ impl Game {
             return Ok(None);
         }
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
-        let i = rng.gen_range(0..count);
+        let i = rng.random_range(0..count);
 
         let t_type = treasures[i];
 
@@ -1177,7 +1177,7 @@ impl Game {
             return Err(Error::Blind);
         }
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         match Game::d(1, 6) {
             1 => {
@@ -1192,9 +1192,9 @@ impl Game {
             3 => Ok(OrbEvent::GazeBack(Game::rand_monster_type())),
 
             4 => {
-                let x = rng.gen_range(0..*self.dungeon.xsize());
-                let y = rng.gen_range(0..*self.dungeon.ysize());
-                let z = rng.gen_range(0..*self.dungeon.zsize());
+                let x = rng.random_range(0..*self.dungeon.xsize());
+                let y = rng.random_range(0..*self.dungeon.ysize());
+                let z = rng.random_range(0..*self.dungeon.zsize());
 
                 let room_type = self.dungeon.room_at(x, y, z).room_type().clone();
 
@@ -1214,9 +1214,9 @@ impl Game {
                     z = loc.2;
                 } else {
                     // Fake location
-                    x = rng.gen_range(0..*self.dungeon.xsize());
-                    y = rng.gen_range(0..*self.dungeon.ysize());
-                    z = rng.gen_range(0..*self.dungeon.zsize());
+                    x = rng.random_range(0..*self.dungeon.xsize());
+                    y = rng.random_range(0..*self.dungeon.ysize());
+                    z = rng.random_range(0..*self.dungeon.zsize());
                 }
 
                 Ok(OrbEvent::OrbOfZot(x, y, z))
@@ -1381,9 +1381,9 @@ impl Game {
             msgs.push(RandomMessage::SeeBat);
         }
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
-        let i = rng.gen_range(0..msgs.len());
+        let i = rng.random_range(0..msgs.len());
 
         msgs[i]
     }
@@ -1407,10 +1407,10 @@ impl Game {
     pub fn d(count: u32, sides: u32) -> u32 {
         let mut total = 0;
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         for _ in 0..count {
-            total += rng.gen_range(0..sides) + 1;
+            total += rng.random_range(0..sides) + 1;
         }
 
         total

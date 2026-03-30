@@ -1,7 +1,7 @@
 extern crate rand;
 
 use self::rand::seq::SliceRandom;
-use self::rand::thread_rng;
+use self::rand::rng;
 use self::rand::Rng;
 
 use crate::curse::Curse;
@@ -25,10 +25,10 @@ impl Dungeon {
 
         let area = xsize * ysize;
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
-        let orb_of_zot_level = rng.gen_range(0..zsize);
-        let runestaff_level = rng.gen_range(0..zsize);
+        let orb_of_zot_level = rng.random_range(0..zsize);
+        let runestaff_level = rng.random_range(0..zsize);
 
         // Add all necessary elements to the level
         for z in 0..zsize {
@@ -204,7 +204,7 @@ impl Dungeon {
         let vendor_count = area / 21; // 3 in 8x8
         let monster_count = area / 5; // 12 in 8x8
 
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         // Monsters
         let monsters_to_place = [
@@ -225,7 +225,7 @@ impl Dungeon {
 
         let num_monsters = monsters_to_place.len();
 
-        let monster_with_runestaff = rng.gen_range(0..monster_count) as usize;
+        let monster_with_runestaff = rng.random_range(0..monster_count) as usize;
 
         for i in 0..monster_count as usize {
             let has_runestaff = i == monster_with_runestaff && z == runestaff_level;
@@ -249,11 +249,11 @@ impl Dungeon {
 
     /// Place curses and treasures
     fn place_curse_treasure(levels: &mut [Vec<Room>], zsize: u32) {
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         // Add curse rooms
         for i in 0..crate::curse::CURSE_COUNT {
-            let curse_level = rng.gen_range(0..zsize) as usize;
+            let curse_level = rng.random_range(0..zsize) as usize;
 
             let curse = Curse::get_curse_by_id(i);
 
@@ -265,7 +265,7 @@ impl Dungeon {
 
         // Add treasures
         for i in 0..crate::treasure::TREASURE_COUNT {
-            let treasure_level = rng.gen_range(0..zsize) as usize;
+            let treasure_level = rng.random_range(0..zsize) as usize;
 
             levels[treasure_level].push(Room {
                 roomtype: RoomType::Treasure(Treasure::new(i)),

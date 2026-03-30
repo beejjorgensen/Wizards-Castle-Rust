@@ -1,7 +1,7 @@
 use std::io::{stdin, stdout, Write};
 
 use rand::rngs::ThreadRng;
-use rand::thread_rng;
+use rand::rng;
 use rand::Rng;
 
 use wizardscastle::armor::{Armor, ArmorType};
@@ -39,7 +39,7 @@ impl UI {
             MonsterType::Dragon,
         ];
 
-        let i = self.rng.gen_range(0..monster.len());
+        let i = self.rng.random_range(0..monster.len());
 
         UI::monster_name(monster[i])
     }
@@ -662,7 +662,7 @@ impl UI {
                     "WICH", " STEW", " SOUP", " BURGER", " ROAST", " MUNCHY", " TACO", " PIE",
                 ];
 
-                let i = self.rng.gen_range(0..suffix.len());
+                let i = self.rng.random_range(0..suffix.len());
 
                 println!("\nYOU SPEND AN HOUR EATING {}{}", m_name, suffix[i]);
             }
@@ -1571,7 +1571,7 @@ impl UI {
             RandomMessage::HearSound => {
                 let sounds = ["A SCREAM", "FOOTSTEPS", "A WUMPUS", "THUNDER"];
 
-                let i = self.rng.gen_range(0..sounds.len());
+                let i = self.rng.random_range(0..sounds.len());
 
                 println!("\nYOU HEAR {}", sounds[i]);
             }
@@ -1661,7 +1661,7 @@ fn main() {
 
         let mut ui = UI {
             game,
-            rng: thread_rng(),
+            rng: rng(),
         };
 
         ui.equip();
