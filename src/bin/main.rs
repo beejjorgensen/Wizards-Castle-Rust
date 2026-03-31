@@ -1,8 +1,8 @@
-use std::io::{stdin, stdout, Write};
+use std::io::{Write, stdin, stdout};
 
-use rand::rngs::ThreadRng;
+use rand::RngExt;
 use rand::rng;
-use rand::Rng;
+use rand::rngs::ThreadRng;
 
 use wizardscastle::armor::{Armor, ArmorType};
 use wizardscastle::error::Error;
@@ -184,11 +184,11 @@ impl UI {
         while !got_num {
             let str = UI::get_input(Some(prompt));
 
-            if let Ok(v) = str.parse::<u32>() {
-                if (1..=8).contains(&v) {
-                    got_num = true;
-                    coord = v;
-                }
+            if let Ok(v) = str.parse::<u32>()
+                && (1..=8).contains(&v)
+            {
+                got_num = true;
+                coord = v;
             }
 
             if !got_num {
@@ -228,24 +228,12 @@ impl UI {
     /// Drink
     fn drink(&mut self) {
         let s = match self.game.drink() {
-            Ok(DrinkEvent::Stronger) => {
-                String::from("FEEL STRONGER")
-            }
-            Ok(DrinkEvent::Weaker) => {
-                String::from("FEEL WEAKER")
-            }
-            Ok(DrinkEvent::Smarter) => {
-                String::from("FEEL SMARTER")
-            }
-            Ok(DrinkEvent::Dumber) => {
-                String::from("FEEL DUMBER")
-            }
-            Ok(DrinkEvent::Nimbler) => {
-                String::from("FEEL NIMBLER")
-            }
-            Ok(DrinkEvent::Clumsier) => {
-                String::from("FEEL CLUMSIER")
-            }
+            Ok(DrinkEvent::Stronger) => String::from("FEEL STRONGER"),
+            Ok(DrinkEvent::Weaker) => String::from("FEEL WEAKER"),
+            Ok(DrinkEvent::Smarter) => String::from("FEEL SMARTER"),
+            Ok(DrinkEvent::Dumber) => String::from("FEEL DUMBER"),
+            Ok(DrinkEvent::Nimbler) => String::from("FEEL NIMBLER"),
+            Ok(DrinkEvent::Clumsier) => String::from("FEEL CLUMSIER"),
             Ok(DrinkEvent::ChangeRace) => {
                 format!("TURN INTO A {}", self.race_str())
             }
@@ -1659,10 +1647,7 @@ fn main() {
     while playing {
         let game = Game::new(8, 8, 8);
 
-        let mut ui = UI {
-            game,
-            rng: rng(),
-        };
+        let mut ui = UI { game, rng: rng() };
 
         ui.equip();
 

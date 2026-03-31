@@ -1,8 +1,8 @@
 extern crate rand;
 
-use self::rand::seq::SliceRandom;
+use self::rand::RngExt;
 use self::rand::rng;
-use self::rand::Rng;
+use self::rand::seq::SliceRandom;
 
 use crate::curse::Curse;
 use crate::monster::{Monster, MonsterType};
@@ -79,11 +79,11 @@ impl Dungeon {
                     for x in 0..xsize {
                         let i = (y * xsize + x) as usize;
 
-                        if let RoomType::Warp(oz) = l[i].roomtype {
-                            if oz {
-                                orb_of_zot = (x, y, z as u32);
-                                found_orb_of_zot = true;
-                            }
+                        if let RoomType::Warp(oz) = l[i].roomtype
+                            && oz
+                        {
+                            orb_of_zot = (x, y, z as u32);
+                            found_orb_of_zot = true;
                         }
                     }
                 }
@@ -94,11 +94,11 @@ impl Dungeon {
                 for x in 0..xsize as usize {
                     let i = y * xsize as usize + x;
 
-                    if let RoomType::Monster(ref m) = levels[z][i].roomtype {
-                        if m.has_runestaff() {
-                            runestaff = (x as u32, y as u32, z as u32);
-                            found_runestaff = true;
-                        }
+                    if let RoomType::Monster(ref m) = levels[z][i].roomtype
+                        && m.has_runestaff()
+                    {
+                        runestaff = (x as u32, y as u32, z as u32);
+                        found_runestaff = true;
                     }
                 }
             }
@@ -298,14 +298,14 @@ impl Dungeon {
                 let mut downs = Vec::new();
                 let mut ups = Vec::new();
 
-                for i in 0..area as usize {
-                    if levels[z - 1][i].roomtype == RoomType::StairsDown {
+                for (i, room) in levels[z - 1].iter().enumerate().take(area as usize) {
+                    if room.roomtype == RoomType::StairsDown {
                         downs.push(i);
                     }
                 }
 
-                for i in 0..area as usize {
-                    if levels[z][i].roomtype == RoomType::StairsUp {
+                for (i, room) in levels[z].iter().enumerate().take(area as usize) {
+                    if room.roomtype == RoomType::StairsUp {
                         ups.push(i);
                     }
                 }

@@ -12,8 +12,8 @@ use crate::weapon::{Weapon, WeaponType};
 
 use std::collections::HashMap;
 
+use self::rand::RngExt;
 use self::rand::rng;
-use self::rand::Rng;
 
 #[derive(Debug, Clone)]
 pub enum Event {
@@ -337,9 +337,12 @@ impl Game {
         } else {
             let mut rng = rng();
 
-            self.player.set_x(rng.random_range(0..*self.dungeon.xsize()));
-            self.player.set_y(rng.random_range(0..*self.dungeon.ysize()));
-            self.player.set_z(rng.random_range(0..*self.dungeon.zsize()));
+            self.player
+                .set_x(rng.random_range(0..*self.dungeon.xsize()));
+            self.player
+                .set_y(rng.random_range(0..*self.dungeon.ysize()));
+            self.player
+                .set_z(rng.random_range(0..*self.dungeon.zsize()));
         }
 
         self.discover_room_at_player();
@@ -643,11 +646,11 @@ impl Game {
                     .room_at(*self.player.x(), *self.player.y(), *self.player.z())
                     .roomtype;
 
-                if let RoomType::Monster(m) = roomtype {
-                    if m.monster_type() == MonsterType::Vendor {
-                        // If we are, make them unangry
-                        self.vendors_angry = false;
-                    }
+                if let RoomType::Monster(m) = roomtype
+                    && m.monster_type() == MonsterType::Vendor
+                {
+                    // If we are, make them unangry
+                    self.vendors_angry = false;
                 }
             } else {
                 panic!("we really thought player had a treasure");
